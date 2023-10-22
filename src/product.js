@@ -1,7 +1,7 @@
 const products = [
     {
         "id": 1,
-        "title": "Gaming Laptop",
+        "title": "Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop",
         "description": "Powerful laptop for gaming",
         "vendor": "Tech Co.",
         "active": true,
