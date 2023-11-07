@@ -1,4 +1,4 @@
-const products = [
+const productsTest = [
     {
         "id": 1,
         "title": "Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop Gaming Laptop",
@@ -357,4 +357,4 @@ const products = [
         ]
     }
 ]
-export default products;
+export default productsTest;
