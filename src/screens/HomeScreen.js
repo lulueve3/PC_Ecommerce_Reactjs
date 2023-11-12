@@ -12,7 +12,9 @@ const HomeScreen = () => {
 
     const productList = useSelector(state => state.productList);
 
-    const { loading, error, products } = productList;
+    const { loading, error, product } = productList;
+
+    console.log(product);
 
     useEffect(() => {
         dispatch(listProducts())
@@ -24,7 +26,7 @@ const HomeScreen = () => {
             {
                 loading ? <Loader /> : error ? <Message variant='danger'>{error}</Message> :
                     <Row>
-                        {products?.map(product => (
+                        {product?.map(product => (
                             <Col sm={12} md={6} lg={4} xl={3}>
                                 <Product product={product} />
                             </Col>
