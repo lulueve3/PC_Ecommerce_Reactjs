@@ -50,7 +50,6 @@ export const listProductDetail = (id) => async (dispatch) => {
             payload: data
         });
     } catch (error) {
-        console.log(error);
         dispatch({
             type: PRODUCT_DETAILS_FAIL,
             payload: error.response && error.response.data.message ? error.response.data.message : error.message

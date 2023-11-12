@@ -6,7 +6,7 @@ import Rating from '../components/Rating'
 import products from '../product'
 import { listProductDetail } from '../action/productActions'
 import Message from '../components/Message'
-import loader from '../components/Loader'
+import Loader from '../components/Loader'
 
 const ProductScreen = ({ }) => {
 
@@ -41,7 +41,7 @@ const ProductScreen = ({ }) => {
                 Go Back
             </Link>
             {
-                loading ? <loader /> : error ? <Message variant='danger'>{error}</Message> :
+                loading ? <Loader /> : error ? <Message variant='danger'>{error}</Message> :
                     product.images?.[0]?.src ? (
                         <Row>
                             <Col md={6}>
