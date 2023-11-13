@@ -14,7 +14,7 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
     const dispatch = useDispatch();
     const logoutHandler = () => {
         dispatch(logout());
-        handleLoginLogout();
+        handleLoginLogout(false);
     }
 
     useEffect(() => {
@@ -36,7 +36,7 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                             <LinkContainer to='/cart'>
                                 <Nav.Link ><i className='fas fa fa-shopping-cart'></i> Giỏ Hàng</Nav.Link>
                             </LinkContainer>
-                            {!isLoggedIn ? (
+                            {isLoggedIn ? (
                                 <NavDropdown title='userName' id='username'>
                                     <LinkContainer to='/profile'>
                                         <NavDropdown.Item>Profile</NavDropdown.Item>

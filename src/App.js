@@ -13,9 +13,9 @@ import { useState } from 'react';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Trạng thái đăng nhập ban đầu
 
-  const handleLoginLogout = () => {
+  const handleLoginLogout = (state) => {
     console.log("log " + isLoggedIn);
-    setIsLoggedIn(!isLoggedIn)
+    setIsLoggedIn(state)
 
   }
   return (
