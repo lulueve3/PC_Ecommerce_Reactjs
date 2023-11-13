@@ -7,18 +7,26 @@ import ProductScreen from './screens/ProductScreen';
 import { Routes, Route } from "react-router-dom";
 import CartScreen from './screens/CartScreen';
 import LoginScreen from './screens/LoginScreen';
+import { useState } from 'react';
 
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Trạng thái đăng nhập ban đầu
+
+  const handleLoginLogout = () => {
+    console.log("log " + isLoggedIn);
+    setIsLoggedIn(!isLoggedIn)
+
+  }
   return (
     <>
-      <Header />
+      <Header handleLoginLogout={handleLoginLogout} isLoggedIn={isLoggedIn} />
       <main className='py-3'>
         <Container>
           <Routes>
             <Route path='/' element={<HomeScreen />} />
             <Route path="/product/:id" element={<ProductScreen />} />
-            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/login" element={<LoginScreen handleLoginLogout={handleLoginLogout} />} />
             <Route path="/cart/:id?" element={<CartScreen />} />
 
           </Routes>

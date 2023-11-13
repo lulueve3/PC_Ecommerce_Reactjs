@@ -8,7 +8,7 @@ import FormContainer from '../components/FormContainer'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 
-const LoginScreen = () => {
+const LoginScreen = ({ handleLoginLogout }) => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('')
@@ -16,7 +16,9 @@ const LoginScreen = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const userLogin = useSelector(state => state.userLogin);
-    const { loading, error, accessToken } = userLogin;
+    const { loading, error } = userLogin;
+    const accessToken = localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : null
+
 
     const location = useLocation();
     const redirect = location.search ? location.search.split('=')[1] : '/';
@@ -30,6 +32,7 @@ const LoginScreen = () => {
     const submitHandler = (e) => {
         e.preventDefault()
         dispatch(login(email, password))
+        handleLoginLogout();
     }
 
 
