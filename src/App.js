@@ -7,11 +7,20 @@ import ProductScreen from './screens/ProductScreen';
 import { Routes, Route } from "react-router-dom";
 import CartScreen from './screens/CartScreen';
 import LoginScreen from './screens/LoginScreen';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import UserListScreen from './screens/UserListScreen';
+import ProductListScreen from './screens/ProductList';
+
 
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Trạng thái đăng nhập ban đầu
+
+  useEffect(() => {
+    const storedAccessToken = localStorage.getItem('accessToken') || null;
+    if (storedAccessToken)
+      setIsLoggedIn(true)
+  }, []);
 
   const handleLoginLogout = (state) => {
     console.log("log " + isLoggedIn);
@@ -28,7 +37,8 @@ function App() {
             <Route path="/product/:id" element={<ProductScreen />} />
             <Route path="/login" element={<LoginScreen handleLoginLogout={handleLoginLogout} />} />
             <Route path="/cart/:id?" element={<CartScreen />} />
-
+            <Route path="/admin/userList" element={<UserListScreen />} />
+            <Route path="/admin/productList" element={<ProductListScreen />} />
           </Routes>
         </Container>
       </main>

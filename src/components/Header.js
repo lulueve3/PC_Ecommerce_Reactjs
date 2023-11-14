@@ -23,6 +23,8 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
         console.log("access " + storedAccessToken);
     }, [isLoggedIn]);
 
+    const isAdmin = true;
+
     return (
         <header>
             <Navbar expand="lg" collapseOnSelect variant='dark' bg='dark' >
@@ -41,6 +43,9 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                     <LinkContainer to='/profile'>
                                         <NavDropdown.Item>Profile</NavDropdown.Item>
                                     </LinkContainer>
+                                    <LinkContainer to='/admin/products'>
+                                        <NavDropdown.Item>Products</NavDropdown.Item>
+                                    </LinkContainer>
                                     <NavDropdown.Item onClick={logoutHandler}>Đăng xuất</NavDropdown.Item>
                                 </NavDropdown>
                             ) :
@@ -50,6 +55,19 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                 </LinkContainer>
 
                             }
+                            {isAdmin && (
+                                <NavDropdown title='Admin' id='adminmenu'>
+                                    <LinkContainer to='/admin/userList'>
+                                        <NavDropdown.Item>Users</NavDropdown.Item>
+                                    </LinkContainer>
+                                    <LinkContainer to='/admin/productList'>
+                                        <NavDropdown.Item>Products</NavDropdown.Item>
+                                    </LinkContainer>
+                                    <LinkContainer to='/admin/orderList'>
+                                        <NavDropdown.Item>Orders</NavDropdown.Item>
+                                    </LinkContainer>
+                                </NavDropdown>
+                            )}
 
 
                         </Nav>
