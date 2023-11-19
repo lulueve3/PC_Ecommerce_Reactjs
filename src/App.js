@@ -10,6 +10,8 @@ import LoginScreen from './screens/LoginScreen';
 import { useEffect, useState } from 'react';
 import UserListScreen from './screens/UserListScreen';
 import ProductListScreen from './screens/ProductList';
+import ProductEditScreen from './screens/ProductEditScreen';
+import ProductCreateScreen from './screens/ProductCreateScreen';
 
 
 
@@ -39,6 +41,8 @@ function App() {
             <Route path="/cart/:id?" element={<CartScreen />} />
             <Route path="/admin/userList" element={<UserListScreen />} />
             <Route path="/admin/productList" element={<ProductListScreen />} />
+            <Route path="/admin/productList/:id/edit" element={<ProductEditScreen />} />
+            <Route path="/admin/productList/create" element={<ProductCreateScreen />} />
           </Routes>
         </Container>
       </main>

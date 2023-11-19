@@ -26,14 +26,14 @@ const ProductListScreen = () => {
 
 
     useEffect(() => {
-        dispatch({ type: PRODUCT_CREATE_RESET })
+        // dispatch({ type: PRODUCT_CREATE_RESET })
 
-        if (successCreate) {
-            navigate.push(`/admin/product/${createProduct.id}/edit`)
-        }
-        else {
-            dispatch(listProducts())
-        }
+        // if (successCreate) {
+        //     navigate(`/admin/product/${createProduct.id}/edit`)
+        // }
+        // else {
+        dispatch(listProducts())
+        // }
     }, [dispatch, successDelete, successCreate])
 
     const deleteHandler = (id) => {
@@ -43,7 +43,7 @@ const ProductListScreen = () => {
     }
 
     const createProductHandler = () => {
-        dispatch(createProduct())
+        navigate('./create');
     }
 
     return (
@@ -81,7 +81,7 @@ const ProductListScreen = () => {
                                 <td>{product.variants[0].price}</td>
                                 <td>{product.active ? 'true' : 'false'}</td>
                                 <td>
-                                    <LinkContainer to={`http://localhost:8080/api/users/${1}/edit`}>
+                                    <LinkContainer to={`${product.id}/edit`}>
                                         <Button variant='light' className='btn-sm'>
                                             <i className='fas fa-edit'></i>
                                         </Button>
