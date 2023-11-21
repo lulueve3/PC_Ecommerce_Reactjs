@@ -46,6 +46,16 @@ const ProductCreateScreen = () => {
             })
         );
         navigate('/admin/productlist');
+        console.log({
+            title,
+            description,
+            vendor,
+            active,
+            variants,
+            options,
+            images,
+        }
+        );
     };
 
     const handleVariantChange = (index, field, value) => {
@@ -61,13 +71,23 @@ const ProductCreateScreen = () => {
 
     };
 
+    function getVariantName(variant) {
+        console.log(variant);
+        const optionNames = Object.keys(variant)
+            .filter(key => key.startsWith('option'))
+            .map(key => variant[key]);
+
+        return optionNames.join('-');
+    }
+
+
+
     const handleOptionChangeToVariant = () => {
         if (options.length > 0) {
-            const result = [{ name: "", price: 0, quantity: 0 }];
-
+            const result = [{ option1: "", option2: "", price: 0, quantity: 0 }];
 
             // Duyệt qua mỗi option
-            options.forEach((option) => {
+            options.forEach((option, index) => {
                 // Tạo mảng mới chứa các biến thể dựa trên giá trị của option
                 const newVariants = [];
 
@@ -75,24 +95,22 @@ const ProductCreateScreen = () => {
                 option.values.forEach((value) => {
                     // Sao chép và mở rộng mỗi phần tử trong mảng kết quả
                     newVariants.push(...result.map((variant) => ({
-                        name: variant.name ? `${variant.name}-${value}` : value,
-                        price: 0,
-                        quantity: 0
+                        ...variant,
+                        [`option${index + 1}`]: variant[`option${index + 1}`] ? `${variant[`option${index + 1}`]}-${value}` : value,
                     })));
                 });
-
 
                 // Gán mảng variants mới cho biến kết quả
                 result.length = 0;
                 result.push(...newVariants);
             });
+
             setVariants(result);
-        }
-        else {
+        } else {
             setVariants([]);
         }
-
     };
+
 
     const handleImageChange = (index, imageUrl) => {
         const updatedImages = [...images];
@@ -222,8 +240,9 @@ const ProductCreateScreen = () => {
 
 
                     {variants.map((variant, index) => (
-                        <div key={variant.name ? variant.name : index} className='mb-3'>
-                            <h5>Variant: {variant.name}</h5>
+                        <div key={index} className='mb-3'>
+                            <h5>Variant: {getVariantName(variant)}</h5>
+
                             <Row className='mb-3'>
                                 <Col>
                                     <label htmlFor={`variantPrice${index}`} className='form-label'>
