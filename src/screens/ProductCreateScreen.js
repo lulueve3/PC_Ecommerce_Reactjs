@@ -6,7 +6,7 @@ import Loader from '../components/Loader';
 import FormContainer from '../components/FormContainer';
 import { createProduct } from '../action/productActions';
 import { Row, Col } from 'react-bootstrap';
-
+import axios from 'axios'
 
 const ProductCreateScreen = () => {
 
@@ -27,6 +27,10 @@ const ProductCreateScreen = () => {
     const [variants, setVariants] = useState([]);
     const [options, setOptions] = useState([]);
     const [images, setImages] = useState([]);
+    const [selectImage, setSelectImage] = useState(null);
+
+
+
 
     useEffect(() => {
         handleOptionChangeToVariant();
@@ -111,11 +115,40 @@ const ProductCreateScreen = () => {
         }
     };
 
+    useEffect(() => {
+        if (selectImage !== null) {
+            uploadImage(selectImage);
+        }
+    }, [selectImage]);
 
-    const handleImageChange = (index, imageUrl) => {
-        const updatedImages = [...images];
-        updatedImages[index] = imageUrl;
-        setImages(updatedImages);
+    const handleImageChange = (index, e) => {
+        setSelectImage({
+            index: index,
+            src: e.target.files[0]
+        });
+    };
+
+    const uploadImage = async (selectImage) => {
+        const index = selectImage.index;
+        const data = new FormData()
+        data.append('file', selectImage.src);
+        data.append('upload_preset', "rctjv3j1");
+        data.append('cloud_name', "dommm7bzh");
+
+        const reponse = await axios.post('https://api.cloudinary.com/v1_1/dommm7bzh/image/upload', data)
+        const imageUrl = reponse.data.secure_url;
+        const newImages = [...images];
+        if (!newImages[index]) {
+            newImages[index] = {};
+        }
+        newImages[index].src = imageUrl;
+        setImages(newImages);
+
+    }
+    const handleRemoveImage = (index) => {
+        const newImages = [...images];
+        newImages[index] = null; // hoặc bạn có thể sử dụng newImages.splice(index, 1) để loại bỏ ảnh khỏi mảng
+        setImages(newImages);
     };
 
     const handleRemoveOption = (indexToRemove) => {
@@ -244,7 +277,7 @@ const ProductCreateScreen = () => {
                             <h5>Variant: {getVariantName(variant)}</h5>
 
                             <Row className='mb-3'>
-                                <Col>
+                                <Col xs={12} md={5}>
                                     <label htmlFor={`variantPrice${index}`} className='form-label'>
                                         Price
                                     </label>
@@ -256,7 +289,7 @@ const ProductCreateScreen = () => {
                                         onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
                                     />
                                 </Col>
-                                <Col>
+                                <Col xs={12} md={4}>
                                     <label htmlFor={`variantQuantity${index}`} className='form-label'>
                                         Quantity
                                     </label>
@@ -268,6 +301,21 @@ const ProductCreateScreen = () => {
                                         onChange={(e) => handleVariantChange(index, 'quantity', e.target.value)}
                                     />
                                 </Col>
+                                <Col xs={12} md={3}>
+                                    <input type='file' onChange={(e) => handleImageChange(index, e)} />
+                                    {!images[index]?.src ? null : (
+                                        <div>
+                                            <img
+                                                src={images[index].src}
+                                                alt={`Uploaded Image ${index + 1}`}
+                                                style={{ width: '150px', height: '150px' }}
+                                            />
+                                            <br />
+                                            <button onClick={() => handleRemoveImage(index)}>Remove</button>
+                                        </div>
+                                    )}
+                                </Col>
+
                             </Row>
                             {/* Add more Row/Col for other variant properties */}
                             {/* ... */}
@@ -276,37 +324,7 @@ const ProductCreateScreen = () => {
 
                     {/* Add button to add more variants */}
 
-
-                    {images.map((imageUrl, index) => (
-                        <div key={index} className='mb-3'>
-                            <h5>Image {index + 1}</h5>
-                            <div className='mb-3'>
-                                <label htmlFor={`imageSrc${index}`} className='form-label'>
-                                    Image URL
-                                </label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    id={`imageSrc${index}`}
-                                    value={imageUrl}
-                                    onChange={(e) => handleImageChange(index, e.target.value)}
-                                />
-                            </div>
-                            {/* Add more input fields for other image properties if needed */}
-                        </div>
-                    ))}
-
-                    {/* Add button to add more images */}
-                    <button
-                        type='button'
-                        className='btn btn-secondary'
-                        onClick={() => setImages([...images, ''])}
-                    >
-                        Add Image
-                    </button>
-
-
-                    <button type='submit' className='btn btn-primary'>
+                    <button type='submit' className='btn btn-primary my-2'>
                         Create
                     </button>
                 </form>

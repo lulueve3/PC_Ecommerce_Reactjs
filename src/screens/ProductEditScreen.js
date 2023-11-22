@@ -6,6 +6,7 @@ import Loader from '../components/Loader';
 import FormContainer from '../components/FormContainer';
 import { listProductDetail, updateProduct } from '../action/productActions';
 
+
 const ProductEditScreen = () => {
     const { id: productId } = useParams();
 
