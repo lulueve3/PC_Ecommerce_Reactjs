@@ -14,8 +14,10 @@ const ProductScreen = ({ }) => {
     const [selectedButton, setSelectedButton] = useState(0);
     const handleButtonClick = (index) => {
         setSelectedButton(index);
+        setQty(1);
         console.log(index);
     };
+
 
     const [qty, setQty] = useState(1);
 
@@ -42,11 +44,11 @@ const ProductScreen = ({ }) => {
             </Link>
             {
                 loading ? <Loader /> : error ? <Message variant='danger'>{error}</Message> :
-                    product.images?.[0]?.src ? (
+                    product?.title ? (
                         <Row>
-                            <Col md={6}>
+                            <Col md={5}>
                                 <Image
-                                    src={product.images[0].src}
+                                    src={product.images[0]?.src ? product.images[0]?.src : `${process.env.PUBLIC_URL}/imgNotFound.png`}
                                     alt={product.title}
                                     fluid
                                 />
@@ -70,7 +72,7 @@ const ProductScreen = ({ }) => {
                                     </ListGroupItem>
                                 </ListGroup>
                             </Col>
-                            <Col md={3}>
+                            <Col md={4}>
                                 <Card>
                                     <ListGroup variant='flush'>
                                         <ListGroup.Item>
@@ -80,19 +82,7 @@ const ProductScreen = ({ }) => {
                                                     <strong>${product.variants[selectedButton].price}</strong>
                                                 </Col>
                                             </Row>
-                                            {
-                                                product.variants.length < 2 ? <></> : product.variants.map((variant, index) => (
-                                                    <Button
-                                                        key={index}
-                                                        variant={selectedButton === index ? 'info' : 'light'}
-                                                        type="button"
-                                                        onClick={() => handleButtonClick(index, variant.price)}
-                                                    >
-                                                        {variant.option1 + ' ' + variant.option2} : {variant.price}
-                                                    </Button>
 
-                                                ))
-                                            }
                                         </ListGroup.Item>
                                         <ListGroup.Item>
                                             <Row>
@@ -101,32 +91,59 @@ const ProductScreen = ({ }) => {
                                                     <strong>{product.variants[selectedButton].quantity}</strong>
                                                 </Col>
                                             </Row>
-                                            {
-                                                product.variants.length < 2 ? <></> : product.variants.map((variant, index) => (
-                                                    <Button
-                                                        key={index}
-                                                        variant={selectedButton === index ? 'info' : 'light'}
-                                                        type="button"
-                                                        onClick={() => handleButtonClick(index, variant.price)}
-                                                    >
-                                                        {variant.option1 + ' ' + variant.option2} : {variant.price}
-                                                    </Button>
+                                            {product.variants.length < 2 ? null : (
+                                                <>
 
-                                                ))
-                                            }
+                                                    {product.variants.map((variant, index) => (
+                                                        <Button
+                                                            key={index}
+                                                            variant={selectedButton === index ? 'info' : 'light'}
+                                                            type="button"
+                                                            onClick={() => handleButtonClick(index, variant.price)}
+                                                        >
+                                                            {variant.option1 + ' ' + variant.option2} : {variant.price}
+                                                        </Button>
+                                                    ))}
+                                                </>
+                                            )}
                                         </ListGroup.Item>
                                         <ListGroup.Item>
-                                            <Button className='btn-blok' type='butoon' onClick={addToCartHandler}>
-                                                Add To Cart
-                                            </Button>
+                                            {product.variants[selectedButton].quantity <= 0 ? (
+                                                <Button className='btn-block' type='button' disabled variant="danger">
+                                                    Out Of Stock
+                                                </Button>
+                                            ) : (
+                                                <>
+                                                    <div className="d-flex mb-2 align-items-center">
+                                                        <span className="mr-2">Enter Quantity:</span>
+                                                        <div className="input-group">
+                                                            <input
+                                                                type="number"
+                                                                value={qty}
+                                                                min={1}
+                                                                max={product.variants[selectedButton].quantity}
+                                                                onChange={(e) => setQty(Math.min(parseInt(e.target.value), product.variants[selectedButton].quantity))}
+                                                                className="form-control text-center"
+                                                                style={{ width: '100%' }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <Button className='btn-block' type='button' onClick={addToCartHandler} variant="success">
+                                                        Add To Cart
+                                                    </Button>
+                                                </>
+                                            )}
                                         </ListGroup.Item>
+
+
+
 
                                     </ListGroup>
                                 </Card>
                             </Col>
                         </Row>
                     ) : (
-                        <Message variant='info'>No images available</Message>
+                        <Message variant='info'>No product available</Message>
                     )
             }
 
