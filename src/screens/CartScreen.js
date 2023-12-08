@@ -27,7 +27,7 @@ const CartScreen = () => {
     }, [dispatch, id, qty])
 
     const removeFromCartHandler = (id) => {
-
+        dispatch(editCartItemQuantity(id, 0));
     }
 
     const editQuantityHandler = (id, newQty) => {
@@ -73,7 +73,7 @@ const CartScreen = () => {
                                         />
                                     </Col>
                                     <Col md={1}>
-                                        <Button type='button' variant='Light' onClick={() => removeFromCartHandler(item.product)}>
+                                        <Button type='button' variant='Light' onClick={() => removeFromCartHandler(item.id)}>
                                             <i className='fas fa-trash'></i>
                                         </Button>
                                     </Col>
