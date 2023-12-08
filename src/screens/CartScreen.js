@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useLocation, useParams, useNavigate } from 'react-router-dom'
 import { Row, Col, ListGroup, Image, Form, Button, Card } from 'react-bootstrap'
-import { addToCart } from '../action/cartAction'
+import { addToCart, editCartItemQuantity } from '../action/cartAction'
 import Message from '../components/Message'
 
 const CartScreen = () => {
@@ -17,6 +17,10 @@ const CartScreen = () => {
     const { cartItems } = cart
 
     useEffect(() => {
+        console.log(cartItems);
+    }, [cartItems])
+
+    useEffect(() => {
         if (id) {
             dispatch(addToCart(id, qty));
         }
@@ -25,6 +29,11 @@ const CartScreen = () => {
     const removeFromCartHandler = (id) => {
 
     }
+
+    const editQuantityHandler = (id, newQty) => {
+        dispatch(editCartItemQuantity(id, newQty));
+    };
+
 
     const checkoutHandler = () => {
         navigate.push('/login?redirect=shipping')
@@ -36,30 +45,41 @@ const CartScreen = () => {
                 <h1>Shopping Cart</h1>
                 {cartItems.length === 0 ? <Message>Your cart is empty <Link to="/">Go Back</Link> </Message> : (
                     <ListGroup variant='flush'>
-                        {cartItems.map(item => {
-                            <ListGroup.Item key={item.product}>
+                        {cartItems.map(item => (
+                            <ListGroup.Item key={item.id}>
                                 <Row>
                                     <Col md={2}>
                                         <Image src={item.image} fluid rounded></Image>
 
                                     </Col>
                                     <Col md={3}>
-                                        <Link to={`/product/${item.product}`}>{item.name}</Link>
+                                        <Link to={`/product/${item.id}`}>{item.title}</Link>
                                     </Col>
                                     <Col md={2}>
                                         {item.price} VNĐ
                                     </Col>
-                                    <Col md={2}>
-                                        Điểu chỉnh số lượng
+                                    <Col md={3}>
+                                        <input
+                                            type="number"
+                                            value={item.qty}
+                                            min={1}
+                                            max={item.inStock}
+                                            onChange={(e) => {
+                                                const newValue = Math.min(Math.max(1, parseInt(e.target.value, 10)), item.inStock);
+                                                editQuantityHandler(item.id, newValue);
+                                            }}
+                                            className="form-control text-center"
+                                            style={{ width: '100%' }}
+                                        />
                                     </Col>
-                                    <Col md={2}>
+                                    <Col md={1}>
                                         <Button type='button' variant='Light' onClick={() => removeFromCartHandler(item.product)}>
                                             <i className='fas fa-trash'></i>
                                         </Button>
                                     </Col>
                                 </Row>
                             </ListGroup.Item>
-                        })}
+                        ))}
                     </ListGroup>
                 )}
             </Col>

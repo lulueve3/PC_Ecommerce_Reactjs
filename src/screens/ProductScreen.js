@@ -7,20 +7,25 @@ import products from '../product'
 import { listProductDetail } from '../action/productActions'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
+import { addToCart, editCartItemQuantity } from '../action/cartAction'
 
 const ProductScreen = ({ }) => {
 
     // Quan ly select button
     const [selectedButton, setSelectedButton] = useState(0);
-    const handleButtonClick = (index) => {
+    const handleButtonClick = (index, price) => {
         setSelectedButton(index);
+        console.log(price);
+        setPrice(price)
         setQty(1);
         console.log(index);
     };
 
 
     const [qty, setQty] = useState(1);
-
+    const [price, setPrice] = useState(0);
+    const [inStock, setInStock] = useState(1);
+    const [image, setImage] = useState('/imgNotFound.png');
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { id } = useParams();
@@ -33,9 +38,25 @@ const ProductScreen = ({ }) => {
         dispatch(listProductDetail(id));
     }, [dispatch, id])
 
+    useEffect(() => {
+        if (product && product.variants) {
+            setPrice(product.variants[0].price);
+            setInStock(product.variants[0].quantity)
+            // setImage(product.variants[0].image);
+        }
+    }, [product]);
+
     const addToCartHandler = () => {
-        navigate.push(`/cart/${id}?qty=${1}`)
+        dispatch(addToCart({
+            id: id,
+            title: product.title,
+            qty,
+            price,
+            image,
+            inStock
+        }));
     }
+
 
     return (
         <>
@@ -101,7 +122,7 @@ const ProductScreen = ({ }) => {
                                                             type="button"
                                                             onClick={() => handleButtonClick(index, variant.price)}
                                                         >
-                                                            {variant.option1 + ' ' + variant.option2} : {variant.price}
+                                                            {variant.option1 + ' ' + variant.option2}
                                                         </Button>
                                                     ))}
                                                 </>

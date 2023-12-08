@@ -38,6 +38,16 @@ const ProductCreateScreen = () => {
 
     const submitHandler = (e) => {
         e.preventDefault();
+        console.log({
+            title,
+            description,
+            vendor,
+            active,
+            variants,
+            options,
+            images,
+        });
+
         dispatch(
             createProduct({
                 title,
@@ -50,16 +60,7 @@ const ProductCreateScreen = () => {
             })
         );
         navigate('/admin/productlist');
-        console.log({
-            title,
-            description,
-            vendor,
-            active,
-            variants,
-            options,
-            images,
-        }
-        );
+
     };
 
     const handleVariantChange = (index, field, value) => {
@@ -145,9 +146,10 @@ const ProductCreateScreen = () => {
         setImages(newImages);
 
     }
-    const handleRemoveImage = (index) => {
+    const handleRemoveImage = (index, e) => {
+        e.preventDefault();
         const newImages = [...images];
-        newImages[index] = null; // hoặc bạn có thể sử dụng newImages.splice(index, 1) để loại bỏ ảnh khỏi mảng
+        newImages.splice(index, 1); // hoặc bạn có thể sử dụng  để loại bỏ ảnh khỏi mảng
         setImages(newImages);
     };
 
@@ -311,7 +313,7 @@ const ProductCreateScreen = () => {
                                                 style={{ width: '150px', height: '150px' }}
                                             />
                                             <br />
-                                            <button onClick={() => handleRemoveImage(index)}>Remove</button>
+                                            <button onClick={(e) => handleRemoveImage(index, e)}>Remove</button>
                                         </div>
                                     )}
                                 </Col>
