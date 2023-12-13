@@ -6,6 +6,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import { useDispatch } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import { logout } from '../action/userAction';
+import SearchBox from '../components/SearchBox';
 
 const Header = ({ handleLoginLogout, isLoggedIn }) => {
     const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken') || null);
@@ -34,6 +35,9 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                     </LinkContainer>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
+                        <Nav className="mx-auto">
+                            <SearchBox />
+                        </Nav>
                         <Nav className="ml-auto">
                             <LinkContainer to='/cart'>
                                 <Nav.Link ><i className='fas fa fa-shopping-cart'></i> Giỏ Hàng</Nav.Link>
