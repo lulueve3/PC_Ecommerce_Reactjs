@@ -13,6 +13,7 @@ import ProductListScreen from './screens/ProductList';
 import ProductEditScreen from './screens/ProductEditScreen';
 import ProductCreateScreen from './screens/ProductCreateScreen';
 import SearchBox from './components/SearchBox';
+import UserProfile from './screens/UserProfile';
 
 
 
@@ -38,6 +39,7 @@ function App() {
           <Routes>
             <Route path='/' element={<HomeScreen />} />
             <Route path='/search/:keyword' element={<SearchBox />} />
+            <Route path='/profile' element={<UserProfile />} />
             <Route path="/product/:id" element={<ProductScreen />} />
             <Route path="/login" element={<LoginScreen handleLoginLogout={handleLoginLogout} />} />
             <Route path="/cart/:id?" element={<CartScreen />} />
