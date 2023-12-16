@@ -48,7 +48,7 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                         <NavDropdown.Item>Profile</NavDropdown.Item>
                                     </LinkContainer>
                                     <LinkContainer to='/admin/products'>
-                                        <NavDropdown.Item>Products</NavDropdown.Item>
+                                        <NavDropdown.Item>My Orders</NavDropdown.Item>
                                     </LinkContainer>
                                     <NavDropdown.Item onClick={logoutHandler}>Đăng xuất</NavDropdown.Item>
                                 </NavDropdown>

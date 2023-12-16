@@ -38,7 +38,7 @@ function App() {
         <Container>
           <Routes>
             <Route path='/' element={<HomeScreen />} />
-            <Route path='/search/:keyword' element={<SearchBox />} />
+
             <Route path='/profile' element={<UserProfile />} />
             <Route path="/product/:id" element={<ProductScreen />} />
             <Route path="/login" element={<LoginScreen handleLoginLogout={handleLoginLogout} />} />
@@ -47,6 +47,9 @@ function App() {
             <Route path="/admin/productList" element={<ProductListScreen />} />
             <Route path="/admin/productList/:id/edit" element={<ProductEditScreen />} />
             <Route path="/admin/productList/create" element={<ProductCreateScreen />} />
+            <Route path='/search/:keyword' element={<HomeScreen />} />
+            <Route path='/page/:pageNumber' element={<HomeScreen />} />
+            <Route path='/search/:keyword/page/:pageNumber' element={<HomeScreen />} />
           </Routes>
         </Container>
       </main>
