@@ -81,9 +81,7 @@ const ProductScreen = ({ }) => {
                                         <h3>{product.title}</h3>
 
                                     </ListGroupItem>
-                                    <ListGroupItem>
-                                        <Rating value={4.5} text={`5`} color={'orange'} />
-                                    </ListGroupItem>
+
 
                                     <ListGroupItem>
                                         Price: ${product.variants[0].price}

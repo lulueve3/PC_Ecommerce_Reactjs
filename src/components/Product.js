@@ -21,11 +21,7 @@ const Product = ({ product }) => {
             </Card.Body>
 
 
-            <Card.Text as='div'>
-                <div className='my-1'>
-                    <Rating value={4.5} text={`5`} color={'orange'} />
-                </div>
-            </Card.Text>
+
             <Card.Text as='h4'>
                 <div className='my-2 text-success'>
                     ${product.variants[0].price}
