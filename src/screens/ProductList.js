@@ -48,7 +48,7 @@ const ProductListScreen = () => {
 
     const createProductHandler = () => {
         dispatch(resetCreateProduct())
-        navigate('./create');
+        navigate('../admin/productList/create');
     }
 
     return (
