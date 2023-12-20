@@ -7,7 +7,7 @@ import { login } from '../action/userAction'
 import FormContainer from '../components/FormContainer'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { deleteProduct, listProducts, createProduct } from '../action/productActions'
+import { deleteProduct, listProducts, createProduct, resetCreateProduct } from '../action/productActions'
 import { LinkContainer } from 'react-router-bootstrap'
 import { PRODUCT_CREATE_RESET } from '../constants/productConstants'
 import Paginate from '../components/Paginate'
@@ -47,6 +47,7 @@ const ProductListScreen = () => {
     }
 
     const createProductHandler = () => {
+        dispatch(resetCreateProduct())
         navigate('./create');
     }
 

@@ -28,6 +28,7 @@ const ProductCreateScreen = () => {
     const [options, setOptions] = useState([]);
     const [images, setImages] = useState([]);
     const [selectImage, setSelectImage] = useState(null);
+    const [uploading, setUploading] = useState(false);
 
 
 
@@ -65,8 +66,15 @@ const ProductCreateScreen = () => {
 
     const handleVariantChange = (index, field, value) => {
         const updatedVariants = [...variants];
-        updatedVariants[index][field] = value;
-        setVariants(updatedVariants);
+        if (value >= 1 || value === "") {
+            updatedVariants[index][field] = value;
+            setVariants(updatedVariants);
+        }
+        else {
+            updatedVariants[index][field] = 1;
+            setVariants(updatedVariants);
+        }
+
     };
 
     const handleOptionChange = (index, optionIndex, value) => {
@@ -89,7 +97,7 @@ const ProductCreateScreen = () => {
 
     const handleOptionChangeToVariant = () => {
         if (options.length > 0) {
-            const result = [{ option1: "", option2: "", price: 0, quantity: 0 }];
+            const result = [{ option1: "", option2: "", price: 1, quantity: 1 }];
 
             // Duyệt qua mỗi option
             options.forEach((option, index) => {
@@ -122,36 +130,84 @@ const ProductCreateScreen = () => {
         }
     }, [selectImage]);
 
-    const handleImageChange = (index, e) => {
-        setSelectImage({
-            index: index,
-            src: e.target.files[0]
-        });
+    // const handleImageChange = (index, e) => {
+    //     setSelectImage({
+    //         index: index,
+    //         src: e.target.files[0]
+    //     });
+    // };
+
+    const handleImageChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        setSelectImage(selectedFiles);
     };
+    // const uploadImage = async (selectImage) => {
+    //     const index = selectImage.index;
+    //     const data = new FormData()
+    //     data.append('file', selectImage.src);
+    //     data.append('upload_preset', "rctjv3j1");
+    //     data.append('cloud_name', "dommm7bzh");
 
-    const uploadImage = async (selectImage) => {
-        const index = selectImage.index;
-        const data = new FormData()
-        data.append('file', selectImage.src);
-        data.append('upload_preset', "rctjv3j1");
-        data.append('cloud_name', "dommm7bzh");
+    //     const reponse = await axios.post('https://api.cloudinary.com/v1_1/dommm7bzh/image/upload', data)
+    //     const imageUrl = reponse.data.secure_url;
+    //     const newImages = [...images];
+    //     if (!newImages[index]) {
+    //         newImages[index] = {};
+    //     }
+    //     const newPosition = newImages.filter((img) => img && img.position).length;
+    //     newImages[index] = {
+    //         ...newImages[index],
+    //         position: newPosition,
+    //         src: imageUrl,
+    //     };
 
-        const reponse = await axios.post('https://api.cloudinary.com/v1_1/dommm7bzh/image/upload', data)
-        const imageUrl = reponse.data.secure_url;
-        const newImages = [...images];
-        if (!newImages[index]) {
-            newImages[index] = {};
+    //     setImages(newImages);
+    // }
+
+    const uploadImage = async (selectedImages) => {
+        try {
+            setUploading(true);
+
+            for (let index = 0; index < selectedImages.length; index++) {
+                const file = selectedImages[index];
+                const data = new FormData();
+
+                data.append('file', file);
+                data.append('upload_preset', 'rctjv3j1');
+                data.append('cloud_name', 'dommm7bzh');
+
+                const response = await axios.post('https://api.cloudinary.com/v1_1/dommm7bzh/image/upload', data);
+                const imageUrl = response.data.secure_url;
+
+                setImages((prevImages) => [
+                    ...prevImages,
+                    {
+                        position: index,
+                        src: imageUrl,
+                    },
+                ]);
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            // Handle error, show a message, etc.
+        } finally {
+            setUploading(false);
         }
-        newImages[index].src = imageUrl;
-        setImages(newImages);
-
-    }
-    const handleRemoveImage = (index, e) => {
-        e.preventDefault();
-        const newImages = [...images];
-        newImages.splice(index, 1); // hoặc bạn có thể sử dụng  để loại bỏ ảnh khỏi mảng
-        setImages(newImages);
     };
+
+
+
+    // const handleRemoveImage = (index, e) => {
+    //     e.preventDefault();
+    //     const newImages = [...images];
+    //     newImages.splice(index, 1); // hoặc bạn có thể sử dụng  để loại bỏ ảnh khỏi mảng
+    //     setImages(newImages);
+    // };
+
+    const handleRemoveImage = (indexToRemove) => {
+        setImages((prevImages) => prevImages.filter((_, index) => index !== indexToRemove));
+    };
+
 
     const handleRemoveOption = (indexToRemove) => {
         const updatedOptions = options.filter((_, index) => index !== indexToRemove);
@@ -179,6 +235,7 @@ const ProductCreateScreen = () => {
                             id='title'
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -192,6 +249,7 @@ const ProductCreateScreen = () => {
                             rows='3'
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            required
                         ></textarea>
                     </div>
 
@@ -205,6 +263,7 @@ const ProductCreateScreen = () => {
                             id='vendor'
                             value={vendor}
                             onChange={(e) => setVendor(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -222,6 +281,25 @@ const ProductCreateScreen = () => {
                             </label>
                         </div>
                     </div>
+
+                    <input type='file' onChange={(e) => handleImageChange(e)} multiple />
+                    {!images || images.length === 0 ? null : (
+                        <div>
+                            {images.map((image, index) => (
+                                <div key={index}>
+                                    <img
+                                        src={image.src}
+                                        alt={`Uploaded Image ${index + 1}`}
+                                        style={{ width: '150px', height: '150px', marginRight: '10px' }}
+                                    />
+                                    <button onClick={() => handleRemoveImage(index)}>Remove</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <br />
+
 
                     {options.map((option, index) => (
                         <div key={index} className='mb-3'>
@@ -289,6 +367,8 @@ const ProductCreateScreen = () => {
                                         id={`variantPrice${index}`}
                                         value={variant.price}
                                         onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
+                                        min={1}
+                                        required
                                     />
                                 </Col>
                                 <Col xs={12} md={4}>
@@ -301,6 +381,8 @@ const ProductCreateScreen = () => {
                                         id={`variantQuantity${index}`}
                                         value={variant.quantity}
                                         onChange={(e) => handleVariantChange(index, 'quantity', e.target.value)}
+                                        min={1}
+                                        required
                                     />
                                 </Col>
                                 <Col xs={12} md={3}>
@@ -326,8 +408,8 @@ const ProductCreateScreen = () => {
 
                     {/* Add button to add more variants */}
 
-                    <button type='submit' className='btn btn-primary my-2'>
-                        Create
+                    <button type='submit' className='btn btn-primary my-2' disabled={uploading}>
+                        {uploading ? 'Uploading...' : 'Create'}
                     </button>
                 </form>
 
