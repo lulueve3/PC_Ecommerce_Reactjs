@@ -21,6 +21,16 @@ const ProductScreen = ({ }) => {
         console.log(index);
     };
 
+    const [selectedImage, setSelectedImage] = useState(0);
+
+    const handlePrevClick = () => {
+        setSelectedImage((prev) => (prev > 0 ? prev - 1 : product.images.length - 1));
+    };
+
+    const handleNextClick = () => {
+        setSelectedImage((prev) => (prev < product.images.length - 1 ? prev + 1 : 0));
+    };
+
 
     const [qty, setQty] = useState(1);
     const [price, setPrice] = useState(0);
@@ -68,12 +78,62 @@ const ProductScreen = ({ }) => {
                     product?.title ? (
                         <Row>
                             <Col md={5}>
-                                <Image
-                                    src={product.images[0]?.src ? product.images[0]?.src : `${process.env.PUBLIC_URL}/imgNotFound.png`}
-                                    alt={product.title}
-                                    fluid
-                                />
+                                <div style={{ position: 'relative', display: 'inline-block' }}>
+                                    <Image
+                                        src={product.images[selectedImage]?.src || `${process.env.PUBLIC_URL}/imgNotFound.png`}
+                                        alt={product.title}
+                                        fluid
+                                        style={{ zIndex: 1 }} // Ensure that the main image is above the buttons
+                                    />
+
+                                    <Button
+                                        className="gallery-nav-button"
+                                        onClick={handlePrevClick}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '50%',
+                                            left: '10px',
+                                            transform: 'translateY(-50%)',
+                                            background: 'gray', // Set the background color to gray
+                                            color: 'white', // Set the text color to white
+                                        }}
+                                    >
+                                        &lt;
+                                    </Button>
+
+                                    <Button
+                                        className="gallery-nav-button"
+                                        onClick={handleNextClick}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '50%',
+                                            right: '10px',
+                                            transform: 'translateY(-50%)',
+                                            background: 'gray', // Set the background color to gray
+                                            color: 'white', // Set the text color to white
+                                        }}
+                                    >
+                                        &gt;
+                                    </Button>
+
+                                    <div className="thumbnails-container">
+                                        {product.images.map((image, index) => (
+                                            <div key={index} className="d-inline-block me-2">
+                                                <Image
+                                                    src={image.src || `${process.env.PUBLIC_URL}/imgNotFound.png`}
+                                                    alt={`Thumbnail ${index + 1}`}
+                                                    fluid
+                                                    onClick={() => setSelectedImage(index)}
+                                                    className={`thumbnail ${index === selectedImage ? 'selected-thumbnail' : ''}`}
+                                                    style={{ width: '50px', height: '50px', margin: '5px' }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </Col>
+
+
 
                             <Col md={3}>
                                 <ListGroup variant='flush'>

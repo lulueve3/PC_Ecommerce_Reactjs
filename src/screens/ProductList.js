@@ -84,7 +84,7 @@ const ProductListScreen = () => {
                                 <tr>
                                     <td>{product.id}</td>
                                     <td>{product.title}</td>
-                                    <td>{product.variants[0].price}</td>
+                                    <td>{product.variants[0]?.price}</td>
                                     <td>{product.active ? 'true' : 'false'}</td>
                                     <td>
                                         <LinkContainer to={`${product.id}/edit`}>
