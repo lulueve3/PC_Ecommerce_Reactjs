@@ -58,11 +58,11 @@ const ProductScreen = ({ }) => {
 
     const addToCartHandler = () => {
         dispatch(addToCart({
-            id: id,
+            id: product.variants[selectedButton].id,
             title: product.title,
             qty,
             price,
-            image,
+            image: product.images[0].src,
             inStock
         }));
     }

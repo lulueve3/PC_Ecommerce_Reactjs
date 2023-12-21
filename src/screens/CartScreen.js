@@ -41,14 +41,14 @@ const CartScreen = () => {
 
     return (
         <Row>
-            <Col md={8}>
+            <Col md={9}>
                 <h1>Shopping Cart</h1>
                 {cartItems.length === 0 ? <Message>Your cart is empty <Link to="/">Go Back</Link> </Message> : (
                     <ListGroup variant='flush'>
                         {cartItems.map(item => (
                             <ListGroup.Item key={item.id}>
                                 <Row>
-                                    <Col md={2}>
+                                    <Col md={3}>
                                         <Image src={item.image} fluid rounded></Image>
 
                                     </Col>
@@ -56,7 +56,7 @@ const CartScreen = () => {
                                         <Link to={`/product/${item.id}`}>{item.title}</Link>
                                     </Col>
                                     <Col md={2}>
-                                        {item.price} VNĐ
+                                        {item.price} $
                                     </Col>
                                     <Col md={3}>
                                         <input
@@ -83,12 +83,12 @@ const CartScreen = () => {
                     </ListGroup>
                 )}
             </Col>
-            <Col md={4}>
+            <Col md={3}>
                 <Card>
                     <ListGroup variant='flush'>
                         <ListGroup.Item>
-                            <h2>Subtotal ({cartItems.reduce((acc, item) => acc + item.qty, 0)})</h2>
-                            ${cartItems.reduce((acc, item) => acc + item.qty * item.price, 0).toFixed(3)}
+                            <h3>Subtotal ({cartItems.reduce((acc, item) => acc + item.qty, 0)})</h3>
+                            <h5>${cartItems.reduce((acc, item) => acc + item.qty * item.price, 0).toFixed(3)}</h5>
                         </ListGroup.Item>
                         <ListGroup.Item>
                             <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>Checkout</Button>
