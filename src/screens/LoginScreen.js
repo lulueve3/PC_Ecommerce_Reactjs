@@ -54,6 +54,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
 
                     localStorage.setItem('accessToken', (data.accessToken))
                     handleLoginLogout(true);
+                    setIsRegistering(false);
 
                 } catch (error) {
                     console.log(error);
