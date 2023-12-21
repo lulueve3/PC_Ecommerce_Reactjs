@@ -73,6 +73,7 @@ const ProductListScreen = () => {
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                <th>IMAGE</th>
                                 <th>TITLE</th>
                                 <th>PRICE</th>
                                 <th>ACTIVE</th>
@@ -82,7 +83,9 @@ const ProductListScreen = () => {
                         <tbody>
                             {product?.map((product) => (
                                 <tr>
-                                    <td>{product.id}</td>
+                                    <td><Link to={`/product/${product.id}`}>{product.id}
+                                    </Link></td>
+                                    <td><Link to={`/product/${product.id}`}><Image src={product.images[0].src} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px', margin: '5px' }} /></Link></td>
                                     <td>{product.title}</td>
                                     <td>{product.variants[0]?.price}</td>
                                     <td>{product.active ? 'true' : 'false'}</td>

@@ -385,20 +385,7 @@ const ProductCreateScreen = () => {
                                         required
                                     />
                                 </Col>
-                                <Col xs={12} md={3}>
-                                    <input type='file' onChange={(e) => handleImageChange(index, e)} />
-                                    {!images[index]?.src ? null : (
-                                        <div>
-                                            <img
-                                                src={images[index].src}
-                                                alt={`Uploaded Image ${index + 1}`}
-                                                style={{ width: '150px', height: '150px' }}
-                                            />
-                                            <br />
-                                            <button onClick={(e) => handleRemoveImage(index, e)}>Remove</button>
-                                        </div>
-                                    )}
-                                </Col>
+
 
                             </Row>
                             {/* Add more Row/Col for other variant properties */}

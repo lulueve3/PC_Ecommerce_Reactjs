@@ -8,6 +8,8 @@ import { listProductDetail } from '../action/productActions'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
 import { addToCart, editCartItemQuantity } from '../action/cartAction'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ProductScreen = ({ }) => {
 
@@ -65,11 +67,24 @@ const ProductScreen = ({ }) => {
             image: product.images[0].src,
             inStock
         }));
+        toast.success('Add to cart success!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+        });
+
     }
 
 
     return (
         <>
+            <ToastContainer />
+
             <Link to='../' className='btn btn-light my-3'>
                 Go Back
             </Link>
@@ -94,7 +109,7 @@ const ProductScreen = ({ }) => {
                                             top: '50%',
                                             left: '10px',
                                             transform: 'translateY(-50%)',
-                                            background: 'gray', // Set the background color to gray
+                                            background: 'rgba(128, 128, 128, 0.5)', // Set the background color to gray
                                             color: 'white', // Set the text color to white
                                         }}
                                     >
@@ -109,7 +124,7 @@ const ProductScreen = ({ }) => {
                                             top: '50%',
                                             right: '10px',
                                             transform: 'translateY(-50%)',
-                                            background: 'gray', // Set the background color to gray
+                                            background: 'rgba(128, 128, 128, 0.5)', // Set the background color to gray
                                             color: 'white', // Set the text color to white
                                         }}
                                     >
