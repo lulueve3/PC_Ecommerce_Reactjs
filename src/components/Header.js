@@ -7,24 +7,62 @@ import { useDispatch } from 'react-redux';
 import { LinkContainer } from 'react-router-bootstrap';
 import { logout } from '../action/userAction';
 import SearchBox from '../components/SearchBox';
+import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom'
+
 
 const Header = ({ handleLoginLogout, isLoggedIn }) => {
+    const [user, setUser] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    const navigate = useNavigate();
     const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken') || null);
+
+
+
+    const setUserInfor = (accessToken) => {
+        try {
+            if (!accessToken) {
+                setIsAdmin(false);
+                return;
+            }
+
+
+            const decodedToken = jwtDecode(accessToken);
+            console.log(decodedToken);
+            setUser(prevUser => {
+                if (prevUser && prevUser.a && prevUser.a[0] === "ROLE_ADMIN") {
+                    setIsAdmin(true);
+                } else {
+                    setIsAdmin(false);
+                }
+                return decodedToken;
+            });
+
+
+        } catch (error) {
+            console.error('Error decoding access token:', error);
+            navigate('/login');
+        }
+    }
+
 
 
     const dispatch = useDispatch();
     const logoutHandler = () => {
         dispatch(logout());
         handleLoginLogout(false);
+        setUser([]);
+        setIsAdmin(false);
     }
 
     useEffect(() => {
         const storedAccessToken = localStorage.getItem('accessToken');
         setAccessToken(storedAccessToken);
-        console.log("access " + storedAccessToken);
-    }, [isLoggedIn]);
+        setUserInfor(storedAccessToken);
+    }, [isLoggedIn, accessToken, user]);
 
-    const isAdmin = true;
+
 
     return (
         <header>
@@ -43,7 +81,7 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                 <Nav.Link ><i className='fas fa fa-shopping-cart'></i> Giỏ Hàng</Nav.Link>
                             </LinkContainer>
                             {isLoggedIn ? (
-                                <NavDropdown title='userName' id='username'>
+                                <NavDropdown title={user.e} id='username'>
                                     <LinkContainer to='/profile'>
                                         <NavDropdown.Item>Profile</NavDropdown.Item>
                                     </LinkContainer>

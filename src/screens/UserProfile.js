@@ -5,9 +5,13 @@ import EditAddress from '../components/EditAddress';
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Link, useParams, useNavigate } from 'react-router-dom'
+
 
 
 const UserProfile = () => {
+    const navigate = useNavigate();
+
     const [user, setUser] = useState({
         username: 'JohnDoe',
         email: 'john.doe@example.com',
@@ -50,6 +54,29 @@ const UserProfile = () => {
         setShowEditModal(true);
     };
 
+    const getAddress = async () => {
+        const accessToken = localStorage.getItem('accessToken');
+
+        if (!accessToken) {
+            // Handle the case where the access token is not available
+            navigate('../login');
+            return;
+        }
+
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        };
+
+        const { data } = await axios.get('http://localhost:8080/api/customer/addresses', config)
+        setAddresses(data.addresses);
+    }
+
+    useEffect(() => {
+        getAddress();
+
+    }, [addresses])
 
     return (
         <>
@@ -112,9 +139,9 @@ const UserProfile = () => {
                                                         <Row key={index} className="mb-3">
                                                             <Col md={6}>
                                                                 <p>
-                                                                    <strong>Name:</strong> {address.name}<br />
+                                                                    <strong>Name:</strong> {address.firstName + " " + address.lastName}<br />
                                                                     <strong>Phone:</strong> {address.phone}<br />
-                                                                    <strong>Street:</strong> {address.street + "-" + address.ward + "-" + address.district + "-" + address.city}
+                                                                    <strong>Street:</strong> {address.address}
                                                                 </p>
                                                             </Col>
                                                             <Col md={3}>
