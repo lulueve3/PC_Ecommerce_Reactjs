@@ -7,6 +7,8 @@ import FormContainer from '../components/FormContainer';
 import { createProduct } from '../action/productActions';
 import { Row, Col } from 'react-bootstrap';
 import axios from 'axios'
+import Select from 'react-select';
+
 
 const ProductCreateScreen = () => {
 
@@ -29,7 +31,8 @@ const ProductCreateScreen = () => {
     const [images, setImages] = useState([]);
     const [selectImage, setSelectImage] = useState(null);
     const [uploading, setUploading] = useState(false);
-
+    const [selectedCollections, setSelectedCollections] = useState([]);
+    const [listCollections, setListCollections] = useState([]);
 
 
 
@@ -47,6 +50,7 @@ const ProductCreateScreen = () => {
             variants,
             options,
             images,
+            collectionIds: selectedCollections
         });
 
         dispatch(
@@ -58,12 +62,54 @@ const ProductCreateScreen = () => {
                 variants,
                 options,
                 images,
+                collectionIds: selectedCollections
             })
         );
         navigate('/admin/productlist');
 
     };
 
+    useEffect(() => {
+        const getCollections = async () => {
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                // Handle the case where the access token is not available
+
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+
+            const { data } = await axios.get(`http://localhost:8080/api/admin/collections?page=0&size=100&sortBy=id&sortDirection=ASC`, config);
+            console.log(data);
+            setListCollections(data.results)
+        }
+
+
+        getCollections();
+    }, [])
+
+    const handleCollectionChange = (selectedOptions) => {
+        // Lấy mảng các giá trị của collection đã chọn
+        const selectedValues = selectedOptions.map(option => option.value);
+        setSelectedCollections(selectedValues);
+    };
+
+    // Chuyển đổi danh sách collections thành định dạng chấp nhận được bởi React-Select
+    const selectOptions = listCollections.map(collection => ({
+        value: collection.id,
+        label: collection.title,
+    }));
+
+    const optionsCollection = listCollections.map(collection => ({
+        value: collection.id,
+        label: collection.title,
+    }));
 
     const handleVariantChange = (index, field, value) => {
         const updatedVariants = [...variants];
@@ -152,39 +198,13 @@ const ProductCreateScreen = () => {
         }
     }, [selectImage]);
 
-    // const handleImageChange = (index, e) => {
-    //     setSelectImage({
-    //         index: index,
-    //         src: e.target.files[0]
-    //     });
-    // };
+
 
     const handleImageChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
         setSelectImage(selectedFiles);
     };
-    // const uploadImage = async (selectImage) => {
-    //     const index = selectImage.index;
-    //     const data = new FormData()
-    //     data.append('file', selectImage.src);
-    //     data.append('upload_preset', "rctjv3j1");
-    //     data.append('cloud_name', "dommm7bzh");
 
-    //     const reponse = await axios.post('https://api.cloudinary.com/v1_1/dommm7bzh/image/upload', data)
-    //     const imageUrl = reponse.data.secure_url;
-    //     const newImages = [...images];
-    //     if (!newImages[index]) {
-    //         newImages[index] = {};
-    //     }
-    //     const newPosition = newImages.filter((img) => img && img.position).length;
-    //     newImages[index] = {
-    //         ...newImages[index],
-    //         position: newPosition,
-    //         src: imageUrl,
-    //     };
-
-    //     setImages(newImages);
-    // }
 
     const uploadImage = async (selectedImages) => {
         try {
@@ -218,13 +238,6 @@ const ProductCreateScreen = () => {
     };
 
 
-
-    // const handleRemoveImage = (index, e) => {
-    //     e.preventDefault();
-    //     const newImages = [...images];
-    //     newImages.splice(index, 1); // hoặc bạn có thể sử dụng  để loại bỏ ảnh khỏi mảng
-    //     setImages(newImages);
-    // };
 
     const handleRemoveImage = (indexToRemove) => {
         setImages((prevImages) => prevImages.filter((_, index) => index !== indexToRemove));
@@ -321,6 +334,18 @@ const ProductCreateScreen = () => {
                     )}
 
                     <br />
+                    <div>
+                        <h3>List of Collections</h3>
+                        <Select
+                            isMulti
+                            options={optionsCollection}
+                            value={optionsCollection.filter(option => selectedCollections.includes(option.value))}
+                            onChange={handleCollectionChange}
+                        />
+
+
+                    </div>
+
 
                     {options.length === 0 && (
                         <div className='mb-3'>
