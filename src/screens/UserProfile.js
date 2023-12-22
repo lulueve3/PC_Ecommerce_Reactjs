@@ -135,7 +135,7 @@ const UserProfile = () => {
                                         <Card>
                                             <Card.Body>
                                                 <Form>
-                                                    {addresses.map((address, index) => (
+                                                    {addresses?.map((address, index) => (
                                                         <Row key={index} className="mb-3">
                                                             <Col md={6}>
                                                                 <p>

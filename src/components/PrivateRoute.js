@@ -1,41 +1,50 @@
 import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { Spinner } from 'react-bootstrap';
+
 
 
 import { Route, Navigate, useNavigate } from 'react-router-dom';
 
 const PrivateRoute = ({ children }) => {
 
-    const [userRole, setUserRole] = useState("ROLE_USER");
-
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
 
 
 
+    const accessToken = localStorage.getItem('accessToken');
     useEffect(() => {
         try {
-            const accessToken = localStorage.getItem('accessToken');
+
             if (!accessToken) {
-                // Handle the case where the access token is not available
                 navigate('/');
                 return;
             }
-            // Giải mã token sử dụng thư viện jwt-decode
             const decodedToken = jwtDecode(accessToken);
-            setUserRole(decodedToken.a[0]);
-            console.log(userRole)
-            console.log(userRole !== 'ROLE_ADMIN');
+            const newUserRole = decodedToken.a[0];
 
+            if (newUserRole !== 'ROLE_ADMIN') {
+                navigate('/');
+            }
+            setLoading(false);
         } catch (error) {
             console.error('Error decoding access token:', error);
         }
-    }, []);
 
+    }, [accessToken]);
 
-    if (userRole !== 'ROLE_ADMIN') {
-        return <Navigate to='/' />
-
+    if (loading) {
+        // Display a React Bootstrap loading spinner
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+                <Spinner animation="border" role="status">
+                    <span className="sr-only">Loading...</span>
+                </Spinner>
+            </div>
+        );
     }
+
     return children;
 
 };

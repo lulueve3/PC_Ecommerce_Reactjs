@@ -54,13 +54,14 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
         handleLoginLogout(false);
         setUser([]);
         setIsAdmin(false);
+        navigate('/');
     }
 
     useEffect(() => {
         const storedAccessToken = localStorage.getItem('accessToken');
         setAccessToken(storedAccessToken);
         setUserInfor(storedAccessToken);
-    }, [isLoggedIn, accessToken, user]);
+    }, [isLoggedIn, accessToken]);
 
 
 
