@@ -64,18 +64,32 @@ const ProductCreateScreen = () => {
 
     };
 
+
     const handleVariantChange = (index, field, value) => {
         const updatedVariants = [...variants];
-        if (value >= 1 || value === "") {
-            updatedVariants[index][field] = value;
-            setVariants(updatedVariants);
-        }
-        else {
-            updatedVariants[index][field] = 1;
-            setVariants(updatedVariants);
+
+        // Ensure that the specified index exists in the array
+        if (!updatedVariants[index]) {
+            // If the index doesn't exist, add a new variant
+            updatedVariants[index] = {
+                option1: "",  // Replace with your default values
+                option2: "",
+                option3: "",
+                price: 1,
+                quantity: 1,
+            };
         }
 
+        // Check if the 'price' or 'quantity' field exists before setting its value
+        if ((field === 'price' || field === 'quantity') && (value >= 1 || value === '')) {
+            updatedVariants[index][field] = value;
+        } else {
+            updatedVariants[index][field] = 1;
+        }
+
+        setVariants(updatedVariants);
     };
+
 
     const handleOptionChange = (index, optionIndex, value) => {
         const updatedOptions = [...options];
@@ -90,14 +104,22 @@ const ProductCreateScreen = () => {
             .filter(key => key.startsWith('option'))
             .map(key => variant[key]);
 
-        return optionNames.join('-');
+        const result = optionNames.join('-');
+
+        // Check if the last character is a hyphen and remove it
+        if (result.endsWith('-')) {
+            return result.slice(0, -1);
+        }
+
+        return result;
     }
+
 
 
 
     const handleOptionChangeToVariant = () => {
         if (options.length > 0) {
-            const result = [{ option1: "", option2: "", price: 1, quantity: 1 }];
+            const result = [{ option1: "", option2: "", option3: "", price: 1, quantity: 1 }];
 
             // Duyệt qua mỗi option
             options.forEach((option, index) => {
@@ -221,7 +243,7 @@ const ProductCreateScreen = () => {
                 Go Back
             </Link>
             <FormContainer>
-                <h1>Edit Product</h1>
+                <h1>Create Product</h1>
                 {loadingCreate && <Loader />}
                 {errorCreate && <Message variant='danger'>{errorCreate}</Message>}
                 <form onSubmit={submitHandler}>
@@ -300,6 +322,42 @@ const ProductCreateScreen = () => {
 
                     <br />
 
+                    {options.length === 0 && (
+                        <div className='mb-3'>
+                            <h5>Default Variant</h5>
+
+                            <Row className='mb-3'>
+                                <Col xs={12} md={5}>
+                                    <label htmlFor={`variantPriceDefault`} className='form-label'>
+                                        Price
+                                    </label>
+                                    <input
+                                        type='number'
+                                        className='form-control'
+                                        id={`variantPriceDefault`}
+                                        value={(variants[0] && variants[0].price) || 1}  // Check if variants[0] exists before accessing price
+                                        onChange={(e) => handleVariantChange(0, 'price', e.target.value)}
+                                        min={1}
+                                        required
+                                    />
+                                </Col>
+                                <Col xs={12} md={4}>
+                                    <label htmlFor={`variantQuantityDefault`} className='form-label'>
+                                        Quantity
+                                    </label>
+                                    <input
+                                        type='number'
+                                        className='form-control'
+                                        id={`variantQuantityDefault`}
+                                        value={(variants[0] && variants[0].quantity) || 1}  // Check if variants[0] exists before accessing quantity
+                                        onChange={(e) => handleVariantChange(0, 'quantity', e.target.value)}
+                                        min={1}
+                                        required
+                                    />
+                                </Col>
+                            </Row>
+                        </div>
+                    )}
 
                     {options.map((option, index) => (
                         <div key={index} className='mb-3'>
@@ -336,23 +394,23 @@ const ProductCreateScreen = () => {
                             >
                                 Remove Option
                             </button>
-                            {/* Add more input fields for other option properties */}
-                            {/* ... */}
                         </div>
                     ))}
 
 
                     {/* Add button to add more options */}
-                    <button
-                        type='button'
-                        className='btn btn-secondary'
-                        onClick={() => setOptions([...options, { name: '', values: [] }])}
-                    >
-                        Add Option
-                    </button>
+                    {options.length < 3 && (
+                        <button
+                            type='button'
+                            className='btn btn-secondary'
+                            onClick={() => setOptions([...options, { name: '', values: [] }])}
+                        >
+                            Add Option
+                        </button>
+                    )}
 
 
-                    {variants.map((variant, index) => (
+                    {variants[0]?.option1 && variants.map((variant, index) => (
                         <div key={index} className='mb-3'>
                             <h5>Variant: {getVariantName(variant)}</h5>
 
@@ -388,12 +446,9 @@ const ProductCreateScreen = () => {
 
 
                             </Row>
-                            {/* Add more Row/Col for other variant properties */}
-                            {/* ... */}
                         </div>
                     ))}
 
-                    {/* Add button to add more variants */}
 
                     <button type='submit' className='btn btn-primary my-2' disabled={uploading}>
                         {uploading ? 'Uploading...' : 'Create'}
