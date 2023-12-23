@@ -100,11 +100,6 @@ const ProductCreateScreen = () => {
         setSelectedCollections(selectedValues);
     };
 
-    // Chuyển đổi danh sách collections thành định dạng chấp nhận được bởi React-Select
-    const selectOptions = listCollections.map(collection => ({
-        value: collection.id,
-        label: collection.title,
-    }));
 
     const optionsCollection = listCollections.map(collection => ({
         value: collection.id,
@@ -342,8 +337,6 @@ const ProductCreateScreen = () => {
                             value={optionsCollection.filter(option => selectedCollections.includes(option.value))}
                             onChange={handleCollectionChange}
                         />
-
-
                     </div>
 
 

@@ -7,7 +7,7 @@ import { login } from '../action/userAction'
 import FormContainer from '../components/FormContainer'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { deleteProduct, listProducts, createProduct, resetCreateProduct } from '../action/productActions'
+import { deleteProduct, listProducts, createProduct, resetCreateProduct, listProductDetail } from '../action/productActions'
 import { LinkContainer } from 'react-router-bootstrap'
 import { PRODUCT_CREATE_RESET } from '../constants/productConstants'
 import Paginate from '../components/Paginate'
@@ -28,7 +28,8 @@ const ProductListScreen = () => {
     const productCreate = useSelector(state => state.productCreate)
     const { loading: loadingCreate, error: errorCreate, success: successCreate, product: createdProduct } = productCreate
 
-
+    const productUpdate = useSelector(state => state.productUpdate)
+    const { loading: loadingUpdate, error: errorUpdate, success: successUpdate } = productUpdate
     useEffect(() => {
         // dispatch({ type: PRODUCT_CREATE_RESET })
 
@@ -38,7 +39,7 @@ const ProductListScreen = () => {
         // else {
         dispatch(listProducts('', pageNumber - 1))
         // }
-    }, [dispatch, successDelete, successCreate, pageNumber])
+    }, [dispatch, successDelete, successCreate, pageNumber, successUpdate])
 
     const deleteHandler = (id) => {
         if (window.confirm('Are you sure')) {
@@ -49,6 +50,13 @@ const ProductListScreen = () => {
     const createProductHandler = () => {
         dispatch(resetCreateProduct())
         navigate('../admin/productList/create');
+    }
+
+    const handleEdit = (id) => {
+        dispatch(listProductDetail(id));
+        navigate(`../admin/productList/${id}/edit`);
+
+
     }
 
     return (
@@ -90,11 +98,9 @@ const ProductListScreen = () => {
                                     <td>{product.variants[0]?.price}</td>
                                     <td>{product.active ? 'true' : 'false'}</td>
                                     <td>
-                                        <LinkContainer to={`${product.id}/edit`}>
-                                            <Button variant='light' className='btn-sm'>
-                                                <i className='fas fa-edit'></i>
-                                            </Button>
-                                        </LinkContainer>
+                                        <Button variant='light' className='btn-sm' onClick={() => handleEdit(product.id)}>
+                                            <i className='fas fa-edit'></i>
+                                        </Button>
                                         <Button variant='danger' className='btn-sm' onClick={() => deleteHandler(product.id)}>
                                             <i className='fas fa-trash'></i>
                                         </Button>

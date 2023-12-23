@@ -115,7 +115,7 @@ export const createProduct = (product) => async (dispatch) => {
     }
 };
 
-export const updateProduct = ({ product }) => async (dispatch) => {
+export const updateProduct = (id, { title, description, vendor, active, variants, options, images, collectionIds }) => async (dispatch) => {
 
     dispatch({ type: PRODUCT_UPDATE_REQUEST });
 
@@ -138,7 +138,16 @@ export const updateProduct = ({ product }) => async (dispatch) => {
             }
         };
 
-        const { data } = await axios.patch(`http://localhost:8080/api/admin/products/${product.id}`, {}, config);
+        const { data } = await axios.patch(`http://localhost:8080/api/admin/products/${id}`, {
+            title,
+            description,
+            vendor,
+            active,
+            variants,
+            options,
+            images,
+            collectionIds,
+        }, config);
 
         dispatch({
             type: PRODUCT_UPDATE_SUCCESS,
@@ -146,7 +155,7 @@ export const updateProduct = ({ product }) => async (dispatch) => {
         });
     } catch (error) {
         dispatch({
-            type: PRODUCT_CREATE_FAIL,
+            type: PRODUCT_UPDATE_FAIL,
             payload: error.response && error.response.data.message ? error.response.data.message : error.message
         });
     }

@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import FormContainer from '../components/FormContainer';
 import { listProductDetail, updateProduct } from '../action/productActions';
 import { Row, Col } from 'react-bootstrap';
 import axios from 'axios'
+import Select from 'react-select';
 
 
 const ProductEditScreen = () => {
     const { id: productId } = useParams();
 
+
     const dispatch = useDispatch();
+    const navigate = useNavigate()
 
     const productDetail = useSelector((state) => state.productDetail);
     const { loading, error, product } = productDetail;
@@ -32,10 +35,9 @@ const ProductEditScreen = () => {
     const [options, setOptions] = useState([]);
     const [images, setImages] = useState([]);
     const [selectImage, setSelectImage] = useState(null);
-
-    useEffect(() => {
-        handleOptionChangeToVariant();
-    }, [options]);
+    const [uploading, setUploading] = useState(false);
+    const [selectedCollections, setSelectedCollections] = useState([]);
+    const [listCollections, setListCollections] = useState([]);
 
     useEffect(() => {
         if (!product.title || String(product.id) !== String(productId)) {
@@ -45,24 +47,32 @@ const ProductEditScreen = () => {
             setDescription(product.description);
             setVendor(product.vendor);
             setActive(product.active);
-            setVariants(product.variants || []);
-            setOptions(product.options || []);
+            if (product.options[0]?.name === "Title") {
+                setOptions([])
+            } else {
+                setOptions(product.options || []);
+            }
+
+
+            setImages(product.images || []);
+
+            setSelectedCollections(prevCollections => [
+                ...prevCollections,
+                ...product.collections.map(col => col.id)
+            ]);
+
+
         }
-    }, [dispatch, productId, product]);
+    }, [dispatch, productId, product, loading]);
+
+
+    useEffect(() => {
+        handleOptionChangeToVariant();
+        setVariants(product.variants || []);
+    }, [options]);
 
     const submitHandler = (e) => {
         e.preventDefault();
-        dispatch(
-            updateProduct({
-                _id: productId,
-                title,
-                description,
-                vendor,
-                active,
-                variants,
-                options,
-            })
-        );
         console.log({
             title,
             description,
@@ -71,15 +81,94 @@ const ProductEditScreen = () => {
             variants,
             options,
             images,
-        }
+            collectionIds: selectedCollections
+        });
+
+        console.log(variants);
+
+        dispatch(
+            updateProduct(productId, {
+                title,
+                description,
+                vendor,
+                active,
+                variants,
+                options,
+                images,
+                collectionIds: selectedCollections
+            })
         );
+        navigate('/admin/productlist');
+
     };
+
+    useEffect(() => {
+        const getCollections = async () => {
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                // Handle the case where the access token is not available
+
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+
+            const { data } = await axios.get(`http://localhost:8080/api/admin/collections?page=0&size=100&sortBy=id&sortDirection=ASC`, config);
+            console.log(data);
+            setListCollections(data.results)
+        }
+
+
+        getCollections();
+    }, [])
+
+    const handleCollectionChange = (selectedOptions) => {
+        // Lấy mảng các giá trị của collection đã chọn
+        const selectedValues = selectedOptions.map(option => option.value);
+        setSelectedCollections(selectedValues);
+    };
+
+    // Chuyển đổi danh sách collections thành định dạng chấp nhận được bởi React-Select
+    const selectOptions = listCollections.map(collection => ({
+        value: collection.id,
+        label: collection.title,
+    }));
+
+    const optionsCollection = listCollections.map(collection => ({
+        value: collection.id,
+        label: collection.title,
+    }));
 
     const handleVariantChange = (index, field, value) => {
         const updatedVariants = [...variants];
-        updatedVariants[index][field] = value;
+
+        // Ensure that the specified index exists in the array
+        if (!updatedVariants[index]) {
+            // If the index doesn't exist, add a new variant
+            updatedVariants[index] = {
+                option1: "",  // Replace with your default values
+                option2: "",
+                option3: "",
+                price: 1,
+                quantity: 1,
+            };
+        }
+
+        // Check if the 'price' or 'quantity' field exists before setting its value
+        if ((field === 'price' || field === 'quantity') && (value >= 1 || value === '')) {
+            updatedVariants[index][field] = Number(value);
+        } else {
+            updatedVariants[index][field] = value;
+        }
+
         setVariants(updatedVariants);
     };
+
 
     const handleOptionChange = (index, optionIndex, value) => {
         const updatedOptions = [...options];
@@ -89,17 +178,27 @@ const ProductEditScreen = () => {
     };
 
     function getVariantName(variant) {
-        console.log(variant);
+
         const optionNames = Object.keys(variant)
             .filter(key => key.startsWith('option'))
             .map(key => variant[key]);
 
-        return optionNames.join('-');
+        const result = optionNames.join('-');
+
+        // Check if the last character is a hyphen and remove it
+        if (result.endsWith('-')) {
+            return result.slice(0, -1);
+        }
+
+        return result;
     }
+
+
+
 
     const handleOptionChangeToVariant = () => {
         if (options.length > 0) {
-            const result = [{ option1: "", option2: "", price: 0, quantity: 0 }];
+            const result = [{ option1: "", option2: "", option3: "", price: 1, quantity: 1 }];
 
             // Duyệt qua mỗi option
             options.forEach((option, index) => {
@@ -132,41 +231,57 @@ const ProductEditScreen = () => {
         }
     }, [selectImage]);
 
-    const handleImageChange = (index, e) => {
-        setSelectImage({
-            index: index,
-            src: e.target.files[0]
-        });
+
+
+    const handleImageChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        setSelectImage(selectedFiles);
     };
 
-    const uploadImage = async (selectImage) => {
-        const index = selectImage.index;
-        const data = new FormData()
-        data.append('file', selectImage.src);
-        data.append('upload_preset', "rctjv3j1");
-        data.append('cloud_name', "dommm7bzh");
 
-        const reponse = await axios.post('https://api.cloudinary.com/v1_1/dommm7bzh/image/upload', data)
-        const imageUrl = reponse.data.secure_url;
-        const newImages = [...images];
-        if (!newImages[index]) {
-            newImages[index] = {};
+    const uploadImage = async (selectedImages) => {
+        try {
+            setUploading(true);
+
+            for (let index = 0; index < selectedImages.length; index++) {
+                const file = selectedImages[index];
+                const data = new FormData();
+
+                data.append('file', file);
+                data.append('upload_preset', 'rctjv3j1');
+                data.append('cloud_name', 'dommm7bzh');
+
+                const response = await axios.post('https://api.cloudinary.com/v1_1/dommm7bzh/image/upload', data);
+                const imageUrl = response.data.secure_url;
+
+                setImages((prevImages) => [
+                    ...prevImages,
+                    {
+                        position: index,
+                        src: imageUrl,
+                    },
+                ]);
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            // Handle error, show a message, etc.
+        } finally {
+            setUploading(false);
         }
-        newImages[index].src = imageUrl;
-        setImages(newImages);
-
-    }
-    const handleRemoveImage = (index, e) => {
-        e.preventDefault();
-        const newImages = [...images];
-        newImages.splice(index, 1); // hoặc bạn có thể sử dụng  để loại bỏ ảnh khỏi mảng
-        setImages(newImages);
     };
+
+
+
+    const handleRemoveImage = (indexToRemove) => {
+        setImages((prevImages) => prevImages.filter((_, index) => index !== indexToRemove));
+    };
+
 
     const handleRemoveOption = (indexToRemove) => {
         const updatedOptions = options.filter((_, index) => index !== indexToRemove);
         setOptions(updatedOptions);
     };
+
 
     return (
         <>
@@ -174,7 +289,7 @@ const ProductEditScreen = () => {
                 Go Back
             </Link>
             <FormContainer>
-                <h1>Edit Product</h1>
+                <h1>Create Product</h1>
                 {loadingUpdate && <Loader />}
                 {errorUpdate && <Message variant='danger'>{errorUpdate}</Message>}
                 <form onSubmit={submitHandler}>
@@ -188,6 +303,7 @@ const ProductEditScreen = () => {
                             id='title'
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -201,6 +317,7 @@ const ProductEditScreen = () => {
                             rows='3'
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            required
                         ></textarea>
                     </div>
 
@@ -214,6 +331,7 @@ const ProductEditScreen = () => {
                             id='vendor'
                             value={vendor}
                             onChange={(e) => setVendor(e.target.value)}
+                            required
                         />
                     </div>
 
@@ -232,7 +350,73 @@ const ProductEditScreen = () => {
                         </div>
                     </div>
 
-                    {options.map((option, index) => (
+                    <input type='file' onChange={(e) => handleImageChange(e)} multiple />
+                    {!images || images.length === 0 ? null : (
+                        <div>
+                            {images.map((image, index) => (
+                                <div key={index}>
+                                    <img
+                                        src={image.src}
+                                        alt={`Uploaded Image ${index + 1}`}
+                                        style={{ width: '150px', height: '150px', marginRight: '10px' }}
+                                    />
+                                    <button onClick={() => handleRemoveImage(index)}>Remove</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <br />
+                    <div>
+                        <h3>List of Collections</h3>
+                        <Select
+                            isMulti
+                            options={optionsCollection}
+                            value={optionsCollection.filter(option => selectedCollections.includes(option.value))}
+                            onChange={handleCollectionChange}
+                        />
+
+                    </div>
+
+
+                    {options.length === 0 && (
+                        <div className='mb-3'>
+                            <h5>Default Variant</h5>
+
+                            <Row className='mb-3'>
+                                <Col xs={12} md={5}>
+                                    <label htmlFor={`variantPriceDefault`} className='form-label'>
+                                        Price
+                                    </label>
+                                    <input
+                                        type='number'
+                                        className='form-control'
+                                        id={`variantPriceDefault`}
+                                        value={(variants[0] && variants[0].price) || 1}  // Check if variants[0] exists before accessing price
+                                        onChange={(e) => handleVariantChange(0, 'price', e.target.value)}
+                                        min={1}
+                                        required
+                                    />
+                                </Col>
+                                <Col xs={12} md={4}>
+                                    <label htmlFor={`variantQuantityDefault`} className='form-label'>
+                                        Quantity
+                                    </label>
+                                    <input
+                                        type='number'
+                                        className='form-control'
+                                        id={`variantQuantityDefault`}
+                                        value={(variants[0] && variants[0].quantity) || 1}  // Check if variants[0] exists before accessing quantity
+                                        onChange={(e) => handleVariantChange(0, 'quantity', e.target.value)}
+                                        min={1}
+                                        required
+                                    />
+                                </Col>
+                            </Row>
+                        </div>
+                    )}
+
+                    {options.length > 0 && options.map((option, index) => (
                         <div key={index} className='mb-3'>
                             <h5>Option {index + 1}</h5>
                             <div className='mb-3'>
@@ -267,23 +451,23 @@ const ProductEditScreen = () => {
                             >
                                 Remove Option
                             </button>
-                            {/* Add more input fields for other option properties */}
-                            {/* ... */}
                         </div>
                     ))}
 
 
                     {/* Add button to add more options */}
-                    <button
-                        type='button'
-                        className='btn btn-secondary'
-                        onClick={() => setOptions([...options, { name: '', values: [] }])}
-                    >
-                        Add Option
-                    </button>
+                    {options.length < 3 && (
+                        <button
+                            type='button'
+                            className='btn btn-secondary'
+                            onClick={() => setOptions([...options, { name: '', values: [] }])}
+                        >
+                            Add Option
+                        </button>
+                    )}
 
 
-                    {variants.map((variant, index) => (
+                    {variants[0]?.option1 !== null && variants[0]?.option1 !== "" && variants.map((variant, index) => (
                         <div key={index} className='mb-3'>
                             <h5>Variant: {getVariantName(variant)}</h5>
 
@@ -298,6 +482,8 @@ const ProductEditScreen = () => {
                                         id={`variantPrice${index}`}
                                         value={variant.price}
                                         onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
+                                        min={1}
+                                        required
                                     />
                                 </Col>
                                 <Col xs={12} md={4}>
@@ -310,33 +496,19 @@ const ProductEditScreen = () => {
                                         id={`variantQuantity${index}`}
                                         value={variant.quantity}
                                         onChange={(e) => handleVariantChange(index, 'quantity', e.target.value)}
+                                        min={1}
+                                        required
                                     />
                                 </Col>
-                                <Col xs={12} md={3}>
-                                    <input type='file' onChange={(e) => handleImageChange(index, e)} />
-                                    {!images[index]?.src ? null : (
-                                        <div>
-                                            <img
-                                                src={images[index].src}
-                                                alt={`Uploaded Image ${index + 1}`}
-                                                style={{ width: '150px', height: '150px' }}
-                                            />
-                                            <br />
-                                            <button onClick={(e) => handleRemoveImage(index, e)}>Remove</button>
-                                        </div>
-                                    )}
-                                </Col>
+
 
                             </Row>
-                            {/* Add more Row/Col for other variant properties */}
-                            {/* ... */}
                         </div>
                     ))}
 
-                    {/* Add button to add more variants */}
 
-                    <button type='submit' className='btn btn-primary my-2'>
-                        Create
+                    <button type='submit' className='btn btn-primary my-2' disabled={uploading}>
+                        {uploading ? 'Uploading...' : 'Update'}
                     </button>
                 </form>
 
