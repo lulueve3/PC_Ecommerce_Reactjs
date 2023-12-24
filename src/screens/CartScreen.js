@@ -4,6 +4,7 @@ import { Link, useLocation, useParams, useNavigate } from 'react-router-dom'
 import { Row, Col, ListGroup, Image, Form, Button, Card, Pagination } from 'react-bootstrap'
 import { addToCart, editCartItemQuantity } from '../action/cartAction'
 import Message from '../components/Message'
+import axios from 'axios'
 
 const ITEMS_PER_PAGE = 5; // Adjust as needed
 const CartScreen = () => {
@@ -15,7 +16,9 @@ const CartScreen = () => {
     const dispatch = useDispatch();
 
     const [customerInfo, setCustomerInfo] = useState({
-        name: "",
+        firstName: "",
+        lastName: "",
+        email: "",
         phone: "",
         address: ""
     });
@@ -60,18 +63,54 @@ const CartScreen = () => {
         dispatch(editCartItemQuantity(id, newQty));
     };
 
+    const createOrder = async (orders) => {
+        try {
+
+
+            const accessToken = localStorage.getItem('accessToken') || null;
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+
+
+            const { data } = await axios.post('http://localhost:8080/api/orders', orders, config)
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 
     const checkoutHandler = () => {
 
-        const selectedItemsDetails = selectedItems.map(itemId => {
+        const line_items = selectedItems.map(itemId => {
             const item = cartItems.find(item => item.id === itemId);
             return {
-                id: itemId,
-                qty: item.qty
+                variant_id: itemId,
+                quantity: item.qty
             };
         });
-        console.log("Selected Items:", selectedItemsDetails);
-
+        const customer = {
+            first_name: customerInfo.firstName,
+            last_name: customerInfo.lastName,
+            email: customerInfo.email
+        }
+        const address = {
+            first_name: customerInfo.firstName,
+            last_name: customerInfo.lastName,
+            address: customerInfo.address,
+            phone: customerInfo.phone
+        }
+        const orders = {
+            line_items,
+            customer,
+            address
+        }
+        console.log(orders);
+        createOrder(orders);
         // Now, selectedItemsDetails contains an array of objects with id and qty properties.
         // You can use this array as needed for your checkout process.
 
@@ -169,18 +208,36 @@ const CartScreen = () => {
                         </ListGroup.Item>
                         <ListGroup.Item>
                             {/* Checkout button */}
-                            <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>
-                                Checkout
-                            </Button>
+
 
                             {/* Customer information form */}
                             <Form className="mt-3">
                                 <Form.Group controlId="formName">
-                                    <Form.Label>Name</Form.Label>
+                                    <Form.Label>First Name</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        name="name"
-                                        value={customerInfo.name}
+                                        name="firstName"
+                                        value={customerInfo.firstName}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="formName">
+                                    <Form.Label>Last Name</Form.Label>
+                                    <Form.Control
+                                        type="email"
+                                        name="lastName"
+                                        value={customerInfo.lastName}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="formName">
+                                    <Form.Label>Email</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="email"
+                                        value={customerInfo.email}
                                         onChange={handleInputChange}
                                         required
                                     />
@@ -205,6 +262,9 @@ const CartScreen = () => {
                                         required
                                     />
                                 </Form.Group>
+                                <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>
+                                    Checkout
+                                </Button>
                             </Form>
                         </ListGroup.Item>
                     </ListGroup>

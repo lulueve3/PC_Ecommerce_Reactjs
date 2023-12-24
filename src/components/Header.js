@@ -86,7 +86,7 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                     <LinkContainer to='/profile'>
                                         <NavDropdown.Item>Profile</NavDropdown.Item>
                                     </LinkContainer>
-                                    <LinkContainer to='/admin/products'>
+                                    <LinkContainer to='/MyOrders'>
                                         <NavDropdown.Item>My Orders</NavDropdown.Item>
                                     </LinkContainer>
                                     <NavDropdown.Item onClick={logoutHandler}>Đăng xuất</NavDropdown.Item>
@@ -100,6 +100,9 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                             }
                             {isAdmin && (
                                 <NavDropdown title='Admin' id='adminmenu'>
+                                    <LinkContainer to='/admin/Dashboard'>
+                                        <NavDropdown.Item>Dashboard</NavDropdown.Item>
+                                    </LinkContainer>
                                     <LinkContainer to='/admin/userList'>
                                         <NavDropdown.Item>Users</NavDropdown.Item>
                                     </LinkContainer>

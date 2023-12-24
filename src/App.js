@@ -17,6 +17,8 @@ import UserProfile from './screens/UserProfile';
 import PrivateRoute from './components/PrivateRoute';
 import { useDispatch, useSelector } from 'react-redux'
 import CollectionScreen from './screens/CollectionScreen'
+import DashboardScreen from './screens/DashboardScreen'
+import MyOrders from './screens/MyOrders';
 
 
 
@@ -53,11 +55,13 @@ function App() {
             <Route path='/' element={<HomeScreen />} />
 
             <Route path='/profile' element={<UserProfile />} />
+            <Route path='/MyOrders' element={<MyOrders />} />
             <Route path="/product/:id" element={<ProductScreen />} />
             <Route path="/login" element={<LoginScreen handleLoginLogout={handleLoginLogout} />} />
             <Route path="/cart/:id?" element={<CartScreen />} />
             <Route path="/admin/userList" element={<UserListScreen />} />
             <Route path="/admin/productList" element={<PrivateRoute><ProductListScreen /></PrivateRoute>} />
+            <Route path="/admin/Dashboard" element={<PrivateRoute><DashboardScreen /></PrivateRoute>} />
             <Route path="/admin/collection" element={<PrivateRoute><CollectionScreen /></PrivateRoute>} />
             <Route path="/admin/productList/:id/edit" element={<PrivateRoute><ProductEditScreen /></PrivateRoute>} />
             <Route path="/admin/productList/create" element={<PrivateRoute><ProductCreateScreen /></PrivateRoute>} />
