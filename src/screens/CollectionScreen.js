@@ -111,7 +111,7 @@ const CollectionsPage = () => {
                                         <Button variant="info" onClick={() => handleEditCollection(collection)}>
                                             Edit
                                         </Button>{' '}
-                                        <Button variant="danger" onClick={() => handleDeleteCollection(collection._id)}>
+                                        <Button variant="danger" onClick={() => handleDeleteCollection(collection.id)}>
                                             Delete
                                         </Button>
                                     </td>
