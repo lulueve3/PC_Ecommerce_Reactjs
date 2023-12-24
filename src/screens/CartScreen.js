@@ -14,6 +14,20 @@ const CartScreen = () => {
 
     const dispatch = useDispatch();
 
+    const [customerInfo, setCustomerInfo] = useState({
+        name: "",
+        phone: "",
+        address: ""
+    });
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setCustomerInfo((prevInfo) => ({
+            ...prevInfo,
+            [name]: value,
+        }));
+    };
+
     const cart = useSelector(state => state.cart)
     const { cartItems } = cart
 
@@ -48,7 +62,20 @@ const CartScreen = () => {
 
 
     const checkoutHandler = () => {
-        navigate.push('/login?redirect=shipping')
+
+        const selectedItemsDetails = selectedItems.map(itemId => {
+            const item = cartItems.find(item => item.id === itemId);
+            return {
+                id: itemId,
+                qty: item.qty
+            };
+        });
+        console.log("Selected Items:", selectedItemsDetails);
+
+        // Now, selectedItemsDetails contains an array of objects with id and qty properties.
+        // You can use this array as needed for your checkout process.
+
+        // Example: navigate.push('/login?redirect=shipping&selectedItems=' + JSON.stringify(selectedItemsDetails));
     }
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -77,7 +104,7 @@ const CartScreen = () => {
                             <ListGroup.Item key={item.id}>
                                 <Row>
                                     <Col md={3}>
-                                        <Link to={`/product/${item.id}`}><Image src={item.image} fluid rounded></Image>
+                                        <Link to={`/product/${item.id}`}><Image src={item.image} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px' }}></Image>
                                         </Link>
 
                                     </Col>
@@ -141,11 +168,49 @@ const CartScreen = () => {
                             <h5>${selectedItems.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId).qty * cartItems.find(item => item.id === itemId).price, 0).toFixed(3)}</h5>
                         </ListGroup.Item>
                         <ListGroup.Item>
-                            <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>Checkout</Button>
+                            {/* Checkout button */}
+                            <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>
+                                Checkout
+                            </Button>
+
+                            {/* Customer information form */}
+                            <Form className="mt-3">
+                                <Form.Group controlId="formName">
+                                    <Form.Label>Name</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="name"
+                                        value={customerInfo.name}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="formPhone">
+                                    <Form.Label>Phone</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="phone"
+                                        value={customerInfo.phone}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="formAddress">
+                                    <Form.Label>Address</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="address"
+                                        value={customerInfo.address}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Form>
                         </ListGroup.Item>
                     </ListGroup>
                 </Card>
             </Col>
+
         </Row>
     )
 }

@@ -4,11 +4,13 @@ import { Container, Card, Form, Button, Row, Col, Modal } from 'react-bootstrap'
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import axios from 'axios';
 
-const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel }) => {
+const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, onSave }) => {
     const [editedAddress, setEditedAddress] = useState({ ...address });
-    const [selectedCity, setSelectedCity] = useState(editedAddress.city || "");
-    const [selectedDistrict, setSelectedDistrict] = useState(editedAddress.district || "");
-    const [selectedWard, setSelectedWard] = useState(editedAddress.ward || "");
+    const [selectedCity, setSelectedCity] = useState(editedAddress.city || 0);
+    const [selectedDistrict, setSelectedDistrict] = useState(editedAddress.district || 0);
+    const [selectedWard, setSelectedWard] = useState(editedAddress.ward || 0);
+    const [addressName, setAddressName] = useState("");
+
 
     // handle call api address
     const [cities, setCities] = useState([]);
@@ -83,16 +85,39 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel })
         }));
     };
 
+    const getAddressString = () => {
+        // Kiểm tra xem các trường đã chọn có giá trị không
+        if (selectedCity && selectedDistrict && selectedWard) {
+            // Lấy tên của thành phố, quận/huyện, và phường/xã đã chọn
+            const city = cities.find((city) => city.code === Number(selectedCity))?.name || "";
+            const district = districts.find((district) => district.code === Number(selectedDistrict))?.name || "";
+            const ward = wards.find((ward) => ward.code === Number(selectedWard))?.name || "";
+
+            // Kết hợp các giá trị để tạo địa chỉ hoàn chỉnh
+            const completeAddress = `${ward} - ${district} - ${city}`;
+
+            return completeAddress;
+        }
+
+        // Trả về chuỗi rỗng nếu có bất kỳ trường nào chưa được chọn
+        return "";
+    };
+
+
+
+
     const handleSave = () => {
         // Kiểm tra xem các trường có giá trị không
         console.log(selectedCity);
         if (selectedCity && selectedCity && selectedWard) {
-            // onSave({
-            //     ...editedAddress,
-            //     city: selectedCity,
-            //     district: selectedDistrict,
-            //     ward: selectedWard,
-            // });
+            onSave([{
+                ...editedAddress,
+                address: getAddressString()
+            }]);
+            console.log({
+                ...editedAddress,
+                address: getAddressString()
+            });
         } else {
             // Hiển thị thông báo hoặc thực hiện các xử lý khác khi các trường không hợp lệ
             window.alert("Invalid address fields. Please fill in all required fields.");
@@ -117,8 +142,8 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel })
                             <Form.Label>Name</Form.Label>
                             <Form.Control
                                 type="text"
-                                name="name"
-                                value={editedAddress.name}
+                                name="lastName"
+                                value={editedAddress.lastName}
                                 onChange={handleInputChange}
                                 required
                             />
@@ -131,6 +156,7 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel })
                                 value={editedAddress.phone}
                                 onChange={handleInputChange}
                                 required
+                                min={10}
                             />
                         </Form.Group>
                         {/* Add more form fields for other address properties */}

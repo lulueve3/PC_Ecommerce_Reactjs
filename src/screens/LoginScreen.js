@@ -50,10 +50,11 @@ const LoginScreen = ({ handleLoginLogout }) => {
                         }
                     }
 
-                    const { data } = await axios.post('http://localhost:8080/api/auth/register', { email, password, firstName, lastName, phone }, config)
+                    const { data } = await axios.post('http://localhost:8080/api/auth/register', { email, password, firstname: firstName, lastname: lastName, phone }, config)
 
                     localStorage.setItem('accessToken', (data.accessToken))
                     handleLoginLogout(true);
+                    dispatch(login(email, password));
                     setIsRegistering(false);
 
                 } catch (error) {
@@ -79,7 +80,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                 {isRegistering && (
                     <>
                         <Form.Group controlId='firstName'>
-                            <Form.Label>Họ</Form.Label>
+                            <Form.Label>First Name</Form.Label>
                             <Form.Control
                                 type='text'
                                 placeholder='Nhập Họ (Không bắt buộc)'
@@ -88,7 +89,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                             />
                         </Form.Group>
                         <Form.Group controlId='lastName'>
-                            <Form.Label>Tên</Form.Label>
+                            <Form.Label>Last Name</Form.Label>
                             <Form.Control
                                 type='text'
                                 placeholder='Nhập Tên (Không bắt buộc)'
@@ -97,7 +98,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                             />
                         </Form.Group>
                         <Form.Group controlId='phone'>
-                            <Form.Label>Số điện thoại</Form.Label>
+                            <Form.Label>Phone</Form.Label>
                             <Form.Control
                                 type='text'
                                 placeholder='Nhập SĐT (Không bắt buộc)'
@@ -118,7 +119,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                     />
                 </Form.Group>
                 <Form.Group controlId='password'>
-                    <Form.Label>Mật khẩu</Form.Label>
+                    <Form.Label>Password</Form.Label>
                     <Form.Control
                         type='password'
                         placeholder='Nhập mật khẩu'

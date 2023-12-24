@@ -12,13 +12,9 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 const UserProfile = () => {
     const navigate = useNavigate();
 
-    const [user, setUser] = useState({
-        username: 'JohnDoe',
-        email: 'john.doe@example.com',
-        phone: '123-456-7890'
-    });
+    const [user, setUser] = useState({});
 
-    const [addresses, setAddresses] = useState([])
+    const [addresses, setAddresses] = useState([{ lastName: "hải", phone: "123", address: "việt nam" }])
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [editedAddressIndex, setEditedAddressIndex] = useState(null);
@@ -31,9 +27,9 @@ const UserProfile = () => {
 
     const handleSaveEditedAddress = (editedAddress) => {
         // Update the user's addresses array with the edited address
-        const updatedAddresses = [...user.addresses];
+        const updatedAddresses = [...addresses];
         updatedAddresses[editedAddressIndex] = editedAddress;
-        setUser({ ...user, addresses: updatedAddresses });
+        setAddresses(updatedAddresses);
 
         // Close the modal
         setShowEditModal(false);
@@ -45,7 +41,7 @@ const UserProfile = () => {
     };
 
     const handleRemoveAddress = (index) => {
-        const updatedAddresses = [...user.addresses];
+        const updatedAddresses = [addresses];
         updatedAddresses.splice(index, 1);
         setUser({ ...user, addresses: updatedAddresses });
     };
@@ -54,29 +50,36 @@ const UserProfile = () => {
         setShowEditModal(true);
     };
 
-    const getAddress = async () => {
-        const accessToken = localStorage.getItem('accessToken');
+    const getUserProfile = async () => {
+        try {
 
-        if (!accessToken) {
-            // Handle the case where the access token is not available
-            navigate('../login');
-            return;
+
+            const accessToken = localStorage.getItem('accessToken') || null;
+
+            console.log(accessToken);
+
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+
+
+            const { data } = await axios.get('http://localhost:8080/api/customer', config)
+            setUser(data)
+
+        } catch (error) {
+
         }
-
-        const config = {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        };
-
-        const { data } = await axios.get('http://localhost:8080/api/customer/addresses', config)
-        setAddresses(data.addresses);
     }
-
     useEffect(() => {
-        getAddress();
+        getUserProfile();
+    }, [])
 
-    }, [addresses])
+    const handleSaveProfile = () => {
+        console.log(user);
+    };
 
     return (
         <>
@@ -94,10 +97,43 @@ const UserProfile = () => {
                                     <Form>
                                         <Row>
                                             <Col md={6}>
-                                                <>edit</>
+                                                <Form.Group controlId="formFirstName">
+                                                    <Form.Label>First Name</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        value={user.firstName || ""}
+                                                        onChange={(e) => setUser({ ...user, firstName: e.target.value })}
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                            <Col md={6}>
+                                                <Form.Group controlId="formLastName">
+                                                    <Form.Label>Last Name</Form.Label>
+                                                    <Form.Control
+                                                        type="text"
+                                                        value={user.lastName || ""}
+                                                        onChange={(e) => setUser({ ...user, lastName: e.target.value })}
+                                                    />
+                                                </Form.Group>
                                             </Col>
                                         </Row>
+                                        <Row>
+                                            <Col md={6}>
+                                                <Form.Group controlId="formEmail">
+                                                    <Form.Label>Email</Form.Label>
+                                                    <Form.Control
+                                                        type="email"
+                                                        value={user.email}
+                                                        readOnly
+                                                    />
+                                                </Form.Group>
+                                            </Col>
+                                        </Row>
+                                        <Button variant="primary" className="mt-3" onClick={handleSaveProfile}>
+                                            Save
+                                        </Button>
                                     </Form>
+
                                 </Card.Body>
                             </Card>
                         </Container>
@@ -123,51 +159,7 @@ const UserProfile = () => {
                     </Accordion.Body>
                 </Accordion.Item>
 
-                <Accordion.Item eventKey="2">
-                    <Accordion.Header style={{ fontSize: '24px', width: '100%' }}>
-                        User Address
-                    </Accordion.Header>
-                    <Accordion.Body>
-                        <Container className="mt-4">
-                            <Card>
-                                <Card.Body>
-                                    <Container className="mt-4">
-                                        <Card>
-                                            <Card.Body>
-                                                <Form>
-                                                    {addresses?.map((address, index) => (
-                                                        <Row key={index} className="mb-3">
-                                                            <Col md={6}>
-                                                                <p>
-                                                                    <strong>Name:</strong> {address.firstName + " " + address.lastName}<br />
-                                                                    <strong>Phone:</strong> {address.phone}<br />
-                                                                    <strong>Street:</strong> {address.address}
-                                                                </p>
-                                                            </Col>
-                                                            <Col md={3}>
-                                                                <Button variant="primary" onClick={() => handleEditAddress(index)}>
-                                                                    Edit
-                                                                </Button>
-                                                            </Col>
-                                                            <Col md={3}>
-                                                                <Button variant="danger" onClick={() => handleRemoveAddress(index)}>
-                                                                    Remove
-                                                                </Button>
-                                                            </Col>
-                                                        </Row>
-                                                    ))}
-                                                </Form>
-                                                <Button variant="success" onClick={handleAddAddress}>
-                                                    Add Address
-                                                </Button>
-                                            </Card.Body>
-                                        </Card>
-                                    </Container>
-                                </Card.Body>
-                            </Card>
-                        </Container>
-                    </Accordion.Body>
-                </Accordion.Item>
+
             </Accordion>
 
             {showEditModal && (
