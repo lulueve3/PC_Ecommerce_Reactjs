@@ -27,7 +27,7 @@ const DashboardScreen = () => {
         <Container className="mt-4">
             <h1>Admin Dashboard</h1>
             <Row>
-                <Col md={4}>
+                <Col md={3}>
                     <Card bg="primary" text="white">
                         <Card.Body>
                             <Card.Title>User Count</Card.Title>
@@ -35,7 +35,7 @@ const DashboardScreen = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={4}>
+                <Col md={3}>
                     <Card bg="warning" text="white">
                         <Card.Body>
                             <Card.Title>Order Count</Card.Title>
@@ -43,10 +43,18 @@ const DashboardScreen = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={4}>
-                    <Card bg="success" text="white">
+                <Col md={3}>
+                    <Card bg="primary" text="white">
                         <Card.Body>
                             <Card.Title>Product Count</Card.Title>
+                            <Card.Text>{statistics.productCount}</Card.Text>
+                        </Card.Body>
+                    </Card>
+                </Col>
+                <Col md={3}>
+                    <Card bg="success" text="white">
+                        <Card.Body>
+                            <Card.Title>revenue</Card.Title>
                             <Card.Text>{statistics.productCount}</Card.Text>
                         </Card.Body>
                     </Card>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Pagination, Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 
-const MyOrders = () => {
+const AdminOrderScrren = () => {
     const [orders, setOrders] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -267,4 +267,4 @@ const MyOrders = () => {
     );
 };
 
-export default MyOrders;
+export default AdminOrderScrren;

@@ -5,6 +5,9 @@ import { Row, Col, ListGroup, Image, Form, Button, Card, Pagination } from 'reac
 import { addToCart, editCartItemQuantity } from '../action/cartAction'
 import Message from '../components/Message'
 import axios from 'axios'
+import { jwtDecode } from 'jwt-decode';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 const ITEMS_PER_PAGE = 5; // Adjust as needed
 const CartScreen = () => {
@@ -22,6 +25,8 @@ const CartScreen = () => {
         phone: "",
         address: ""
     });
+
+    const [userEmail, setUserEmail] = useState(null);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -76,12 +81,45 @@ const CartScreen = () => {
             };
 
 
-            const { data } = await axios.post('http://localhost:8080/api/orders', orders, config)
+            const { data } = await axios.post('http://localhost:8080/api/orders', orders)
+            selectedItems.forEach(item => {
+                removeFromCartHandler(item.id);
+            })
+            toast.success('Order success!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+
 
         } catch (error) {
             console.log(error);
         }
     }
+
+    const accessToken = localStorage.getItem('accessToken') || null;
+
+    useEffect(() => {
+        try {
+
+            if (!accessToken) {
+
+                return;
+            }
+            const decodedToken = jwtDecode(accessToken);
+            setUserEmail(decodedToken.e);
+
+            console.log(decodedToken);
+        } catch (error) {
+            console.error('Error decoding access token:', error);
+        }
+
+    }, [accessToken]);
 
 
     const checkoutHandler = () => {
@@ -134,144 +172,159 @@ const CartScreen = () => {
 
 
     return (
-        <Row>
-            <Col md={9}>
-                <h1>Shopping Cart</h1>
-                {cartItems.length === 0 ? <Message>Your cart is empty <Link to="/">Go Back</Link> </Message> : (
-                    <ListGroup variant='flush'>
-                        {currentCartItems.map(item => (
-                            <ListGroup.Item key={item.id}>
-                                <Row>
-                                    <Col md={3}>
-                                        <Link to={`/product/${item.id}`}><Image src={item.image} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px' }}></Image>
-                                        </Link>
+        <>
+            <ToastContainer />
+            <Row>
+                <Col md={9}>
+                    <h1>Shopping Cart</h1>
+                    {cartItems.length === 0 ? <Message>Your cart is empty <Link to="/">Go Back</Link> </Message> : (
+                        <ListGroup variant='flush'>
+                            {currentCartItems.map(item => (
+                                <ListGroup.Item key={item.id}>
+                                    <Row>
+                                        <Col md={3}>
+                                            <Link to={`/product/${item.id}`}><Image src={item.image} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px' }}></Image>
+                                            </Link>
 
-                                    </Col>
-                                    <Col md={3}>
-                                        <Link to={`/product/${item.id}`}>{item.title}</Link>
-                                    </Col>
-                                    <Col md={2}>
-                                        {item.price} $
-                                    </Col>
-                                    <Col md={2}>
-                                        <input
-                                            type="number"
-                                            value={item.qty}
-                                            min={1}
-                                            max={item.inStock}
-                                            onChange={(e) => {
-                                                const newValue = Math.min(Math.max(1, parseInt(e.target.value, 10)), item.inStock);
-                                                editQuantityHandler(item.id, newValue);
-                                            }}
-                                            className="form-control text-center"
-                                            style={{ width: '100%' }}
-                                        />
-                                    </Col>
-                                    <Col md={2}>
-                                        <Button
-                                            type='button'
-                                            variant='light'
-                                            onClick={() => removeFromCartHandler(item.id)}
-                                            className='me-2'
-                                        >
-                                            <i className='fas fa-trash'></i>
-                                        </Button>
-                                        <input
-                                            type='checkbox'
-                                            id={item.id}
-                                            checked={selectedItems.includes(item.id)}
-                                            onChange={() => toggleSelectItem(item.id)}
-                                        />
-                                    </Col>
+                                        </Col>
+                                        <Col md={3}>
+                                            <Link
+                                                to={`/product/${item.id}`}
+                                                style={{
+                                                    display: 'block',
+                                                    maxWidth: '100%',
+                                                    wordWrap: 'break-word',
+                                                    wordBreak: 'break-all'
+                                                }}
+                                            >
+                                                {item.title}
+                                            </Link>
 
-                                </Row>
+                                        </Col>
+                                        <Col md={2}>
+                                            {item.price} $
+                                        </Col>
+                                        <Col md={2}>
+                                            <input
+                                                type="number"
+                                                value={item.qty}
+                                                min={1}
+                                                max={item.inStock}
+                                                onChange={(e) => {
+                                                    const newValue = Math.min(Math.max(1, parseInt(e.target.value, 10)), item.inStock);
+                                                    editQuantityHandler(item.id, newValue);
+                                                }}
+                                                className="form-control text-center"
+                                                style={{ width: '100%' }}
+                                            />
+                                        </Col>
+                                        <Col md={2}>
+                                            <Button
+                                                type='button'
+                                                variant='light'
+                                                onClick={() => removeFromCartHandler(item.id)}
+                                                className='me-2'
+                                            >
+                                                <i className='fas fa-trash'></i>
+                                            </Button>
+                                            <input
+                                                type='checkbox'
+                                                id={item.id}
+                                                checked={selectedItems.includes(item.id)}
+                                                onChange={() => toggleSelectItem(item.id)}
+                                            />
+                                        </Col>
+
+                                    </Row>
+                                </ListGroup.Item>
+                            ))}
+                        </ListGroup>
+                    )}
+                    <div className="d-flex justify-content-center">
+                        <Pagination>
+                            {pageNumbers.map(number => (
+                                <Pagination.Item key={number} active={number === currentPage} onClick={() => paginate(number)}>
+                                    {number}
+                                </Pagination.Item>
+                            ))}
+                        </Pagination>
+                    </div>
+                </Col>
+                <Col md={3}>
+                    <Card>
+                        <ListGroup variant='flush'>
+                            <ListGroup.Item>
+                                <h3>Subtotal ({selectedItems.length})</h3>
+                                <h5>${selectedItems?.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0).toFixed(3)}</h5>
                             </ListGroup.Item>
-                        ))}
-                    </ListGroup>
-                )}
-                <div className="d-flex justify-content-center">
-                    <Pagination>
-                        {pageNumbers.map(number => (
-                            <Pagination.Item key={number} active={number === currentPage} onClick={() => paginate(number)}>
-                                {number}
-                            </Pagination.Item>
-                        ))}
-                    </Pagination>
-                </div>
-            </Col>
-            <Col md={3}>
-                <Card>
-                    <ListGroup variant='flush'>
-                        <ListGroup.Item>
-                            <h3>Subtotal ({selectedItems.length})</h3>
-                            <h5>${selectedItems.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId).qty * cartItems.find(item => item.id === itemId).price, 0).toFixed(3)}</h5>
-                        </ListGroup.Item>
-                        <ListGroup.Item>
-                            {/* Checkout button */}
+                            <ListGroup.Item>
+                                {/* Checkout button */}
 
 
-                            {/* Customer information form */}
-                            <Form className="mt-3">
-                                <Form.Group controlId="formName">
-                                    <Form.Label>First Name</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="firstName"
-                                        value={customerInfo.firstName}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="formName">
-                                    <Form.Label>Last Name</Form.Label>
-                                    <Form.Control
-                                        type="email"
-                                        name="lastName"
-                                        value={customerInfo.lastName}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="formName">
-                                    <Form.Label>Email</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="email"
-                                        value={customerInfo.email}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="formPhone">
-                                    <Form.Label>Phone</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="phone"
-                                        value={customerInfo.phone}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="formAddress">
-                                    <Form.Label>Address</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="address"
-                                        value={customerInfo.address}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </Form.Group>
-                                <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>
-                                    Checkout
-                                </Button>
-                            </Form>
-                        </ListGroup.Item>
-                    </ListGroup>
-                </Card>
-            </Col>
+                                {/* Customer information form */}
+                                <Form className="mt-3">
+                                    <Form.Group controlId="formName">
+                                        <Form.Label>First Name</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            name="firstName"
+                                            value={customerInfo.firstName}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </Form.Group>
+                                    <Form.Group controlId="formName">
+                                        <Form.Label>Last Name</Form.Label>
+                                        <Form.Control
+                                            type="email"
+                                            name="lastName"
+                                            value={customerInfo.lastName}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </Form.Group>
+                                    <Form.Group controlId="formName">
+                                        <Form.Label>Email</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            name="email"
+                                            value={userEmail ? userEmail : customerInfo.email}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </Form.Group>
+                                    <Form.Group controlId="formPhone">
+                                        <Form.Label>Phone</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            name="phone"
+                                            value={customerInfo.phone}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </Form.Group>
+                                    <Form.Group controlId="formAddress">
+                                        <Form.Label>Address</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            name="address"
+                                            value={customerInfo.address}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </Form.Group>
+                                    <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>
+                                        Checkout
+                                    </Button>
+                                </Form>
+                            </ListGroup.Item>
+                        </ListGroup>
+                    </Card>
+                </Col>
 
-        </Row>
+            </Row>
+        </>
+
     )
 }
 
