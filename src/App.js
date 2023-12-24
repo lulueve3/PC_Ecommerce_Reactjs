@@ -16,6 +16,7 @@ import SearchBox from './components/SearchBox';
 import UserProfile from './screens/UserProfile';
 import PrivateRoute from './components/PrivateRoute';
 import { useDispatch, useSelector } from 'react-redux'
+import CollectionScreen from './screens/CollectionScreen'
 
 
 
@@ -57,11 +58,12 @@ function App() {
             <Route path="/cart/:id?" element={<CartScreen />} />
             <Route path="/admin/userList" element={<UserListScreen />} />
             <Route path="/admin/productList" element={<PrivateRoute><ProductListScreen /></PrivateRoute>} />
-            <Route path="/admin/productList/:id/edit" element={<ProductEditScreen />} />
-            <Route path="/admin/productList/create" element={<ProductCreateScreen />} />
+            <Route path="/admin/collection" element={<PrivateRoute><CollectionScreen /></PrivateRoute>} />
+            <Route path="/admin/productList/:id/edit" element={<PrivateRoute><ProductEditScreen /></PrivateRoute>} />
+            <Route path="/admin/productList/create" element={<PrivateRoute><ProductCreateScreen /></PrivateRoute>} />
             <Route path='/search/:keyword' element={<HomeScreen />} />
             <Route path='/page/:pageNumber' element={<HomeScreen />} />
-            <Route path='/admin/productList/page/:pageNumber' element={<ProductListScreen />} />
+            <Route path='/admin/productList/page/:pageNumber' element={<PrivateRoute><ProductListScreen /></PrivateRoute>} />
             <Route path='/search/:keyword/page/:pageNumber' element={<HomeScreen />} />
           </Routes>
         </Container>

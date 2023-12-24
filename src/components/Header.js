@@ -106,7 +106,7 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                     <LinkContainer to='/admin/productList'>
                                         <NavDropdown.Item>Products</NavDropdown.Item>
                                     </LinkContainer>
-                                    <LinkContainer to='/admin/userList'>
+                                    <LinkContainer to='/admin/collection'>
                                         <NavDropdown.Item>Collection</NavDropdown.Item>
                                     </LinkContainer>
                                     <LinkContainer to='/admin/orderList'>

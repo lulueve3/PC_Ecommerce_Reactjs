@@ -56,9 +56,6 @@ const UserProfile = () => {
 
             const accessToken = localStorage.getItem('accessToken') || null;
 
-            console.log(accessToken);
-
-
             const config = {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
@@ -129,9 +126,9 @@ const UserProfile = () => {
                                                 </Form.Group>
                                             </Col>
                                         </Row>
-                                        <Button variant="primary" className="mt-3" onClick={handleSaveProfile}>
+                                        {/* <Button variant="primary" className="mt-3" onClick={handleSaveProfile}>
                                             Save
-                                        </Button>
+                                        </Button> */}
                                     </Form>
 
                                 </Card.Body>
