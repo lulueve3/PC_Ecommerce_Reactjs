@@ -76,7 +76,9 @@ export const deleteProduct = (id) => async (dispatch) => {
             }
         };
 
-        await axios.delete(`http://localhost:8080/api/admin/products/${id}`, config);
+        await axios.patch(`http://localhost:8080/api/admin/products/${id}`, {
+            active: false
+        }, config);
 
         dispatch({
             type: PRODUCT_DELETE_SUCCESS,

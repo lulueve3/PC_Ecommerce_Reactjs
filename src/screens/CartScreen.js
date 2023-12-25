@@ -85,7 +85,7 @@ const CartScreen = () => {
             selectedItems.forEach(item => {
                 removeFromCartHandler(item.id);
             })
-            toast.success('Order success!', {
+            toast.success('Checkout success!', {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -99,6 +99,16 @@ const CartScreen = () => {
 
         } catch (error) {
             console.log(error);
+            toast.error('Checkout faild!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
         }
     }
 
@@ -124,6 +134,20 @@ const CartScreen = () => {
 
     const checkoutHandler = () => {
 
+        if (selectedItems.length < 1) {
+            toast.warning('Please select product to checkout', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            return
+        }
+
         const line_items = selectedItems.map(itemId => {
             const item = cartItems.find(item => item.id === itemId);
             return {
@@ -134,7 +158,7 @@ const CartScreen = () => {
         const customer = {
             first_name: customerInfo.firstName,
             last_name: customerInfo.lastName,
-            email: customerInfo.email
+            email: userEmail ? userEmail : customerInfo.email
         }
         const address = {
             first_name: customerInfo.firstName,
@@ -183,7 +207,7 @@ const CartScreen = () => {
                                 <ListGroup.Item key={item.id}>
                                     <Row>
                                         <Col md={3}>
-                                            <Link to={`/product/${item.id}`}><Image src={item.image} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px' }}></Image>
+                                            <Link to={`/product/${item.productId}`}><Image src={item.image} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px' }}></Image>
                                             </Link>
 
                                         </Col>

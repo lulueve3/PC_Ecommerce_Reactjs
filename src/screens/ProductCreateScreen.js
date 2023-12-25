@@ -355,7 +355,7 @@ const ProductCreateScreen = () => {
                                         id={`variantPriceDefault`}
                                         value={(variants[0] && variants[0].price) || 1}  // Check if variants[0] exists before accessing price
                                         onChange={(e) => handleVariantChange(0, 'price', e.target.value)}
-                                        min={1}
+
                                         required
                                     />
                                 </Col>

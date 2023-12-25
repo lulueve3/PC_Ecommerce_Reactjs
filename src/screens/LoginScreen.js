@@ -74,7 +74,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
     return (
         <FormContainer>
             <h1>{isRegistering ? 'Register' : 'Sign In'}</h1>
-            {error && <Message variant='danger'>Đăng nhập thất bại</Message>}
+            {error && <Message variant='danger'>Login Error</Message>}
             {loading && <Loader></Loader>}
             <Form onSubmit={submitHandler}>
                 {isRegistering && (
@@ -83,7 +83,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                             <Form.Label>First Name</Form.Label>
                             <Form.Control
                                 type='text'
-                                placeholder='Nhập Họ (Không bắt buộc)'
+                                placeholder='Enter First Name'
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
                             />
@@ -92,7 +92,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                             <Form.Label>Last Name</Form.Label>
                             <Form.Control
                                 type='text'
-                                placeholder='Nhập Tên (Không bắt buộc)'
+                                placeholder='Enter Last Name'
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
                             />
@@ -101,7 +101,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                             <Form.Label>Phone</Form.Label>
                             <Form.Control
                                 type='text'
-                                placeholder='Nhập SĐT (Không bắt buộc)'
+                                placeholder='Enter Number Phone'
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                             />
@@ -112,7 +112,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                     <Form.Label>Email</Form.Label>
                     <Form.Control
                         type='email'
-                        placeholder='Nhập email'
+                        placeholder='Enter email'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -122,7 +122,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                     <Form.Label>Password</Form.Label>
                     <Form.Control
                         type='password'
-                        placeholder='Nhập mật khẩu'
+                        placeholder='Enter Password'
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required

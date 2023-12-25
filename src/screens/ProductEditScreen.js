@@ -7,6 +7,8 @@ import FormContainer from '../components/FormContainer';
 import { listProductDetail, updateProduct } from '../action/productActions';
 import { Row, Col } from 'react-bootstrap';
 import axios from 'axios'
+import { ToastContainer, toast } from 'react-toastify';
+
 import Select from 'react-select';
 
 
@@ -129,9 +131,15 @@ const ProductEditScreen = () => {
 
     const handleCollectionChange = (selectedOptions) => {
         // Lấy mảng các giá trị của collection đã chọn
+
         const selectedValues = selectedOptions.map(option => option.value);
         setSelectedCollections(selectedValues);
+
     };
+
+    useEffect(() => {
+        updateCollection();
+    }, [selectedCollections])
 
     // Chuyển đổi danh sách collections thành định dạng chấp nhận được bởi React-Select
     const selectOptions = listCollections.map(collection => ({
@@ -238,6 +246,43 @@ const ProductEditScreen = () => {
         setSelectImage(selectedFiles);
     };
 
+    const addNewImage = async (index, imageUrl) => {
+        try {
+            // Retrieve the access token from localStorage
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                toast.warning('Please login again', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+
+            await axios.post(`http://localhost:8080/api/admin/products/${productId}/images`, {
+                position: index,
+                src: imageUrl,
+                width: 0,
+                height: 0
+            }, config);
+
+        } catch (error) {
+
+        }
+    }
+
 
     const uploadImage = async (selectedImages) => {
         try {
@@ -253,6 +298,8 @@ const ProductEditScreen = () => {
 
                 const response = await axios.post('https://api.cloudinary.com/v1_1/dommm7bzh/image/upload', data);
                 const imageUrl = response.data.secure_url;
+
+                addNewImage(index, imageUrl);
 
                 setImages((prevImages) => [
                     ...prevImages,
@@ -272,9 +319,88 @@ const ProductEditScreen = () => {
 
 
 
-    const handleRemoveImage = (indexToRemove) => {
-        setImages((prevImages) => prevImages.filter((_, index) => index !== indexToRemove));
+    const handleRemoveImage = async (e, idToRemove) => {
+        e.preventDefault();
+
+        try {
+            // Retrieve the access token from localStorage
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                toast.warning('Please login again', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+
+            await axios.delete(`http://localhost:8080/api/admin/products/${productId}/images/${idToRemove}`, config);
+
+        } catch (error) {
+            toast.warning('Delete Image faild!', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+        }
+        setImages((prevImages) => prevImages.filter((image) => image.id !== idToRemove));
     };
+
+    const updateCollection = async () => {
+
+        try {
+            // Retrieve the access token from localStorage
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                toast.warning('Please login again', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+
+            await axios.patch(`http://localhost:8080/api/admin/products/${productId}/collections`,
+                {
+                    productId: 1,
+                    collectionIds: selectedCollections
+                }
+                , config);
+
+        } catch (error) {
+
+        }
+    };
+
 
 
     const handleRemoveOption = (indexToRemove) => {
@@ -285,11 +411,12 @@ const ProductEditScreen = () => {
 
     return (
         <>
+            <ToastContainer />
             <Link to='/admin/productlist' className='btn btn-light my-3'>
                 Go Back
             </Link>
             <FormContainer>
-                <h1>Create Product</h1>
+                <h1>Edit Product</h1>
                 {loadingUpdate && <Loader />}
                 {errorUpdate && <Message variant='danger'>{errorUpdate}</Message>}
                 <form onSubmit={submitHandler}>
@@ -353,14 +480,14 @@ const ProductEditScreen = () => {
                     <input type='file' onChange={(e) => handleImageChange(e)} multiple />
                     {!images || images.length === 0 ? null : (
                         <div>
-                            {images.map((image, index) => (
-                                <div key={index}>
+                            {images.map((image) => (
+                                <div key={image.id}>
                                     <img
                                         src={image.src}
-                                        alt={`Uploaded Image ${index + 1}`}
+                                        alt={`Uploaded Image ${image.id + 1}`}
                                         style={{ width: '150px', height: '150px', marginRight: '10px' }}
                                     />
-                                    <button onClick={() => handleRemoveImage(index)}>Remove</button>
+                                    <button onClick={(e) => handleRemoveImage(e, image.id)}>Remove</button>
                                 </div>
                             ))}
                         </div>
@@ -394,7 +521,7 @@ const ProductEditScreen = () => {
                                         id={`variantPriceDefault`}
                                         value={(variants[0] && variants[0].price) || 1}  // Check if variants[0] exists before accessing price
                                         onChange={(e) => handleVariantChange(0, 'price', e.target.value)}
-                                        min={1}
+
                                         required
                                     />
                                 </Col>
@@ -444,19 +571,19 @@ const ProductEditScreen = () => {
                                 />
                             </div>
                             {/* Add button to remove option */}
-                            <button
+                            {/* <button
                                 type='button'
                                 className='btn btn-danger'
                                 onClick={() => handleRemoveOption(index)}
                             >
                                 Remove Option
-                            </button>
+                            </button> */}
                         </div>
                     ))}
 
 
                     {/* Add button to add more options */}
-                    {options.length < 3 && (
+                    {/* {options.length < 3 && (
                         <button
                             type='button'
                             className='btn btn-secondary'
@@ -464,7 +591,7 @@ const ProductEditScreen = () => {
                         >
                             Add Option
                         </button>
-                    )}
+                    )} */}
 
 
                     {variants[0]?.option1 !== null && variants[0]?.option1 !== "" && variants.map((variant, index) => (

@@ -124,7 +124,7 @@ const CollectionsPage = () => {
 
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{editedCollection._id ? 'Edit Collection' : 'Add Collection'}</Modal.Title>
+                    <Modal.Title>{editedCollection.id ? 'Edit Collection' : 'Add Collection'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>

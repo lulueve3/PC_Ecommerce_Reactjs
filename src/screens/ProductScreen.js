@@ -60,6 +60,7 @@ const ProductScreen = ({ }) => {
 
     const addToCartHandler = () => {
         dispatch(addToCart({
+            productId: product.id,
             id: product.variants[selectedButton].id,
             title: product.title,
             qty,
