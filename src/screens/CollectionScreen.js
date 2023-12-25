@@ -22,7 +22,7 @@ const CollectionsPage = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            const response = await axios.get('http://localhost:8080/api/admin/collections', config);
+            const response = await axios.get('http://localhost:8080/api/collections', config);
             setCollections(response.data.results);
             console.log(response.data.results);
         } catch (error) {
@@ -56,7 +56,11 @@ const CollectionsPage = () => {
                 }, config);
             } else {
                 // If _id doesn't exist, it means we are adding a new collection
-                await axios.post('http://localhost:8080/api/admin/collections', editedCollection, config);
+                await axios.post('http://localhost:8080/api/admin/collections',
+                    {
+                        editedCollection,
+                        active: true
+                    }, config);
             }
 
             // Refresh the collections list

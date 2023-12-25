@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import FormContainer from '../components/FormContainer';
-import { listProductDetail, updateProduct } from '../action/productActions';
+import { listProductDetail, updateProduct, } from '../action/productActions';
 import { Row, Col } from 'react-bootstrap';
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,6 +14,7 @@ import Select from 'react-select';
 
 const ProductEditScreen = () => {
     const { id: productId } = useParams();
+
 
 
     const dispatch = useDispatch();
@@ -40,6 +41,8 @@ const ProductEditScreen = () => {
     const [uploading, setUploading] = useState(false);
     const [selectedCollections, setSelectedCollections] = useState([]);
     const [listCollections, setListCollections] = useState([]);
+    const [flagCollection, setFlagCollection] = useState(false);
+
 
     useEffect(() => {
         if (!product.title || String(product.id) !== String(productId)) {
@@ -66,6 +69,9 @@ const ProductEditScreen = () => {
 
         }
     }, [dispatch, productId, product, loading]);
+    const selectedCollectionsRef = useRef(selectedCollections);
+
+
 
 
     useEffect(() => {
@@ -130,16 +136,23 @@ const ProductEditScreen = () => {
     }, [])
 
     const handleCollectionChange = (selectedOptions) => {
-        // Lấy mảng các giá trị của collection đã chọn
+        setFlagCollection(!flagCollection);
 
         const selectedValues = selectedOptions.map(option => option.value);
-        setSelectedCollections(selectedValues);
 
+        if (selectedValues.length > 0) {
+
+            const uniqueSelectedValues = [...new Set(selectedValues)];
+            setSelectedCollections(uniqueSelectedValues);
+        }
     };
 
+
     useEffect(() => {
-        updateCollection();
-    }, [selectedCollections])
+        if (selectedCollections.length > 0) {
+            updateCollection();
+        }
+    }, [flagCollection]);
 
     // Chuyển đổi danh sách collections thành định dạng chấp nhận được bởi React-Select
     const selectOptions = listCollections.map(collection => ({
