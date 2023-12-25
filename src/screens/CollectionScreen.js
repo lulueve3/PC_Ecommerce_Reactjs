@@ -141,7 +141,7 @@ const CollectionsPage = () => {
                                             Edit
                                         </Button>{' '}
                                         <Button variant="danger" onClick={() => handleDeleteCollection(collection.id)}>
-                                            Hide
+                                            Delete
                                         </Button>
                                     </td>
                                     <td>{JSON.stringify(collection.active)}</td>

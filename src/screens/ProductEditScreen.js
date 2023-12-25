@@ -60,6 +60,7 @@ const ProductEditScreen = () => {
 
 
             setImages(product.images || []);
+            setSelectedCollections([]);
 
             setSelectedCollections(prevCollections => [
                 ...prevCollections,
@@ -69,8 +70,6 @@ const ProductEditScreen = () => {
 
         }
     }, [dispatch, productId, product, loading]);
-    const selectedCollectionsRef = useRef(selectedCollections);
-
 
 
 
@@ -568,7 +567,7 @@ const ProductEditScreen = () => {
                                     className='form-control'
                                     id={`optionName${index}`}
                                     value={option.name}
-                                    onChange={(e) => handleOptionChange(index, 'name', e.target.value)}
+                                // onChange={(e) => handleOptionChange(index, 'name', e.target.value)}
                                 />
                             </div>
                             <div className='mb-3'>
@@ -580,7 +579,7 @@ const ProductEditScreen = () => {
                                     className='form-control'
                                     id={`optionValues${index}`}
                                     value={option.values.join(',')}
-                                    onChange={(e) => handleOptionChange(index, 'values', e.target.value.split(','))}
+                                // onChange={(e) => handleOptionChange(index, 'values', e.target.value.split(','))}
                                 />
                             </div>
                             {/* Add button to remove option */}
