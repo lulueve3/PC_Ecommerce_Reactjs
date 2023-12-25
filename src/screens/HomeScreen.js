@@ -40,7 +40,10 @@ const HomeScreen = () => {
                                 </Col>
                             ))}
                         </Row>
-                        <Paginate pages={pages} page={page + 1} keyword={keyword ? keyword : ''}></Paginate>
+                        <div className='d-flex justify-content-center'>
+
+                            <Paginate pages={pages} page={page + 1} keyword={keyword ? keyword : ''}></Paginate>
+                        </div>
                     </>
             }
 
