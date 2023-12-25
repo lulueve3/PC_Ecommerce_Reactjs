@@ -110,7 +110,10 @@ const ProductListScreen = () => {
 
                         </tbody>
                     </Table>
-                    <Paginate pages={pages} page={page + 1} link='/admin/productList'></Paginate>
+                    <div className='d-flex justify-content-center'>
+                        <Paginate pages={pages} page={page + 1} link='/admin/productList'></Paginate>
+
+                    </div>
 
                 </>
             )}

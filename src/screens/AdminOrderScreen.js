@@ -14,7 +14,7 @@ const AdminOrderScrren = () => {
     const fetchOrders = async (page = 0, size = 10) => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            const response = await axios.get(`http://localhost:8080/api/orders?page=${page}&size=${size}&sortBy=id&sortDirection=ASC`, {
+            const response = await axios.get(`http://localhost:8080/api/admin/orders?page=${page}&size=${size}&sortBy=id&sortDirection=ASC`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -229,17 +229,19 @@ const AdminOrderScrren = () => {
                 </tbody>
             </Table>
 
-            <Pagination>
-                {Array.from({ length: totalPages }, (_, index) => index + 1).map(pageNumber => (
-                    <Pagination.Item
-                        key={pageNumber}
-                        active={pageNumber === currentPage}
-                        onClick={() => handlePageChange(pageNumber)}
-                    >
-                        {pageNumber}
-                    </Pagination.Item>
-                ))}
-            </Pagination>
+            <div className='d-flex justify-content-center'>
+                <Pagination>
+                    {Array.from({ length: totalPages }, (_, index) => index + 1).map(pageNumber => (
+                        <Pagination.Item
+                            key={pageNumber}
+                            active={pageNumber === currentPage}
+                            onClick={() => handlePageChange(pageNumber)}
+                        >
+                            {pageNumber}
+                        </Pagination.Item>
+                    ))}
+                </Pagination>
+            </div>
 
             <Modal show={showModal} onHide={handleCloseModal} size='lg'>
                 <Modal.Header closeButton>

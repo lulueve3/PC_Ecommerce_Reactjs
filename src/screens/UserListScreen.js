@@ -1,69 +1,82 @@
-import React, { useEffect, useState } from 'react'
-import { Row, Col, Image, ListGroup, Card, Button, ListGroupItem, Form, Table } from 'react-bootstrap'
-import { useDispatch, useSelector } from 'react-redux'
-import Message from '../components/Message'
-import Loader from '../components/Loader'
-import { login } from '../action/userAction'
-import FormContainer from '../components/FormContainer'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { listUsers } from '../action/userAction'
-import { LinkContainer } from 'react-router-bootstrap'
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from 'react-bootstrap';
+import axios from 'axios';
 
 const UserListScreen = () => {
-    const dispatch = useDispatch();
-
-    const userList = useSelector(state => state.userList)
-    const { loading, error, users } = userList
+    const [userList, setUserList] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
-        dispatch(listUsers())
-    }, [dispatch])
+        // Fetch collections when the component mounts
+        getUser();
+    }, []);
 
-    const deleteHandler = (id) => {
-        console.log('delete');
-    }
+    const getUser = async (page = 0, size = 10) => {
+        try {
+
+            const accessToken = localStorage.getItem('accessToken') || null;
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+            const response = await axios.get('http://localhost:8080/api/admin/customers?page=0&size=10&sortBy=id&sortDirection=ASC', config);
+            setUserList(response.data.results);
+            console.log(response.data.results);
+        } catch (error) {
+            console.error('Error fetching collections:', error);
+        }
+    };
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        getUser(pageNumber - 1);
+    };
+
 
     return (
-        <>
-            <h1>Users</h1>
-            {loading ? <Loader /> : error ? <Message variant='danger'>{error}</Message> : (
-                <Table striped bordered hover responsive className='table-sm'>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>NAME</th>
-                            <th>EMAIL</th>
-                            <th>PHONE</th>
-                            <th>ROLE</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>hải</td>
-                            <td>giotocdo@gmail.com</td>
-                            <td>098721312</td>
-                            <td>Admin</td>
-                            <td>
-                                <LinkContainer to={`http://localhost:8080/api/users/${1}/edit`}>
-                                    <Button variant='light' className='btn-sm'>
-                                        <i className='fas fa-edit'></i>
-                                    </Button>
-                                </LinkContainer>
-                                <Button variant='danger' className='btn-sm' onClick={() => deleteHandler(1)}>
-                                    <i className='fas fa-trash'></i>
-                                </Button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </Table>
-            )}
+        <Container>
+            <Row className="mt-4">
+                <Col>
+                    <h2>User List</h2>
 
-        </>
+                    <Table className="mt-3" striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>NAME</th>
+                                <th>EMAIL</th>
 
-    )
-}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {userList?.map((user) => (
+                                <tr key={user.id}>
+                                    <td>{user.id}</td>
+                                    <td>{user.firstName + "     " + user.lastName}</td>
+                                    <td>{user.email} </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                </Col>
+            </Row>
+            <div className='d-flex justify-content-center'>
+                <Pagination>
+                    {Array.from({ length: totalPages }, (_, index) => index + 1).map(pageNumber => (
+                        <Pagination.Item
+                            key={pageNumber}
+                            active={pageNumber === currentPage}
+                            onClick={() => handlePageChange(pageNumber)}
+                        >
+                            {pageNumber}
+                        </Pagination.Item>
+                    ))}
+                </Pagination>
+            </div>
+        </Container>
+    );
+};
 
 export default UserListScreen

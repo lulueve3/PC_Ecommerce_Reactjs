@@ -82,9 +82,10 @@ const CartScreen = () => {
 
 
             const { data } = await axios.post('http://localhost:8080/api/orders', orders)
-            selectedItems.forEach(item => {
-                removeFromCartHandler(item.id);
-            })
+            const removeFunctions = selectedItems.map(itemId => () => removeFromCartHandler(itemId));
+
+            // Gọi các hàm removeFunctions trong một lệnh
+            removeFunctions.forEach(removeFunction => removeFunction());
             toast.success('Checkout success!', {
                 position: "top-right",
                 autoClose: 3000,
@@ -147,6 +148,20 @@ const CartScreen = () => {
             });
             return
         }
+        console.log(JSON.stringify(customerInfo));
+        if (!customerInfo.firstName || !customerInfo.lastName || (!customerInfo.email && !userEmail) || !customerInfo.phone || !customerInfo.address) {
+            toast.warning('Please fill in all customer information', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            return;
+        }
 
         const line_items = selectedItems.map(itemId => {
             const item = cartItems.find(item => item.id === itemId);
@@ -173,10 +188,7 @@ const CartScreen = () => {
         }
         console.log(orders);
         createOrder(orders);
-        // Now, selectedItemsDetails contains an array of objects with id and qty properties.
-        // You can use this array as needed for your checkout process.
 
-        // Example: navigate.push('/login?redirect=shipping&selectedItems=' + JSON.stringify(selectedItemsDetails));
     }
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -320,7 +332,7 @@ const CartScreen = () => {
                                     <Form.Group controlId="formPhone">
                                         <Form.Label>Phone</Form.Label>
                                         <Form.Control
-                                            type="text"
+                                            type="number"
                                             name="phone"
                                             value={customerInfo.phone}
                                             onChange={handleInputChange}
