@@ -3,6 +3,7 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
+
 const DashboardScreen = () => {
     const [statistics, setStatistics] = useState({
         userCount: 0,
@@ -16,6 +17,7 @@ const DashboardScreen = () => {
         getOrderCount();
         getUserCount();
     }, []);
+
 
     const getProductCount = async () => {
         try {
@@ -102,7 +104,7 @@ const DashboardScreen = () => {
                     </Link>
                 </Col>
                 <Col md={3}>
-                    <Link to="/admin/revenue">
+                    <Link to="/admin/orderList">
                         <Card bg="success" text="white">
                             <Card.Body>
                                 <Card.Title>Revenue</Card.Title>

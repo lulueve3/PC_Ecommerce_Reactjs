@@ -8,7 +8,7 @@ import axios from 'axios'
 import { jwtDecode } from 'jwt-decode';
 import { ToastContainer, toast } from 'react-toastify';
 import StripeContainer from '../components/StripeContainer'
-
+import emailjs from '@emailjs/browser'
 
 
 const ITEMS_PER_PAGE = 5; // Adjust as needed
@@ -62,6 +62,17 @@ const CartScreen = () => {
         console.log(cartItems);
     }, [cartItems])
 
+    const sendEmail = (orders) => {
+
+        const templateParams = {
+            name: "Tên khách hàng",
+            email: "giotocdo@gmail.com",
+            my_html: OrderConfirmationEmail(orders)
+        };
+        emailjs.send('service_6g2chws', 'template_928whlk', templateParams, 'PSjw63Ie2cQ9NAUsO');
+    };
+
+
     useEffect(() => {
         if (id) {
             dispatch(addToCart(id, qty));
@@ -75,6 +86,65 @@ const CartScreen = () => {
     const editQuantityHandler = (id, newQty) => {
         dispatch(editCartItemQuantity(id, newQty));
     };
+
+
+    const OrderConfirmationEmail = ({ line_items, customer, address }) => {
+        const html = `
+          <div>
+            <h2>Order Confirmation</h2>
+      
+            <h3>Customer Information</h3>
+            <p>
+              <strong>Name:</strong> ${customer.first_name} ${customer.last_name}
+            </p>
+            <p>
+              <strong>Email:</strong> ${customer.email}
+            </p>
+      
+            <h3>Shipping Address</h3>
+            <p>
+              <strong>Address:</strong> ${address.address}
+            </p>
+            <p>
+              <strong>Phone:</strong> ${address.phone}
+            </p>
+      
+            <h3>Ordered Items</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #ddd;">
+  <thead>
+    <tr style="background-color: #f2f2f2;">
+      <th style="padding: 10px; text-align: left;">Image</th>
+      <th style="padding: 10px; text-align: center;">Quantity</th>
+      <th style="padding: 10px; text-align: center;">Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${line_items
+                .map(
+                    (item) => `
+          <tr key=${item.variant_id} style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 10px; text-align: center;"><img src="${cartItems.find(cartItem => cartItem.id === item.variant_id)?.image}" alt="Product" style="max-width: 50px; max-height: 50px; border-radius: 5px;"></td>
+            <td style="padding: 10px; text-align: center;">${item.quantity}</td>
+            <td style="padding: 10px; text-align: center;">$${(cartItems.find(cartItem => cartItem.id === item.variant_id)?.price * item.quantity).toFixed(2)}</td>
+          </tr>
+        `
+                )
+                .join('')}
+  </tbody>
+</table>
+
+      
+<p style="font-size: 18px; color: green;">Total Order Amount: $${line_items
+                .reduce((total, item) => total + cartItems.find(cartItem => cartItem.id === item.variant_id)?.price * item.quantity, 0)
+                .toFixed(2)}</p>
+
+  <p style="font-size: 16px; color: green;">Thank you for shopping with us!</p>
+          </div>
+        `;
+        return html;
+    };
+
+
 
     const createOrder = async () => {
         const line_items = selectedItems.map(itemId => {
@@ -113,6 +183,7 @@ const CartScreen = () => {
 
 
             const { data } = await axios.post('http://localhost:8080/api/orders', orders)
+
             const removeFunctions = selectedItems.map(itemId => () => removeFromCartHandler(itemId));
 
             // Gọi các hàm removeFunctions trong một lệnh
@@ -127,6 +198,7 @@ const CartScreen = () => {
                 progress: undefined,
                 theme: "light",
             });
+            sendEmail(orders)
 
 
         } catch (error) {
@@ -165,6 +237,7 @@ const CartScreen = () => {
 
 
     const checkoutHandler = () => {
+
 
         if (selectedItems.length < 1) {
             toast.warning('Please select product to checkout', {
