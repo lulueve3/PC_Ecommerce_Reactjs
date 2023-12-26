@@ -1,6 +1,7 @@
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import axios from "axios"
 import React, { useState } from 'react'
+import { ToastContainer, toast } from 'react-toastify';
 
 const styles = {
     container: {
@@ -53,6 +54,16 @@ export default function PaymentForm({ amount, onSuccess }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        toast.info('Paying', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+        });
         const { error, paymentMethod } = await stripe.createPaymentMethod({
             type: "card",
             card: elements.getElement(CardElement)
@@ -72,9 +83,31 @@ export default function PaymentForm({ amount, onSuccess }) {
                     onSuccess();
                     setSuccess(true)
                 }
+                else {
+                    toast.error('Payment faild!, Try again', {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
+                }
+
 
             } catch (error) {
-                console.log("Error", error)
+                toast.error('Payment faild!, Try again', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
             }
         } else {
             console.log(error.message)
@@ -83,7 +116,7 @@ export default function PaymentForm({ amount, onSuccess }) {
 
     return (
         <>
-
+            <ToastContainer />
             {!success ?
                 <form onSubmit={handleSubmit}>
                     <fieldset className="FormGroup">
