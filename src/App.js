@@ -25,7 +25,9 @@ import AdminOrderScrren from './screens/AdminOrderScreen';
 
 
 
+
 function App() {
+
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Trạng thái đăng nhập ban đầu
 
   const user = useSelector(state => state.userLogin)
@@ -50,6 +52,7 @@ function App() {
   }
   return (
     <>
+
       <Header handleLoginLogout={handleLoginLogout} isLoggedIn={isLoggedIn} />
       <main className='py-3'>
         <Container>
@@ -77,6 +80,7 @@ function App() {
       </main>
 
       <Footer />
+
     </>
   );
 }

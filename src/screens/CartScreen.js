@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useLocation, useParams, useNavigate } from 'react-router-dom'
-import { Row, Col, ListGroup, Image, Form, Button, Card, Pagination } from 'react-bootstrap'
+import { Row, Col, ListGroup, Image, Form, Button, Card, Pagination, Modal } from 'react-bootstrap'
 import { addToCart, editCartItemQuantity } from '../action/cartAction'
 import Message from '../components/Message'
 import axios from 'axios'
 import { jwtDecode } from 'jwt-decode';
 import { ToastContainer, toast } from 'react-toastify';
+import StripeContainer from '../components/StripeContainer'
+
 
 
 const ITEMS_PER_PAGE = 5; // Adjust as needed
@@ -25,6 +27,12 @@ const CartScreen = () => {
         phone: "",
         address: ""
     });
+
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+    const handleClosePaymentModal = () => setShowPaymentModal(false);
+    const handleShowPaymentModal = () => setShowPaymentModal(true);
+
 
     const [userEmail, setUserEmail] = useState(null);
 
@@ -68,7 +76,30 @@ const CartScreen = () => {
         dispatch(editCartItemQuantity(id, newQty));
     };
 
-    const createOrder = async (orders) => {
+    const createOrder = async () => {
+        const line_items = selectedItems.map(itemId => {
+            const item = cartItems.find(item => item.id === itemId);
+            return {
+                variant_id: itemId,
+                quantity: item.qty
+            };
+        });
+        const customer = {
+            first_name: customerInfo.firstName,
+            last_name: customerInfo.lastName,
+            email: userEmail ? userEmail : customerInfo.email
+        }
+        const address = {
+            first_name: customerInfo.firstName,
+            last_name: customerInfo.lastName,
+            address: customerInfo.address,
+            phone: customerInfo.phone
+        }
+        const orders = {
+            line_items,
+            customer,
+            address
+        }
         try {
 
 
@@ -163,31 +194,8 @@ const CartScreen = () => {
             return;
         }
 
-        const line_items = selectedItems.map(itemId => {
-            const item = cartItems.find(item => item.id === itemId);
-            return {
-                variant_id: itemId,
-                quantity: item.qty
-            };
-        });
-        const customer = {
-            first_name: customerInfo.firstName,
-            last_name: customerInfo.lastName,
-            email: userEmail ? userEmail : customerInfo.email
-        }
-        const address = {
-            first_name: customerInfo.firstName,
-            last_name: customerInfo.lastName,
-            address: customerInfo.address,
-            phone: customerInfo.phone
-        }
-        const orders = {
-            line_items,
-            customer,
-            address
-        }
-        console.log(orders);
-        createOrder(orders);
+
+        handleShowPaymentModal();
 
     }
 
@@ -210,6 +218,15 @@ const CartScreen = () => {
     return (
         <>
             <ToastContainer />
+            <Modal show={showPaymentModal} onHide={handleClosePaymentModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Payment</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {/* Include the StripeContainer component inside the modal body */}
+                    <StripeContainer onSuccess={createOrder} amount={selectedItems?.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0).toFixed(3)} />
+                </Modal.Body>
+            </Modal>
             <Row>
                 <Col md={9}>
                     <h1>Shopping Cart</h1>
@@ -352,6 +369,7 @@ const CartScreen = () => {
                                     <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>
                                         Checkout
                                     </Button>
+
                                 </Form>
                             </ListGroup.Item>
                         </ListGroup>
