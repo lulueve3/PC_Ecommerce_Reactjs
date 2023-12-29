@@ -74,7 +74,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
     return (
         <FormContainer>
             <h1>{isRegistering ? 'Register' : 'Sign In'}</h1>
-            {error && <Message variant='danger'>Login Error</Message>}
+            {error && <Message variant='danger'>Login Faild!, Please check your email and password</Message>}
             {loading && <Loader></Loader>}
             <Form onSubmit={submitHandler}>
                 {isRegistering && (

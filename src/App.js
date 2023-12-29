@@ -74,7 +74,10 @@ function App() {
             <Route path='/search/:keyword' element={<SearchScreen />} />
             <Route path='/page/:pageNumber' element={<HomeScreen />} />
             <Route path='/admin/productList/page/:pageNumber' element={<PrivateRoute><ProductListScreen /></PrivateRoute>} />
+            <Route path='/search/:keyword/page/:pageNumber/collection/:idCollect' element={<SearchScreen />} />
             <Route path='/search/:keyword/page/:pageNumber' element={<SearchScreen />} />
+            <Route path='/search' element={<SearchScreen />} />
+
           </Routes>
         </Container>
       </main>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector, } from 'react-redux'
-import { Link, useParams, } from 'react-router-dom'
+import { Link, useParams, useLocation } from 'react-router-dom'
 
 import productsTest from '../product'
 import { Col, Row } from 'react-bootstrap'
@@ -14,8 +14,9 @@ import axios from 'axios';
 
 const SearchScreen = () => {
 
-    const { keyword, pageNumber } = useParams();
-    const [selectedCategory, setSelectedCategory] = useState('');
+
+    const { keyword, id, pageNumber } = useParams();
+    const [selectedCategory, setSelectedCategory] = useState(id || '');
     const [collections, setCollections] = useState([]);
 
 
@@ -79,8 +80,10 @@ const SearchScreen = () => {
                                 </Col>
                             ))}
                         </Row>
-                        <Paginate pages={pages} page={page + 1} keyword={keyword ? keyword : ''}></Paginate>
-                    </>
+                        <div className='d-flex justify-content-center'>
+
+                            <Paginate pages={pages} page={page + 1} keyword={keyword ? keyword : ''} search={true}></Paginate>
+                        </div>                    </>
             }
 
         </>

@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { Doughnut, Bar } from 'react-chartjs-2';
+import { Chart, ArcElement } from 'chart.js'
+Chart.register(ArcElement);
+
 
 
 const DashboardScreen = () => {
@@ -11,6 +15,15 @@ const DashboardScreen = () => {
         productCount: 0,
         revenue: 0,
     });
+
+    const userOrderData = {
+        labels: ['Users', 'Orders'],
+        datasets: [{
+            data: [statistics.userCount, statistics.orderCount],
+            backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+            hoverBackgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)'],
+        }],
+    };
 
     useEffect(() => {
         getProductCount();
@@ -35,6 +48,17 @@ const DashboardScreen = () => {
             console.error('Error fetching statistics:', error);
         }
     }
+
+    const dataUserOrder = [
+        { label: 'User', value: statistics.userCount },
+        { label: 'Order', value: statistics.orderCount },
+    ];
+
+    const dataOrderRevenue = [
+        { label: 'Order', value: statistics.orderCount },
+        { label: 'Revenue', value: statistics.revenue },
+    ];
+
 
     const getUserCount = async () => {
         try {
@@ -75,7 +99,7 @@ const DashboardScreen = () => {
             <Row>
                 <Col md={3}>
                     <Link to="/admin/userList">
-                        <Card bg="primary" text="white">
+                        <Card style={{ backgroundColor: '#3e95cd' }} text="white">
                             <Card.Body>
                                 <Card.Title>User Count</Card.Title>
                                 <Card.Text>{statistics.userCount}</Card.Text>
@@ -85,12 +109,13 @@ const DashboardScreen = () => {
                 </Col>
                 <Col md={3}>
                     <Link to="/admin/orderList">
-                        <Card bg="warning" text="white">
+                        <Card style={{ backgroundColor: '#8e5ea2' }} text="white">
                             <Card.Body>
                                 <Card.Title>Order Count</Card.Title>
                                 <Card.Text>{statistics.orderCount}</Card.Text>
                             </Card.Body>
                         </Card>
+
                     </Link>
                 </Col>
                 <Col md={3}>
@@ -114,6 +139,8 @@ const DashboardScreen = () => {
                     </Link>
                 </Col>
             </Row>
+
+
         </Container>
     );
 };

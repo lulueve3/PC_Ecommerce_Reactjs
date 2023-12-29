@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
 
 import productsTest from '../product'
-import { Col, Row } from 'react-bootstrap'
+import { Col, Row, Carousel } from 'react-bootstrap'
 import Product from '../components/Product'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
@@ -29,6 +29,49 @@ const HomeScreen = () => {
 
     return (
         <>
+            <Carousel className='custom-carousel-bg' interval={1500}>
+                <Carousel.Item>
+                    <Link to="/search/laptop">
+                        <img
+                            className="d-block w-100"
+                            src={`${process.env.PUBLIC_URL}/laptop.jpg`}
+                            alt="Laptop"
+                            style={{ maxHeight: '400px', objectFit: 'contain' }}
+                        />
+                    </Link>
+                </Carousel.Item>
+                <Carousel.Item>
+                    <Link to="/search/bàn phím">
+                        <img
+                            className="d-block w-100"
+                            src={`${process.env.PUBLIC_URL}/banphim.png`}
+                            alt="Laptop văn phòng"
+                            style={{ maxHeight: '400px', objectFit: 'contain' }}
+                        />
+                    </Link>
+                </Carousel.Item>
+                <Carousel.Item>
+                    <Link to="/search/chuột">
+                        <img
+                            className="d-block w-100"
+                            src={`${process.env.PUBLIC_URL}/chuot.jpg`}
+                            alt="Laptop văn phòng"
+                            style={{ maxHeight: '400px', objectFit: 'contain' }}
+                        />
+                    </Link>
+                </Carousel.Item>
+                <Carousel.Item>
+                    <Link to="/search/tai nghe">
+                        <img
+                            className="d-block w-100"
+                            src={`${process.env.PUBLIC_URL}/tainghe.jpg`}
+                            alt="Laptop văn phòng"
+                            style={{ maxHeight: '400px', objectFit: 'contain' }}
+                        />
+                    </Link>
+                </Carousel.Item>
+            </Carousel>
+
             <h1>Lastest Products</h1>
             {
                 loading ? <Loader /> : error ? <Message variant='danger'>{error}</Message> :

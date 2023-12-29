@@ -50,3 +50,7 @@
     inset 0 1px 0 #e298d8;
   transform: scale(0.99);
 }
+
+.custom-carousel-bg {
+  background-color: #777; /* Adjust the color code to the shade of gray you desire */
+}

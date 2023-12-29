@@ -14,7 +14,7 @@ const MyOrders = () => {
     const fetchOrders = async (page = 0, size = 10) => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            const response = await axios.get(`http://localhost:8080/api/orders?page=${page}&size=${size}&sortBy=id&sortDirection=ASC`, {
+            const response = await axios.get(`http://localhost:8080/api/orders?page=${page}&size=${size}&sortBy=id&sortDirection=DESC`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }

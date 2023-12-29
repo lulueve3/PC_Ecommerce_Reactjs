@@ -200,6 +200,8 @@ const CartScreen = () => {
             });
             sendEmail(orders)
 
+            setSelectedItems([])
+
 
         } catch (error) {
             console.log(error);
@@ -308,11 +310,14 @@ const CartScreen = () => {
                             {currentCartItems.map(item => (
                                 <ListGroup.Item key={item.id}>
                                     <Row>
+                                        {/* Column 1: Image */}
                                         <Col md={3}>
-                                            <Link to={`/product/${item.productId}`}><Image src={item.image} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px' }}></Image>
+                                            <Link to={`/product/${item.productId}`}>
+                                                <Image src={item.image} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px' }} />
                                             </Link>
-
                                         </Col>
+
+                                        {/* Column 2: Title */}
                                         <Col md={3}>
                                             <Link
                                                 to={`/product/${item.id}`}
@@ -325,11 +330,14 @@ const CartScreen = () => {
                                             >
                                                 {item.title}
                                             </Link>
-
                                         </Col>
+
+                                        {/* Column 3: Price */}
                                         <Col md={2}>
                                             {item.price} $
                                         </Col>
+
+                                        {/* Column 4: Quantity */}
                                         <Col md={2}>
                                             <input
                                                 type="number"
@@ -344,6 +352,8 @@ const CartScreen = () => {
                                                 style={{ width: '100%' }}
                                             />
                                         </Col>
+
+                                        {/* Column 5: Remove and Select */}
                                         <Col md={2}>
                                             <Button
                                                 type='button'
@@ -361,6 +371,8 @@ const CartScreen = () => {
                                             />
                                         </Col>
 
+                                        {/* Vertical Separator Column */}
+                                        <Col md={1} className="separator-column"></Col>
                                     </Row>
                                 </ListGroup.Item>
                             ))}

@@ -7,14 +7,14 @@ export const listProducts = (keyword = '', page = '0', category = '') => async (
         dispatch({ type: PRODUCT_LIST_REQUEST })
 
         if (category !== '') {
-            const { data } = await axios.get(`http://localhost:8080/api/collections/${category}/products?page=${page ? page : 0}&size=8&keyword=${keyword}`)
+            const { data } = await axios.get(`http://localhost:8080/api/collections/${category}/products?page=${page ? page : 0}&size=8&keyword=${keyword}&sortDirection=DESC`)
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
             })
 
         } else {
-            const { data } = await axios.get(`http://localhost:8080/api/products?keyword=${keyword}&page=${page ? page : 0}&size=8`)
+            const { data } = await axios.get(`http://localhost:8080/api/products?keyword=${keyword}&page=${page ? page : 0}&size=8&sortDirection=DESC`)
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
