@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Pagination, Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
+import { format } from 'date-fns';
 
 const MyOrders = () => {
     const [orders, setOrders] = useState([]);
@@ -9,6 +10,13 @@ const MyOrders = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [productDetails, setProductDetails] = useState([]);
+
+
+    const formatTime = (time) => {
+        const dateObject = new Date(time);
+        return format(dateObject, "dd/MM/yyyy HH:mm:ss"); // Có thể sửa đổi định dạng tùy ý
+
+    }
 
 
     const fetchOrders = async (page = 0, size = 10) => {
@@ -208,6 +216,7 @@ const MyOrders = () => {
                         <th>Order ID</th>
                         <th>Customer Name</th>
                         <th>Total Amount</th>
+                        <th>Created Time</th>
                         <th>Actions</th>
                         {/* Thêm các cột khác tùy thuộc vào dữ liệu đơn hàng */}
                     </tr>
@@ -218,6 +227,7 @@ const MyOrders = () => {
                             <td>{order.id}</td>
                             <td>{order.address.first_name + " " + order.address.last_name}</td>
                             <td>{totalOrderById(order.id)}</td>
+                            <td>{formatTime(order.created_time)}</td>
                             <td>
                                 <Button variant="info" onClick={() => handleViewDetails(order.id)}>
                                     View Details
@@ -229,17 +239,19 @@ const MyOrders = () => {
                 </tbody>
             </Table>
 
-            <Pagination>
-                {Array.from({ length: totalPages }, (_, index) => index + 1).map(pageNumber => (
-                    <Pagination.Item
-                        key={pageNumber}
-                        active={pageNumber === currentPage}
-                        onClick={() => handlePageChange(pageNumber)}
-                    >
-                        {pageNumber}
-                    </Pagination.Item>
-                ))}
-            </Pagination>
+            <div className='d-flex justify-content-center'>
+                <Pagination>
+                    {Array.from({ length: totalPages }, (_, index) => index + 1).map(pageNumber => (
+                        <Pagination.Item
+                            key={pageNumber}
+                            active={pageNumber === currentPage}
+                            onClick={() => handlePageChange(pageNumber)}
+                        >
+                            {pageNumber}
+                        </Pagination.Item>
+                    ))}
+                </Pagination>
+            </div>
 
             <Modal show={showModal} onHide={handleCloseModal} size='lg'>
                 <Modal.Header closeButton>

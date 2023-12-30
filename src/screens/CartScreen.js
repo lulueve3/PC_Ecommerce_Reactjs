@@ -65,8 +65,8 @@ const CartScreen = () => {
     const sendEmail = (orders) => {
 
         const templateParams = {
-            name: "Tên khách hàng",
-            email: "giotocdo@gmail.com",
+            name: customerInfo.first_name + customerInfo.lastName,
+            email: userEmail ? userEmail : customerInfo.email,
             my_html: OrderConfirmationEmail(orders)
         };
         emailjs.send('service_6g2chws', 'template_928whlk', templateParams, 'PSjw63Ie2cQ9NAUsO');
@@ -108,11 +108,16 @@ const CartScreen = () => {
             <p>
               <strong>Phone:</strong> ${address.phone}
             </p>
+            <p>
+              <strong>Created Time:</strong> ${new Date()}
+            </p>
+      
       
             <h3>Ordered Items</h3>
             <table style="width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #ddd;">
   <thead>
     <tr style="background-color: #f2f2f2;">
+    <th style="padding: 10px; text-align: left;">Product Name</th>
       <th style="padding: 10px; text-align: left;">Image</th>
       <th style="padding: 10px; text-align: center;">Quantity</th>
       <th style="padding: 10px; text-align: center;">Price</th>
@@ -123,6 +128,9 @@ const CartScreen = () => {
                 .map(
                     (item) => `
           <tr key=${item.variant_id} style="border-bottom: 1px solid #ddd;">
+          <td style="padding: 10px; text-align: center;">${item.title}
+          <br />
+          ${item.variant}</td>
             <td style="padding: 10px; text-align: center;"><img src="${cartItems.find(cartItem => cartItem.id === item.variant_id)?.image}" alt="Product" style="max-width: 50px; max-height: 50px; border-radius: 5px;"></td>
             <td style="padding: 10px; text-align: center;">${item.quantity}</td>
             <td style="padding: 10px; text-align: center;">$${(cartItems.find(cartItem => cartItem.id === item.variant_id)?.price * item.quantity).toFixed(2)}</td>
@@ -151,7 +159,9 @@ const CartScreen = () => {
             const item = cartItems.find(item => item.id === itemId);
             return {
                 variant_id: itemId,
-                quantity: item.qty
+                quantity: item.qty,
+                title: item.title,
+                variant: item.variant
             };
         });
         const customer = {
@@ -307,7 +317,7 @@ const CartScreen = () => {
                     <h1>Shopping Cart</h1>
                     {cartItems.length === 0 ? <Message>Your cart is empty <Link to="/">Go Back</Link> </Message> : (
                         <ListGroup variant='flush'>
-                            {currentCartItems.map(item => (
+                            {currentCartItems.reverse().map(item => (
                                 <ListGroup.Item key={item.id}>
                                     <Row>
                                         {/* Column 1: Image */}
@@ -320,7 +330,7 @@ const CartScreen = () => {
                                         {/* Column 2: Title */}
                                         <Col md={3}>
                                             <Link
-                                                to={`/product/${item.id}`}
+                                                to={`/product/${item.productId}`}
                                                 style={{
                                                     display: 'block',
                                                     maxWidth: '100%',
@@ -329,6 +339,8 @@ const CartScreen = () => {
                                                 }}
                                             >
                                                 {item.title}
+                                                <br />
+                                                {item.variant}
                                             </Link>
                                         </Col>
 

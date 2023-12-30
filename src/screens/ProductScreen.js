@@ -62,11 +62,12 @@ const ProductScreen = ({ }) => {
         dispatch(addToCart({
             productId: product.id,
             id: product.variants[selectedButton].id,
+            variant: product.variants[selectedButton].option1 + " " + product.variants[selectedButton].option2 + " " + product.variants[selectedButton].option3,
             title: product.title,
             qty,
             price,
             image: product.images[0].src,
-            inStock
+            inStock: product.variants[selectedButton].quantity
         }));
         toast.success('Add to cart success!', {
             position: "top-right",
@@ -196,7 +197,7 @@ const ProductScreen = ({ }) => {
                                                             type="button"
                                                             onClick={() => handleButtonClick(index, variant.price)}
                                                         >
-                                                            {variant.option1 + ' ' + variant.option2}
+                                                            {variant.option1 + ' ' + variant.option2 + " " + variant.option3}
                                                         </Button>
                                                     ))}
                                                 </>

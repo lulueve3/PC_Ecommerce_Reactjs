@@ -208,6 +208,7 @@ const AdminOrderScrren = () => {
                         <th>Order ID</th>
                         <th>Customer Name</th>
                         <th>Total Amount</th>
+                        <th>Created Time</th>
                         <th>Actions</th>
                         {/* Thêm các cột khác tùy thuộc vào dữ liệu đơn hàng */}
                     </tr>
@@ -218,6 +219,7 @@ const AdminOrderScrren = () => {
                             <td>{order.id}</td>
                             <td>{order.address.first_name + " " + order.address.last_name}</td>
                             <td>{totalOrderById(order.id)}</td>
+                            <td>{order.created_time}</td>
                             <td>
                                 <Button variant="info" onClick={() => handleViewDetails(order.id)}>
                                     View Details
