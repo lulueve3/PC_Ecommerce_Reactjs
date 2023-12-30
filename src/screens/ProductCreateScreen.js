@@ -32,7 +32,7 @@ const ProductCreateScreen = () => {
     } = productCreate;
 
     const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('aabc');
+    const [description, setDescription] = useState('');
     const [vendor, setVendor] = useState('');
     const [active, setActive] = useState(true);
     const [variants, setVariants] = useState([]);
@@ -53,12 +53,9 @@ const ProductCreateScreen = () => {
 
     const convertHTML = () => {
         const htmlContent = convertToHTML(editorState.getCurrentContent()); // Use convertToHTML
-        console.log(htmlContent);
+        return htmlContent
     }
 
-    useEffect(() => {
-        convertHTML()
-    }, [editorState])
 
     useEffect(() => {
         handleOptionChangeToVariant();
@@ -68,7 +65,7 @@ const ProductCreateScreen = () => {
         e.preventDefault();
         console.log({
             title,
-            description,
+            description: convertHTML(),
             vendor,
             active,
             variants,
@@ -80,7 +77,7 @@ const ProductCreateScreen = () => {
         dispatch(
             createProduct({
                 title,
-                description,
+                description: convertHTML(),
                 vendor,
                 active,
                 variants,

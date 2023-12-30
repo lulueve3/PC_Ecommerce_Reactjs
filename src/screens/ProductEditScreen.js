@@ -8,8 +8,13 @@ import { listProductDetail, updateProduct, } from '../action/productActions';
 import { Row, Col } from 'react-bootstrap';
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify';
-
 import Select from 'react-select';
+import { convertToHTML, convertFromHTML } from 'draft-convert';
+import { EditorState, convertToRaw, ContentState } from 'draft-js';
+import { Editor } from 'react-draft-wysiwyg';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+
+
 
 
 const ProductEditScreen = () => {
@@ -44,12 +49,36 @@ const ProductEditScreen = () => {
     const [flagCollection, setFlagCollection] = useState(false);
 
 
+    const [editorState, setEditorState] = useState(() =>
+        EditorState.createEmpty()
+    );
+
+    const onEditorStateChange = (newEditorState) => {
+        setEditorState(newEditorState);
+    };
+
+    const convertHTML = () => {
+        const htmlContent = convertToHTML(editorState.getCurrentContent()); // Use convertToHTML
+        return htmlContent
+    }
+
+    useEffect(() => {
+        dispatch(listProductDetail(productId));
+    }, [])
+
+    useEffect(() => {
+        const contentState = convertFromHTML(description)
+        const editorState = EditorState.createWithContent(contentState);
+        setEditorState(editorState);
+    }, [description])
+
     useEffect(() => {
         if (!product.title || String(product.id) !== String(productId)) {
             dispatch(listProductDetail(productId));
         } else {
             setTitle(product.title);
             setDescription(product.description);
+
             setVendor(product.vendor);
             setActive(product.active);
             if (product.options[0]?.name === "Title") {
@@ -82,7 +111,7 @@ const ProductEditScreen = () => {
         e.preventDefault();
         console.log({
             title,
-            description,
+            description: convertHTML(),
             vendor,
             active,
             variants,
@@ -96,7 +125,7 @@ const ProductEditScreen = () => {
         dispatch(
             updateProduct(productId, {
                 title,
-                description,
+                description: convertHTML(),
                 vendor,
                 active,
                 variants,
@@ -446,18 +475,18 @@ const ProductEditScreen = () => {
                         />
                     </div>
 
-                    <div className='mb-3'>
+                    <div className='mb-3' style={{ height: '400px', background: '#f0f2d8', overflow: 'hidden' }}>
                         <label htmlFor='description' className='form-label'>
                             Description
                         </label>
-                        <textarea
-                            className='form-control'
-                            id='description'
-                            rows='3'
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            required
-                        ></textarea>
+                        <Editor
+                            editorState={editorState}
+                            onEditorStateChange={onEditorStateChange}
+                            wrapperClassName="wrapper-class"
+                            editorClassName="editor-class"
+                            toolbarClassName="toolbar-class"
+                            editorStyle={{ height: '300px', overflow: 'auto' }} // Adjust the height and overflow as needed
+                        />
                     </div>
 
                     <div className='mb-3'>
