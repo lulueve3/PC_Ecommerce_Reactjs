@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from 'react-bootstrap';
 import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom'
+
 
 const UserListScreen = () => {
+
+    const navigate = useNavigate();
+
     const [userList, setUserList] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -11,6 +16,11 @@ const UserListScreen = () => {
         // Fetch collections when the component mounts
         getUser();
     }, []);
+
+    const getUserOrder = (id) => {
+        navigate(`./${id}`);
+
+    }
 
     const getUser = async (page = 0, size = 10) => {
         try {
@@ -47,6 +57,8 @@ const UserListScreen = () => {
                                 <th>ID</th>
                                 <th>NAME</th>
                                 <th>EMAIL</th>
+                                <th>Total</th>
+                                <th>Action</th>
 
                             </tr>
                         </thead>
@@ -54,8 +66,11 @@ const UserListScreen = () => {
                             {userList?.map((user) => (
                                 <tr key={user.id}>
                                     <td>{user.id}</td>
-                                    <td>{user.firstName + "     " + user.lastName}</td>
+                                    <td>{user.firstName + " " + user.lastName}</td>
                                     <td>{user.email} </td>
+                                    <td>{user.totalOrderValue + " $"} </td>
+                                    <td onClick={() => getUserOrder(user.id)} style={{ fontSize: '2em' }}>ℹ️</td>
+
                                 </tr>
                             ))}
                         </tbody>

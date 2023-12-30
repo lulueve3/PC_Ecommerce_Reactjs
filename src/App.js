@@ -21,6 +21,7 @@ import DashboardScreen from './screens/DashboardScreen'
 import MyOrders from './screens/MyOrders';
 import SearchScreen from './screens/SearchScreen';
 import AdminOrderScrren from './screens/AdminOrderScreen';
+import AdminUserOrder from './screens/AdminUserOrder'
 
 
 
@@ -65,6 +66,8 @@ function App() {
             <Route path="/login" element={<LoginScreen handleLoginLogout={handleLoginLogout} />} />
             <Route path="/cart/:id?" element={<CartScreen />} />
             <Route path="/admin/userList" element={<UserListScreen />} />
+            <Route path="/admin/userList/:id" element={<AdminUserOrder />} />
+
             <Route path="/admin/productList" element={<PrivateRoute><ProductListScreen /></PrivateRoute>} />
             <Route path="/admin/orderList" element={<PrivateRoute><AdminOrderScrren /></PrivateRoute>} />
             <Route path="/admin/Dashboard" element={<PrivateRoute><DashboardScreen /></PrivateRoute>} />
