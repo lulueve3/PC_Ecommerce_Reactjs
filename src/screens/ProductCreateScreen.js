@@ -8,6 +8,15 @@ import { createProduct } from '../action/productActions';
 import { Row, Col } from 'react-bootstrap';
 import axios from 'axios'
 import Select from 'react-select';
+import { EditorState, convertToRaw, ContentState } from 'draft-js';
+import { Editor } from 'react-draft-wysiwyg';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import { convertToHTML, convertFromHTML } from 'draft-convert';
+
+
+
+
+
 
 
 const ProductCreateScreen = () => {
@@ -23,7 +32,7 @@ const ProductCreateScreen = () => {
     } = productCreate;
 
     const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
+    const [description, setDescription] = useState('aabc');
     const [vendor, setVendor] = useState('');
     const [active, setActive] = useState(true);
     const [variants, setVariants] = useState([]);
@@ -34,7 +43,22 @@ const ProductCreateScreen = () => {
     const [selectedCollections, setSelectedCollections] = useState([]);
     const [listCollections, setListCollections] = useState([]);
 
+    const [editorState, setEditorState] = useState(() =>
+        EditorState.createEmpty()
+    );
 
+    const onEditorStateChange = (newEditorState) => {
+        setEditorState(newEditorState);
+    };
+
+    const convertHTML = () => {
+        const htmlContent = convertToHTML(editorState.getCurrentContent()); // Use convertToHTML
+        console.log(htmlContent);
+    }
+
+    useEffect(() => {
+        convertHTML()
+    }, [editorState])
 
     useEffect(() => {
         handleOptionChangeToVariant();
@@ -268,20 +292,21 @@ const ProductCreateScreen = () => {
                             required
                         />
                     </div>
-
-                    <div className='mb-3'>
+                    <div className='mb-3' style={{ height: '400px', background: '#f0f2d8', overflow: 'hidden' }}>
                         <label htmlFor='description' className='form-label'>
                             Description
                         </label>
-                        <textarea
-                            className='form-control'
-                            id='description'
-                            rows='3'
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            required
-                        ></textarea>
+                        <Editor
+                            editorState={editorState}
+                            onEditorStateChange={onEditorStateChange}
+                            wrapperClassName="wrapper-class"
+                            editorClassName="editor-class"
+                            toolbarClassName="toolbar-class"
+                            editorStyle={{ height: '300px', overflow: 'auto' }} // Adjust the height and overflow as needed
+                        />
                     </div>
+
+
 
                     <div className='mb-3'>
                         <label htmlFor='vendor' className='form-label'>
