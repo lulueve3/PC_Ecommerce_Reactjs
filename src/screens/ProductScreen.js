@@ -64,11 +64,19 @@ const ProductScreen = ({ }) => {
         }
     }, [product]);
 
+    function concatenateOptions() {
+        let { option1 = '', option2 = '', option3 = '' } = product.variants[selectedButton];
+        if (option1 === null) option1 = "";
+        if (option2 === null) option2 = "";
+        if (option3 === null) option3 = "";
+        return option1 + ' ' + option2 + ' ' + option3;
+    }
+
     const addToCartHandler = () => {
         dispatch(addToCart({
             productId: product.id,
             id: product.variants[selectedButton].id,
-            variant: product.variants[selectedButton].option1 + " " + product.variants[selectedButton].option2 + " " + product.variants[selectedButton].option3,
+            variant: concatenateOptions(),
             title: product.title,
             qty,
             price,

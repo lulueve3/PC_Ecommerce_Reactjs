@@ -13,6 +13,7 @@ import emailjs from '@emailjs/browser'
 
 const ITEMS_PER_PAGE = 5; // Adjust as needed
 const CartScreen = () => {
+    const [success, SetSuccess] = useState(false);
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
@@ -196,6 +197,8 @@ const CartScreen = () => {
 
             const removeFunctions = selectedItems.map(itemId => () => removeFromCartHandler(itemId));
 
+            SetSuccess(true);
+
             // Gọi các hàm removeFunctions trong một lệnh
             removeFunctions.forEach(removeFunction => removeFunction());
             toast.success('Checkout success!', {
@@ -214,17 +217,31 @@ const CartScreen = () => {
 
 
         } catch (error) {
-            console.log(error);
-            toast.error('Checkout faild!', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            console.log(error.response.data.message);
+            if (error.response.data.message === "Stock doesn't have enough quantity")
+
+                toast.error("Stock doesn't have enough quantity!", {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+
+            else
+                toast.error('Checkout faild!', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
         }
     }
 
@@ -309,7 +326,7 @@ const CartScreen = () => {
                 </Modal.Header>
                 <Modal.Body>
                     {/* Include the StripeContainer component inside the modal body */}
-                    <StripeContainer onSuccess={createOrder} amount={selectedItems?.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0).toFixed(3)} />
+                    <StripeContainer success={success} onSuccess={createOrder} amount={selectedItems?.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0).toFixed(3)} />
                 </Modal.Body>
             </Modal>
             <Row>

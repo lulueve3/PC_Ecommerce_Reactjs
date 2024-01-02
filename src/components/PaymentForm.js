@@ -46,8 +46,10 @@ const CARD_OPTIONS = {
     }
 }
 
-export default function PaymentForm({ amount, onSuccess }) {
-    const [success, setSuccess] = useState(false)
+export default function PaymentForm({ amount, onSuccess, success }) {
+    const [paymentSuccess, setPaymentSuccess] = useState(success || false);
+
+
     const stripe = useStripe()
     const elements = useElements()
 
@@ -81,7 +83,7 @@ export default function PaymentForm({ amount, onSuccess }) {
                 if (response.data === "Payment successful") {
                     console.log("Successful payment")
                     onSuccess();
-                    setSuccess(true)
+
                 }
                 else {
                     toast.error('Payment faild!, Try again', {
@@ -117,7 +119,7 @@ export default function PaymentForm({ amount, onSuccess }) {
     return (
         <>
             <ToastContainer />
-            {!success ?
+            {!paymentSuccess ?
                 <form onSubmit={handleSubmit}>
                     <fieldset className="FormGroup">
                         <h2>Total: {amount} $</h2>
