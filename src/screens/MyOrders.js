@@ -123,9 +123,9 @@ const MyOrders = () => {
                                     <td>
                                         {variant && (
                                             <>
-                                                {variant.option1 && <span>{variant.option1}</span>}
-                                                {variant.option2 && <span>{variant.option2}</span>}
-                                                {variant.option3 && <span>{variant.option3}</span>}
+                                                {variant.option1 && <span>{variant.option1 + "-"}</span>}
+                                                {variant.option2 && <span>{variant.option2 + "-"}</span>}
+                                                {variant.option3 && <span>{variant.option3 + "-"}</span>}
                                                 {!variant.option1 && !variant.option2 && !variant.option3 && <span>No Options</span>}
                                             </>
                                         )}
