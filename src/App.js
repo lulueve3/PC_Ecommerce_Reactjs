@@ -22,6 +22,9 @@ import MyOrders from './screens/MyOrders';
 import SearchScreen from './screens/SearchScreen';
 import AdminOrderScrren from './screens/AdminOrderScreen';
 import AdminUserOrder from './screens/AdminUserOrder'
+import BuildPcScreen from './screens/BuildPcScreen';
+import QnAPScreen from './screens/QnAScreen';
+import PostDetail from './screens/PostDetailScreen';
 
 
 
@@ -65,6 +68,9 @@ function App() {
             <Route path="/product/:id" element={<ProductScreen />} />
             <Route path="/login" element={<LoginScreen handleLoginLogout={handleLoginLogout} />} />
             <Route path="/cart/:id?" element={<CartScreen />} />
+            <Route path="/buid-pc" element={<BuildPcScreen />} />
+            <Route path="/QnA" element={<QnAPScreen />} />
+            <Route path="/PostDetail" element={<PostDetail />} />
             <Route path="/admin/userList" element={<UserListScreen />} />
             <Route path="/admin/userList/:id" element={<AdminUserOrder />} />
 

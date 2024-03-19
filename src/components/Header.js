@@ -78,8 +78,14 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                             <SearchBox />
                         </Nav>
                         <Nav className="ml-auto">
+                            <LinkContainer to='/buid-pc'>
+                                <Nav.Link ><i className='fas  fa-wrench'></i> Build PC</Nav.Link>
+                            </LinkContainer>
+                            <LinkContainer to='/QnA'>
+                                <Nav.Link ><i className='fas fa-question'></i> Q&A</Nav.Link>
+                            </LinkContainer>
                             <LinkContainer to='/cart'>
-                                <Nav.Link ><i className='fas fa fa-shopping-cart'></i> Giỏ Hàng</Nav.Link>
+                                <Nav.Link ><i className='fas fa fa-shopping-cart'></i> Cart</Nav.Link>
                             </LinkContainer>
                             {isLoggedIn ? (
                                 <NavDropdown title={user.e} id='username'>
