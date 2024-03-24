@@ -78,6 +78,9 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                             <SearchBox />
                         </Nav>
                         <Nav className="ml-auto">
+                            <LinkContainer to='/app'>
+                                <Nav.Link ><i className='fas  fa-wrench'></i> App</Nav.Link>
+                            </LinkContainer>
                             <LinkContainer to='/buid-pc'>
                                 <Nav.Link ><i className='fas  fa-wrench'></i> Build PC</Nav.Link>
                             </LinkContainer>

@@ -25,6 +25,7 @@ import AdminUserOrder from './screens/AdminUserOrder'
 import BuildPcScreen from './screens/BuildPcScreen';
 import QnAPScreen from './screens/QnAScreen';
 import PostDetail from './screens/PostDetailScreen';
+import AppScreen from './screens/AppScreen';
 
 
 
@@ -70,6 +71,8 @@ function App() {
             <Route path="/cart/:id?" element={<CartScreen />} />
             <Route path="/buid-pc" element={<BuildPcScreen />} />
             <Route path="/QnA" element={<QnAPScreen />} />
+            <Route path="/App" element={<AppScreen />} />
+
             <Route path="/PostDetail" element={<PostDetail />} />
             <Route path="/admin/userList" element={<UserListScreen />} />
             <Route path="/admin/userList/:id" element={<AdminUserOrder />} />
