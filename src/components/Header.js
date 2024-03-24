@@ -124,6 +124,9 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                     <LinkContainer to='/admin/orderList'>
                                         <NavDropdown.Item>Orders</NavDropdown.Item>
                                     </LinkContainer>
+                                    <LinkContainer to='/exchange/tasks'>
+                                        <NavDropdown.Item>Exchange</NavDropdown.Item>
+                                    </LinkContainer>
                                 </NavDropdown>
                             )}
 

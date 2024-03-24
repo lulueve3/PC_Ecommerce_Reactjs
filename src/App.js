@@ -26,6 +26,9 @@ import BuildPcScreen from './screens/BuildPcScreen';
 import QnAPScreen from './screens/QnAScreen';
 import PostDetail from './screens/PostDetailScreen';
 import AppScreen from './screens/AppScreen';
+import ExchangePage from './screens/ExchangeScreen';
+import TaskPage from './components/TaskPage';
+import RedeemPage from './components/RedeemPage';
 
 
 
@@ -72,6 +75,9 @@ function App() {
             <Route path="/buid-pc" element={<BuildPcScreen />} />
             <Route path="/QnA" element={<QnAPScreen />} />
             <Route path="/App" element={<AppScreen />} />
+            <Route path="/Exchange" element={<ExchangePage />} />
+            <Route path="/exchange/tasks" element={<TaskPage />} />
+            <Route path="/exchange/redeem" element={<RedeemPage />} />
 
             <Route path="/PostDetail" element={<PostDetail />} />
             <Route path="/admin/userList" element={<UserListScreen />} />
