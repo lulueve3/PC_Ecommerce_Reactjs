@@ -12,10 +12,29 @@ const CreatePostForm = ({ handleCreatePost }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" />
-            <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Content"></textarea>
-            <button type="submit">Create Post</button>
+        <form onSubmit={handleSubmit} className="container">
+            <div className="form-group">
+                <label htmlFor="title">Title</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Title"
+                />
+            </div>
+            <div className="form-group">
+                <label htmlFor="content">Content</label>
+                <textarea
+                    className="form-control"
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Content"
+                ></textarea>
+            </div>
+            <button type="submit" className="btn btn-primary">Create Post</button>
         </form>
     );
 };

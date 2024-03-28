@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Pagination, Modal, Button } from 'react-bootstrap';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
+
 import axios from 'axios';
 
 const AdminOrderScrren = () => {
@@ -9,6 +11,118 @@ const AdminOrderScrren = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [productDetails, setProductDetails] = useState([]);
+    const [filterStatus, setFilterStatus] = useState("All"); // Thêm state để lưu trữ trạng thái lọc
+    const [orderCounts, setOrderCounts] = useState([
+        { status: "New", count: 0 },
+        { status: "Accept", count: 0 },
+        { status: "Shipping", count: 0 },
+        { status: "Done", count: 0 }
+    ]);
+
+    // Tính số lượng đơn hàng ở mỗi trạng thái
+    useEffect(() => {
+        const countOrdersByStatus = () => {
+            const counts = [
+                { status: "New", count: 0 },
+                { status: "Accept", count: 0 },
+                { status: "Shipping", count: 0 },
+                { status: "Done", count: 0 }
+            ];
+
+            orders.forEach(order => {
+                const index = counts.findIndex(item => item.status === order.status);
+                if (index !== -1) {
+                    counts[index].count++;
+                }
+            });
+
+            setOrderCounts(counts);
+        };
+
+        countOrdersByStatus();
+    }, [orders]);
+
+
+    const filterOrdersByStatus = (status) => {
+        if (status === "All") {
+            setOrders(sampleOrders); // Hiển thị tất cả đơn hàng nếu lọc theo "All"
+        } else {
+            const filteredOrders = sampleOrders.filter(order => order.status === status);
+            setOrders(filteredOrders); // Hiển thị đơn hàng phù hợp với trạng thái được chọn
+        }
+    };
+
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    const sampleOrders = [
+        {
+            id: 1,
+            address: {
+                first_name: "John",
+                last_name: "Doe"
+            },
+            line_items: [
+                {
+                    productId: 1,
+                    variantId: 1,
+                    price: 10,
+                    quantity: 2
+                },
+                {
+                    productId: 2,
+                    variantId: 1,
+                    price: 15,
+                    quantity: 1
+                }
+            ],
+            created_time: "2024-03-27 10:00:00",
+            status: "New" // Thêm trạng thái cho đơn hàng mới
+        },
+        {
+            id: 2,
+            address: {
+                first_name: "Jane",
+                last_name: "Smith"
+            },
+            line_items: [
+                {
+                    productId: 3,
+                    variantId: 1,
+                    price: 20,
+                    quantity: 3
+                }
+            ],
+            created_time: "2024-03-26 14:30:00",
+            status: "New" // Thêm trạng thái cho đơn hàng mới
+        },
+        // Add more sample orders here...
+    ];
+
+    const changeOrderStatus = (orderId, newStatus) => {
+        setOrders(prevOrders =>
+            prevOrders.map(order =>
+                order.id === orderId ? { ...order, status: newStatus } : order
+            )
+        );
+    };
+
+    const getOrderStatusColor = (status) => {
+        switch (status) {
+            case "New":
+                return "yellow";
+            case "Accept":
+                return "purple";
+            case "Shipping":
+                return "orange";
+            case "Done":
+                return "green";
+            default:
+                return "";
+        }
+    };
+
 
 
     const fetchOrders = async (page = 0, size = 10) => {
@@ -20,9 +134,11 @@ const AdminOrderScrren = () => {
                 }
             });
 
-            setOrders(response.data.results);
+            //setOrders(response.data.results);
+
             setTotalPages(response.data.page.totalPages);
         } catch (error) {
+            setOrders(sampleOrders)
             console.error('Error fetching orders:', error);
         }
     };
@@ -202,6 +318,15 @@ const AdminOrderScrren = () => {
     return (
         <div>
             <h2>My Orders</h2>
+            {/* Dropdown để lọc theo trạng thái */}
+            <DropdownButton id="filter-dropdown" title={`Filter by Status: ${filterStatus}`}>
+                <Dropdown.Item onClick={() => setFilterStatus("All")}>All</Dropdown.Item>
+                {orderCounts.map((item, index) => (
+                    <Dropdown.Item key={index} onClick={() => setFilterStatus(item.status)}>
+                        {item.status} ({item.count})
+                    </Dropdown.Item>
+                ))}
+            </DropdownButton>
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -215,20 +340,35 @@ const AdminOrderScrren = () => {
                 </thead>
                 <tbody>
                     {orders?.map(order => (
-                        <tr key={order.id}>
+                        <tr key={order.id} style={{ backgroundColor: getOrderStatusColor(order.status) }}>
                             <td>{order.id}</td>
                             <td>{order.address.first_name + " " + order.address.last_name}</td>
                             <td>{totalOrderById(order.id)}</td>
                             <td>{order.created_time}</td>
                             <td>
-                                <Button variant="info" onClick={() => handleViewDetails(order.id)}>
-                                    View Details
-                                </Button>
+                                <DropdownButton id={`dropdown-button-${order.id}`} title={order.status}>
+                                    {order.status === "New" && (
+                                        <>
+                                            <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Accept")}>Accept</Dropdown.Item>
+                                            <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Cancel")}>Cancel</Dropdown.Item>
+                                        </>
+                                    )}
+                                    {order.status === "Accept" && (
+                                        <>
+                                            <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Shipping")}>Shipping</Dropdown.Item>
+                                            <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Cancel")}>Cancel</Dropdown.Item>
+                                        </>
+                                    )}
+                                    {order.status === "Shipping" && (
+                                        <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Done")}>Done</Dropdown.Item>
+                                    )}
+                                </DropdownButton>
                             </td>
                             {/* Thêm các cột khác tùy thuộc vào dữ liệu đơn hàng */}
                         </tr>
                     ))}
                 </tbody>
+
             </Table>
 
             <div className='d-flex justify-content-center'>
