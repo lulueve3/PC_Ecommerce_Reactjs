@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Card, Form, Button, Row, Col, Modal } from 'react-bootstrap';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import axios from 'axios';
+import localData from "./address.json"
 
 const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, onSave }) => {
     const [editedAddress, setEditedAddress] = useState({ ...address });
@@ -18,64 +19,38 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
     const [wards, setWards] = useState([]);
 
 
-
-    const host = "https://provinces.open-api.vn/api/";
-
-    const callAPI = async (api, callback) => {
-        try {
-            const response = await axios.get(api);
-            callback(response.data);
-        } catch (error) {
-            console.error('Error calling API:', error);
-        }
-    };
-
     useEffect(() => {
+        const cityMap = {};
+        const districtMap = {};
+        const wardMap = {};
 
+        localData.forEach(item => {
+            cityMap[item.CityCode] = item.CityName;
+            if (item.CityCode.toString() === selectedCity.toString()) {
 
-        callAPI(`${host}?depth=1`, setCities);
-    }, []);
-
-    const handleCityChange = (event, index) => {
-        const cityCode = event.target.value;
-        callApiDistrict(`${host}p/${cityCode}?depth=2`, (data) => {
-            // const updatedAddresses = [...editedAddresses];
-            // updatedAddresses[index].districts = data.districts;
-            // updatedAddresses[index].city = cityCode;
-            // setEditedAddresses(updatedAddresses);
+                districtMap[item.DistrictCode] = item.DistrictName;
+            }
+            if (item.DistrictCode.toString() === selectedDistrict.toString()) {
+                wardMap[item.WardCode] = item.WardName;
+            }
         });
 
+        setCities(Object.entries(cityMap).map(([code, name]) => ({ code, name })));
+        setDistricts(Object.entries(districtMap).map(([code, name]) => ({ code, name })));
+        setWards(Object.entries(wardMap).map(([code, name]) => ({ code, name })));
+    }, [selectedCity, selectedDistrict]);
+
+    const handleCityChange = (event) => {
+        const code = event.target.value;
+        setSelectedCity(code);
+        setSelectedDistrict('');
+        setWards([]);
     };
 
-    const handleDistrictChange = (event, index) => {
-        const districtCode = event.target.value;
-        callApiWard(`${host}d/${districtCode}?depth=2`, (data) => {
-            // const updatedAddresses = [...editedAddresses];
-            // updatedAddresses[index].wards = data.wards;
-            // updatedAddresses[index].district = districtCode;
-            // setEditedAddresses(updatedAddresses);
-        });
+    const handleDistrictChange = (event) => {
+        const code = event.target.value;
+        setSelectedDistrict(code);
     };
-
-    const handleWardChange = (event, index) => {
-        const wardCode = event.target.value;
-        // const updatedAddresses = [...editedAddresses];
-        // updatedAddresses[index].ward = wardCode;
-        // setEditedAddresses(updatedAddresses);
-    };
-
-    const callApiWard = (api, callback) => {
-        callAPI(api, (data) => {
-            setWards(data.wards);
-        });
-    };
-
-    const callApiDistrict = (api, callback) => {
-        callAPI(api, (data) => {
-            setDistricts(data.districts);
-        });
-    };
-
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -159,40 +134,39 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                                 min={10}
                             />
                         </Form.Group>
+                        <Form.Group controlId="formPhone">
+                            <Form.Label>Street</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="street"
+                                value={editedAddress.street}
+                                onChange={handleInputChange}
+                                required
+                                min={10}
+                            />
+                        </Form.Group>
                         {/* Add more form fields for other address properties */}
                         <Form.Group controlId="formCity">
                             <Form.Label>City</Form.Label>
-                            <select
-                                value={selectedCity}
-                                onChange={(e) => {
-                                    setSelectedCity(e.target.value);
-                                    handleCityChange(e);
-                                }}
-                            >
-                                <option value="" disabled>
-                                    Chọn tỉnh thành
+                            <select onChange={handleCityChange} value={selectedCity}>
+                                <option value="">
+                                    Choose city
                                 </option>
-                                {cities.map((city) => (
+                                {cities.map(city => (
+
                                     <option key={city.code} value={city.code}>
                                         {city.name}
                                     </option>
                                 ))}
                             </select>
+
                         </Form.Group>
 
                         <Form.Group controlId="formDistrict">
                             <Form.Label>District</Form.Label>
-                            <select
-                                value={selectedDistrict}
-                                onChange={(e) => {
-                                    setSelectedDistrict(e.target.value);
-                                    handleDistrictChange(e);
-                                }}
-                            >
-                                <option value="" disabled>
-                                    Chọn quận huyện
-                                </option>
-                                {districts.map((district) => (
+                            <select onChange={handleDistrictChange} value={selectedDistrict}>
+
+                                {districts.map(district => (
                                     <option key={district.code} value={district.code}>
                                         {district.name}
                                     </option>
@@ -206,12 +180,9 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                                 value={selectedWard}
                                 onChange={(e) => {
                                     setSelectedWard(e.target.value);
-                                    handleWardChange(e);
                                 }}
                             >
-                                <option value="" disabled>
-                                    Chọn phường xã
-                                </option>
+
                                 {wards.map((ward) => (
                                     <option key={ward.code} value={ward.code}>
                                         {ward.name}

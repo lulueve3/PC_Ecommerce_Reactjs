@@ -14,7 +14,7 @@ const UserProfile = () => {
 
     const [user, setUser] = useState({});
 
-    const [addresses, setAddresses] = useState([{ lastName: "hải", phone: "123", address: "việt nam" }])
+    const [addresses, setAddresses] = useState([{ lastName: "hải", phone: "123", address: "việt nam" }, { lastName: "hải", phone: "123", address: "việt nam" }])
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [editedAddressIndex, setEditedAddressIndex] = useState(null);
@@ -25,6 +25,10 @@ const UserProfile = () => {
         setShowEditModal(true);
     };
 
+    const handleAddNewAddress = () => {
+        setEditedAddressIndex(null); // No index since it's a new address
+        setShowEditModal(true);
+    };
     const handleSaveEditedAddress = (editedAddress) => {
         // Update the user's addresses array with the edited address
         const updatedAddresses = [...addresses];
@@ -76,6 +80,11 @@ const UserProfile = () => {
 
     const handleSaveProfile = () => {
         console.log(user);
+    };
+
+    const addressStyle = {
+        fontFamily: 'Arial, sans-serif', // This is a widely available, readable font
+        fontSize: '16px' // This size is generally readable for most users
     };
 
     return (
@@ -156,12 +165,56 @@ const UserProfile = () => {
                     </Accordion.Body>
                 </Accordion.Item>
 
+                <Accordion.Item eventKey="2">
+                    <Accordion.Header style={{ fontSize: '24px', width: '100%' }}>
+                        Address
+                    </Accordion.Header>
+                    <Accordion.Body>
+                        <Container className="mt-4">
+                            <Card>
+                                <Card.Body>
+                                    <Button variant="primary" className="mb-3" onClick={handleAddNewAddress}>
+                                        Add New Address
+                                    </Button>
+                                    <div>
+                                        {addresses.map((address, index) => (
+                                            <>
+                                                <div key={index} className="mb-2 d-flex justify-content-between">
+                                                    <div>
+                                                        <p style={addressStyle}>{address.lastName}</p>
+                                                        <p style={addressStyle}>{address.phone}</p>
+                                                        <p style={addressStyle}>{address.address}</p>
+                                                    </div>
+                                                    <div>
+                                                        <Button variant="secondary" onClick={() => handleEditAddress(index)}>
+                                                            Edit
+                                                        </Button>
+                                                        {' '}
+                                                        <Button variant="danger" onClick={() => handleRemoveAddress(index)}>
+                                                            Delete
+                                                        </Button>
+                                                    </div>
+
+                                                </div>
+                                                <hr />
+                                            </>
+
+
+                                        ))}
+
+                                    </div>
+                                </Card.Body>
+                            </Card>
+                        </Container>
+                    </Accordion.Body>
+                </Accordion.Item>
+
 
             </Accordion>
 
             {showEditModal && (
                 <EditAddress
-                    address={addresses[editedAddressIndex]}
+                    address={editedAddressIndex !== null ? addresses[editedAddressIndex] : {}}
                     onSave={handleSaveEditedAddress}
                     onCancel={handleCancelEdit}
                 />
