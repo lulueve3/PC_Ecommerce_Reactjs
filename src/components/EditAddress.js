@@ -83,7 +83,6 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
 
     const handleSave = () => {
         // Kiểm tra xem các trường có giá trị không
-        console.log(selectedCity);
         if (selectedCity && selectedCity && selectedWard) {
             onSave([{
                 ...editedAddress,

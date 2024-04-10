@@ -122,7 +122,7 @@ const ProductCreateScreen = () => {
     };
 
 
-    const optionsCollection = listCollections.map(collection => ({
+    const optionsCollection = listCollections?.map(collection => ({
         value: collection.id,
         label: collection.title,
     }));
@@ -161,27 +161,8 @@ const ProductCreateScreen = () => {
     };
 
     function getVariantName(variant) {
-        console.log(variant);
-        const optionNames = Object.keys(variant)
-            .filter(key => key.startsWith('option'))
-            .map(key => variant[key].trim());
-
-        const result = optionNames.join('-').trim();
-
-        // Check if the last character is a hyphen and remove it
-        if (result.endsWith('--')) {
-            return result.slice(0, -2);
-
-        }
-        if (result.endsWith('-')) {
-            return result.slice(0, -1);
-
-        }
-
-
-
-
-        return result;
+        // Lọc ra các chuỗi không rỗng và nối chúng lại với nhau bằng dấu gạch ngang
+        return variant.options.filter(option => option).join('-');
     }
 
 
@@ -189,25 +170,29 @@ const ProductCreateScreen = () => {
 
     const handleOptionChangeToVariant = () => {
         if (options.length > 0) {
-            const result = [{ option1: "", option2: "", option3: "", price: 1, quantity: 1 }];
+            let result = [{ options: [], price: 1, quantity: 1 }];
 
-            // Duyệt qua mỗi option
+            // Iterate over each option
             options.forEach((option, index) => {
-                // Tạo mảng mới chứa các biến thể dựa trên giá trị của option
-                const newVariants = [];
+                // Create a new array to hold the variants based on the option's values
+                let newVariants = [];
 
-                // Duyệt qua mỗi giá trị của option và tạo variants
-                option.values.forEach((value) => {
-                    // Sao chép và mở rộng mỗi phần tử trong mảng kết quả
-                    newVariants.push(...result.map((variant) => ({
-                        ...variant,
-                        [`option${index + 1}`]: variant[`option${index + 1}`] ? `${variant[`option${index + 1}`]}-${value}` : value,
-                    })));
+                // Iterate over each value of the option to create variants
+                option.values.forEach(value => {
+                    if (index === 0) {
+                        // Initialize the variants with the first option's values
+                        newVariants.push({ options: [value], price: 1, quantity: 1 });
+                    } else {
+                        // Copy and extend each variant for the subsequent options
+                        newVariants = newVariants.concat(result.map(variant => ({
+                            ...variant,
+                            options: [...variant.options, value]
+                        })));
+                    }
                 });
 
-                // Gán mảng variants mới cho biến kết quả
-                result.length = 0;
-                result.push(...newVariants);
+                // Replace the result with the newly created variants
+                result = newVariants;
             });
 
             setVariants(result);
@@ -380,7 +365,7 @@ const ProductCreateScreen = () => {
                                 <Select
                                     isMulti
                                     options={optionsCollection}
-                                    value={optionsCollection.filter(option => selectedCollections.includes(option.value))}
+                                    value={optionsCollection?.filter(option => selectedCollections.includes(option.value))}
                                     onChange={handleCollectionChange}
                                 />
                             </div>
@@ -467,7 +452,7 @@ const ProductCreateScreen = () => {
 
 
                                 {/* Add button to add more options */}
-                                {options.length < 3 && (
+                                {options.length >= 0 && (
                                     <button
                                         type='button'
                                         className='btn btn-secondary'
@@ -478,7 +463,7 @@ const ProductCreateScreen = () => {
                                 )}
 
 
-                                {variants[0]?.option1 && variants.map((variant, index) => (
+                                {variants.length > 1 && variants.map((variant, index) => (
                                     <div key={index} className='mb-3'>
                                         <h5>Variant: {getVariantName(variant)}</h5>
 
