@@ -5,7 +5,7 @@ import Message from '../components/Message';
 import Loader from '../components/Loader';
 import FormContainer from '../components/FormContainer';
 import { listProductDetail, updateProduct, } from '../action/productActions';
-import { Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify';
 import Select from 'react-select';
@@ -200,19 +200,21 @@ const ProductEditScreen = () => {
         if (!updatedVariants[index]) {
             // If the index doesn't exist, add a new variant
             updatedVariants[index] = {
-                option1: "",  // Replace with your default values
-                option2: "",
-                option3: "",
+                options: [""],
                 price: 1,
                 quantity: 1,
+                compareAtPrice: 0
             };
         }
 
         // Check if the 'price' or 'quantity' field exists before setting its value
         if ((field === 'price' || field === 'quantity') && (value >= 1 || value === '')) {
-            updatedVariants[index][field] = Number(value);
-        } else {
             updatedVariants[index][field] = value;
+        } else {
+            if (field === 'compareAtPrice' && value >= 0)
+                updatedVariants[index][field] = value;
+            else
+                updatedVariants[index][field] = 1;
         }
 
         setVariants(updatedVariants);
@@ -227,19 +229,9 @@ const ProductEditScreen = () => {
     };
 
     function getVariantName(variant) {
-
-        const optionNames = Object.keys(variant)
-            .filter(key => key.startsWith('option'))
-            .map(key => variant[key]);
-
-        const result = optionNames.join('-');
-
-        // Check if the last character is a hyphen and remove it
-        if (result.endsWith('-')) {
-            return result.slice(0, -1);
-        }
-
-        return result;
+        console.log(variant);
+        // Lọc ra các chuỗi không rỗng và nối chúng lại với nhau bằng dấu gạch ngang
+        return variant.options.filter(option => option).join('-');
     }
 
 
@@ -247,25 +239,29 @@ const ProductEditScreen = () => {
 
     const handleOptionChangeToVariant = () => {
         if (options.length > 0) {
-            const result = [{ option1: "", option2: "", option3: "", price: 1, quantity: 1 }];
+            let result = [{ options: [], price: 1, quantity: 1, compareAtPrice: 0 }];
 
-            // Duyệt qua mỗi option
+            // Iterate over each option
             options.forEach((option, index) => {
-                // Tạo mảng mới chứa các biến thể dựa trên giá trị của option
-                const newVariants = [];
+                // Create a new array to hold the variants based on the option's values
+                let newVariants = [];
 
-                // Duyệt qua mỗi giá trị của option và tạo variants
-                option.values.forEach((value) => {
-                    // Sao chép và mở rộng mỗi phần tử trong mảng kết quả
-                    newVariants.push(...result.map((variant) => ({
-                        ...variant,
-                        [`option${index + 1}`]: variant[`option${index + 1}`] ? `${variant[`option${index + 1}`]}-${value}` : value,
-                    })));
+                // Iterate over each value of the option to create variants
+                option.values.forEach(value => {
+                    if (index === 0) {
+                        // Initialize the variants with the first option's values
+                        newVariants.push({ options: [value], price: 1, quantity: 1, compareAtPrice: 0 });
+                    } else {
+                        // Copy and extend each variant for the subsequent options
+                        newVariants = newVariants.concat(result.map(variant => ({
+                            ...variant,
+                            options: [...variant.options, value]
+                        })));
+                    }
                 });
 
-                // Gán mảng variants mới cho biến kết quả
-                result.length = 0;
-                result.push(...newVariants);
+                // Replace the result with the newly created variants
+                result = newVariants;
             });
 
             setVariants(result);
@@ -273,6 +269,7 @@ const ProductEditScreen = () => {
             setVariants([]);
         }
     };
+
 
     useEffect(() => {
         if (selectImage !== null) {
@@ -452,235 +449,246 @@ const ProductEditScreen = () => {
 
     return (
         <>
-            <ToastContainer />
-            <Link to='/admin/productlist' className='btn btn-light my-3'>
-                Go Back
-            </Link>
-            <FormContainer>
-                <h1>Edit Product</h1>
+            <div>
+                <ToastContainer />
+                <Link to='/admin/productlist' className='btn btn-light my-3'>
+                    Go Back
+                </Link>
+                <div className='text-center'><h1>Create Product</h1></div>
                 {loadingUpdate && <Loader />}
                 {errorUpdate && <Message variant='danger'>{errorUpdate}</Message>}
                 <form onSubmit={submitHandler}>
-                    <div className='mb-3'>
-                        <label htmlFor='title' className='form-label'>
-                            Title
-                        </label>
-                        <input
-                            type='text'
-                            className='form-control'
-                            id='title'
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            required
-                        />
-                    </div>
+                    <Card className='mb-3'>
+                        <Card.Body>
+                            <Card.Title>Product Information</Card.Title>
+                            <div className='mb-3'>
+                                <label htmlFor='title' className='form-label'>
+                                    Title
+                                </label>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    id='title'
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className='mb-3' style={{ height: '400px', background: '#FAFAFA', overflow: 'hidden' }}>
+                                <label htmlFor='description' className='form-label'>
+                                    Description
+                                </label>
+                                <Editor
+                                    editorState={editorState}
+                                    onEditorStateChange={onEditorStateChange}
+                                    wrapperClassName="wrapper-class"
+                                    editorClassName="editor-class"
+                                    toolbarClassName="toolbar-class"
+                                    editorStyle={{ height: '300px', overflow: 'auto' }} // Adjust the height and overflow as needed
+                                />
+                            </div>
 
-                    <div className='mb-3' style={{ height: '400px', background: '#f0f2d8', overflow: 'hidden' }}>
-                        <label htmlFor='description' className='form-label'>
-                            Description
-                        </label>
-                        <Editor
-                            editorState={editorState}
-                            onEditorStateChange={onEditorStateChange}
-                            wrapperClassName="wrapper-class"
-                            editorClassName="editor-class"
-                            toolbarClassName="toolbar-class"
-                            editorStyle={{ height: '300px', overflow: 'auto' }} // Adjust the height and overflow as needed
-                        />
-                    </div>
 
-                    <div className='mb-3'>
-                        <label htmlFor='vendor' className='form-label'>
-                            Vendor
-                        </label>
-                        <input
-                            type='text'
-                            className='form-control'
-                            id='vendor'
-                            value={vendor}
-                            onChange={(e) => setVendor(e.target.value)}
-                            required
-                        />
-                    </div>
 
-                    <div className='mb-3'>
-                        <div className='form-check'>
-                            <input
-                                className='form-check-input'
-                                type='checkbox'
-                                id='active'
-                                checked={active}
-                                onChange={(e) => setActive(e.target.checked)}
-                            />
-                            <label className='form-check-label' htmlFor='active'>
-                                Active
-                            </label>
-                        </div>
-                    </div>
-
-                    <input type='file' onChange={(e) => handleImageChange(e)} multiple />
-                    {!images || images.length === 0 ? null : (
-                        <div>
-                            {images.map((image) => (
-                                <div key={image.id}>
-                                    <img
-                                        src={image.src}
-                                        alt={`Uploaded Image ${image.id + 1}`}
-                                        style={{ width: '150px', height: '150px', marginRight: '10px' }}
+                            <div className='mb-3'>
+                                <label htmlFor='vendor' className='form-label'>
+                                    Vendor
+                                </label>
+                                <input
+                                    type='text'
+                                    className='form-control'
+                                    id='vendor'
+                                    value={vendor}
+                                    onChange={(e) => setVendor(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className='mb-3'>
+                                <div className='form-check'>
+                                    <input
+                                        className='form-check-input'
+                                        type='checkbox'
+                                        id='active'
+                                        checked={active}
+                                        onChange={(e) => setActive(e.target.checked)}
                                     />
-                                    <button onClick={(e) => handleRemoveImage(e, image.id)}>Remove</button>
+                                    <label className='form-check-label' htmlFor='active'>
+                                        Active
+                                    </label>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            </div>
+                        </Card.Body>
+                    </Card>
+
+
+
+                    <Card className='mb-3'>
+                        <Card.Body>
+                            <div className='mb-3'>
+                                <input type='file' onChange={(e) => handleImageChange(e)} multiple />
+                                {!images || images.length === 0 ? null : (
+                                    <div>
+                                        {images.map((image, index) => (
+                                            <div key={index}>
+                                                <img
+                                                    src={image.src}
+                                                    alt={`Uploaded Image ${index + 1}`}
+                                                    style={{ width: '150px', height: '150px', marginRight: '10px' }}
+                                                />
+                                                <button onClick={() => handleRemoveImage(index)}>Remove</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </Card.Body>
+                    </Card>
+
 
                     <br />
-                    <div>
-                        <h3>List of Collections</h3>
-                        <Select
-                            isMulti
-                            options={optionsCollection}
-                            value={optionsCollection.filter(option => selectedCollections.includes(option.value))}
-                            onChange={handleCollectionChange}
-                        />
-
-                    </div>
-
-
-                    {options.length === 0 && (
-                        <div className='mb-3'>
-                            <h5>Default Variant</h5>
-
-                            <Row className='mb-3'>
-                                <Col xs={12} md={5}>
-                                    <label htmlFor={`variantPriceDefault`} className='form-label'>
-                                        Price
-                                    </label>
-                                    <input
-                                        type='number'
-                                        className='form-control'
-                                        id={`variantPriceDefault`}
-                                        value={(variants[0] && variants[0].price) || 1}  // Check if variants[0] exists before accessing price
-                                        onChange={(e) => handleVariantChange(0, 'price', e.target.value)}
-
-                                        required
-                                    />
-                                </Col>
-                                <Col xs={12} md={4}>
-                                    <label htmlFor={`variantQuantityDefault`} className='form-label'>
-                                        Quantity
-                                    </label>
-                                    <input
-                                        type='number'
-                                        className='form-control'
-                                        id={`variantQuantityDefault`}
-                                        value={(variants[0] && variants[0].quantity) || 1}  // Check if variants[0] exists before accessing quantity
-                                        onChange={(e) => handleVariantChange(0, 'quantity', e.target.value)}
-                                        min={1}
-                                        required
-                                    />
-                                </Col>
-                            </Row>
-                        </div>
-                    )}
-
-                    {options.length > 0 && options.map((option, index) => (
-                        <div key={index} className='mb-3'>
-                            <h5>Option {index + 1}</h5>
+                    <Card className='mb-3'>
+                        <Card.Body>
                             <div className='mb-3'>
-                                <label htmlFor={`optionName${index}`} className='form-label'>
-                                    Name
-                                </label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    id={`optionName${index}`}
-                                    value={option.name}
-                                // onChange={(e) => handleOptionChange(index, 'name', e.target.value)}
+                                <h3>List of Collections</h3>
+                                <Select
+                                    isMulti
+                                    options={optionsCollection}
+                                    value={optionsCollection?.filter(option => selectedCollections.includes(option.value))}
+                                    onChange={handleCollectionChange}
                                 />
                             </div>
+                        </Card.Body>
+                    </Card>
+
+                    <Card className='mb-3'>
+                        <Card.Body>
                             <div className='mb-3'>
-                                <label htmlFor={`optionValues${index}`} className='form-label'>
-                                    Values (comma-separated)
-                                </label>
-                                <input
-                                    type='text'
-                                    className='form-control'
-                                    id={`optionValues${index}`}
-                                    value={option.values.join(',')}
-                                // onChange={(e) => handleOptionChange(index, 'values', e.target.value.split(','))}
-                                />
+                                {options.length === 0 && (
+                                    <div className='mb-3'>
+                                        <h5>Default Variant</h5>
+
+                                        <Row className='mb-3'>
+                                            <Col xs={12} md={3}>
+                                                <label htmlFor={`variantPriceDefault`} className='form-label'>
+                                                    Price
+                                                </label>
+                                                <input
+                                                    type='number'
+                                                    className='form-control'
+                                                    id={`variantPriceDefault`}
+                                                    value={(variants[0] && variants[0].price) || 1}  // Check if variants[0] exists before accessing price
+                                                    onChange={(e) => handleVariantChange(0, 'price', e.target.value)}
+                                                    onClick={(e) => e.target.select()}
+                                                    required
+                                                />
+                                            </Col>
+                                            <Col xs={12} md={3}>
+                                                <label htmlFor={`variantPriceDefault`} className='form-label'>
+                                                    Compare-at price
+                                                </label>
+                                                <input
+                                                    type='number'
+                                                    className='form-control'
+                                                    id={`variantPriceDefault`}
+                                                    value={(variants[0] && variants[0].compareAtPrice) || 0}
+                                                    onChange={(e) => handleVariantChange(0, 'compareAtPrice', e.target.value)}
+                                                    onClick={(e) => e.target.select()}
+                                                    min={0}
+                                                    required
+                                                />
+                                            </Col>
+                                            <Col xs={12} md={2}>
+                                                <label htmlFor={`variantQuantityDefault`} className='form-label'>
+                                                    Quantity
+                                                </label>
+                                                <input
+                                                    type='number'
+                                                    className='form-control'
+                                                    id={`variantQuantityDefault`}
+                                                    value={(variants[0] && variants[0].quantity) || 1}  // Check if variants[0] exists before accessing quantity
+                                                    onChange={(e) => handleVariantChange(0, 'quantity', e.target.value)}
+                                                    min={1}
+                                                    onClick={(e) => e.target.select()}
+                                                    required
+                                                />
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                )}
+
+
+
+
+
+                                {variants.length > 1 && variants.map((variant, index) => (
+                                    <div key={index} className='mb-3'>
+                                        <h5>Variant: {getVariantName(variant)}</h5>
+
+                                        <Row className='mb-3'>
+                                            <Col xs={12} md={3}>
+                                                <label htmlFor={`variantPrice${index}`} className='form-label'>
+                                                    Price
+                                                </label>
+                                                <input
+                                                    type='number'
+                                                    className='form-control'
+                                                    id={`variantPrice${index}`}
+                                                    value={variant.price}
+                                                    onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
+                                                    min={1}
+                                                    onClick={(e) => e.target.select()}
+
+                                                    required
+                                                />
+                                            </Col>
+                                            <Col xs={12} md={3}>
+                                                <label htmlFor={`variantPrice${index}`} className='form-label'>
+                                                    Compare-at price
+                                                </label>
+                                                <input
+                                                    type='number'
+                                                    className='form-control'
+                                                    id={`variantPrice${index}`}
+                                                    value={variant.compareAtPrice}
+                                                    onChange={(e) => handleVariantChange(index, 'compareAtPrice', e.target.value)}
+                                                    min={1}
+                                                    onClick={(e) => e.target.select()}
+
+                                                    required
+                                                />
+                                            </Col>
+                                            <Col xs={12} md={2}>
+                                                <label htmlFor={`variantQuantity${index}`} className='form-label'>
+                                                    Quantity
+                                                </label>
+                                                <input
+                                                    type='number'
+                                                    className='form-control'
+                                                    id={`variantQuantity${index}`}
+                                                    value={variant.quantity}
+                                                    onChange={(e) => handleVariantChange(index, 'quantity', e.target.value)}
+                                                    min={1}
+                                                    onClick={(e) => e.target.select()}
+
+                                                    required
+                                                />
+                                            </Col>
+
+
+                                        </Row>
+                                    </div>
+                                ))}
                             </div>
-                            {/* Add button to remove option */}
-                            {/* <button
-                                type='button'
-                                className='btn btn-danger'
-                                onClick={() => handleRemoveOption(index)}
-                            >
-                                Remove Option
-                            </button> */}
-                        </div>
-                    ))}
-
-
-                    {/* Add button to add more options */}
-                    {/* {options.length < 3 && (
-                        <button
-                            type='button'
-                            className='btn btn-secondary'
-                            onClick={() => setOptions([...options, { name: '', values: [] }])}
-                        >
-                            Add Option
-                        </button>
-                    )} */}
-
-
-                    {variants[0]?.option1 !== null && variants[0]?.option1 !== "" && variants.map((variant, index) => (
-                        <div key={index} className='mb-3'>
-                            <h5>Variant: {getVariantName(variant)}</h5>
-
-                            <Row className='mb-3'>
-                                <Col xs={12} md={5}>
-                                    <label htmlFor={`variantPrice${index}`} className='form-label'>
-                                        Price
-                                    </label>
-                                    <input
-                                        type='number'
-                                        className='form-control'
-                                        id={`variantPrice${index}`}
-                                        value={variant.price}
-                                        onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
-                                        min={1}
-                                        required
-                                    />
-                                </Col>
-                                <Col xs={12} md={4}>
-                                    <label htmlFor={`variantQuantity${index}`} className='form-label'>
-                                        Quantity
-                                    </label>
-                                    <input
-                                        type='number'
-                                        className='form-control'
-                                        id={`variantQuantity${index}`}
-                                        value={variant.quantity}
-                                        onChange={(e) => handleVariantChange(index, 'quantity', e.target.value)}
-                                        min={1}
-                                        required
-                                    />
-                                </Col>
-
-
-                            </Row>
-                        </div>
-                    ))}
+                        </Card.Body>
+                    </Card>
 
 
                     <button type='submit' className='btn btn-primary my-2' disabled={uploading}>
-                        {uploading ? 'Uploading...' : 'Update'}
+                        {uploading ? 'Uploading...' : 'Create'}
                     </button>
                 </form>
+            </div>
 
-            </FormContainer>
         </>
     );
 };

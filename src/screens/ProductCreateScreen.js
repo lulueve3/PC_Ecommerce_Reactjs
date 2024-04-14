@@ -134,11 +134,10 @@ const ProductCreateScreen = () => {
         if (!updatedVariants[index]) {
             // If the index doesn't exist, add a new variant
             updatedVariants[index] = {
-                option1: "",  // Replace with your default values
-                option2: "",
-                option3: "",
+                options: [""],
                 price: 1,
                 quantity: 1,
+                compareAtPrice: 0
             };
         }
 
@@ -146,7 +145,10 @@ const ProductCreateScreen = () => {
         if ((field === 'price' || field === 'quantity') && (value >= 1 || value === '')) {
             updatedVariants[index][field] = value;
         } else {
-            updatedVariants[index][field] = 1;
+            if (field === 'compareAtPrice' && value >= 0)
+                updatedVariants[index][field] = value;
+            else
+                updatedVariants[index][field] = 1;
         }
 
         setVariants(updatedVariants);
@@ -170,7 +172,7 @@ const ProductCreateScreen = () => {
 
     const handleOptionChangeToVariant = () => {
         if (options.length > 0) {
-            let result = [{ options: [], price: 1, quantity: 1 }];
+            let result = [{ options: [], price: 1, quantity: 1, compareAtPrice: 0 }];
 
             // Iterate over each option
             options.forEach((option, index) => {
@@ -181,7 +183,7 @@ const ProductCreateScreen = () => {
                 option.values.forEach(value => {
                     if (index === 0) {
                         // Initialize the variants with the first option's values
-                        newVariants.push({ options: [value], price: 1, quantity: 1 });
+                        newVariants.push({ options: [value], price: 1, quantity: 1, compareAtPrice: 0 });
                     } else {
                         // Copy and extend each variant for the subsequent options
                         newVariants = newVariants.concat(result.map(variant => ({
@@ -380,7 +382,7 @@ const ProductCreateScreen = () => {
                                         <h5>Default Variant</h5>
 
                                         <Row className='mb-3'>
-                                            <Col xs={12} md={5}>
+                                            <Col xs={12} md={3}>
                                                 <label htmlFor={`variantPriceDefault`} className='form-label'>
                                                     Price
                                                 </label>
@@ -390,11 +392,26 @@ const ProductCreateScreen = () => {
                                                     id={`variantPriceDefault`}
                                                     value={(variants[0] && variants[0].price) || 1}  // Check if variants[0] exists before accessing price
                                                     onChange={(e) => handleVariantChange(0, 'price', e.target.value)}
-
+                                                    onClick={(e) => e.target.select()}
                                                     required
                                                 />
                                             </Col>
-                                            <Col xs={12} md={4}>
+                                            <Col xs={12} md={3}>
+                                                <label htmlFor={`variantPriceDefault`} className='form-label'>
+                                                    Compare-at price
+                                                </label>
+                                                <input
+                                                    type='number'
+                                                    className='form-control'
+                                                    id={`variantPriceDefault`}
+                                                    value={(variants[0] && variants[0].compareAtPrice) || 0}
+                                                    onChange={(e) => handleVariantChange(0, 'compareAtPrice', e.target.value)}
+                                                    onClick={(e) => e.target.select()}
+                                                    min={0}
+                                                    required
+                                                />
+                                            </Col>
+                                            <Col xs={12} md={2}>
                                                 <label htmlFor={`variantQuantityDefault`} className='form-label'>
                                                     Quantity
                                                 </label>
@@ -405,6 +422,7 @@ const ProductCreateScreen = () => {
                                                     value={(variants[0] && variants[0].quantity) || 1}  // Check if variants[0] exists before accessing quantity
                                                     onChange={(e) => handleVariantChange(0, 'quantity', e.target.value)}
                                                     min={1}
+                                                    onClick={(e) => e.target.select()}
                                                     required
                                                 />
                                             </Col>
@@ -468,7 +486,7 @@ const ProductCreateScreen = () => {
                                         <h5>Variant: {getVariantName(variant)}</h5>
 
                                         <Row className='mb-3'>
-                                            <Col xs={12} md={5}>
+                                            <Col xs={12} md={3}>
                                                 <label htmlFor={`variantPrice${index}`} className='form-label'>
                                                     Price
                                                 </label>
@@ -479,10 +497,28 @@ const ProductCreateScreen = () => {
                                                     value={variant.price}
                                                     onChange={(e) => handleVariantChange(index, 'price', e.target.value)}
                                                     min={1}
+                                                    onClick={(e) => e.target.select()}
+
                                                     required
                                                 />
                                             </Col>
-                                            <Col xs={12} md={4}>
+                                            <Col xs={12} md={3}>
+                                                <label htmlFor={`variantPrice${index}`} className='form-label'>
+                                                    Compare-at price
+                                                </label>
+                                                <input
+                                                    type='number'
+                                                    className='form-control'
+                                                    id={`variantPrice${index}`}
+                                                    value={variant.compareAtPrice}
+                                                    onChange={(e) => handleVariantChange(index, 'compareAtPrice', e.target.value)}
+                                                    min={1}
+                                                    onClick={(e) => e.target.select()}
+
+                                                    required
+                                                />
+                                            </Col>
+                                            <Col xs={12} md={2}>
                                                 <label htmlFor={`variantQuantity${index}`} className='form-label'>
                                                     Quantity
                                                 </label>
@@ -493,6 +529,8 @@ const ProductCreateScreen = () => {
                                                     value={variant.quantity}
                                                     onChange={(e) => handleVariantChange(index, 'quantity', e.target.value)}
                                                     min={1}
+                                                    onClick={(e) => e.target.select()}
+
                                                     required
                                                 />
                                             </Col>
