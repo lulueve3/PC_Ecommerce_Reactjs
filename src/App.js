@@ -29,6 +29,7 @@ import AppScreen from './screens/AppScreen';
 import ExchangePage from './screens/ExchangeScreen';
 import TaskPage from './components/TaskPage';
 import RedeemPage from './components/RedeemPage';
+import DiscountManager from './screens/DiscountManager';
 
 
 
@@ -78,6 +79,7 @@ function App() {
             <Route path="/Exchange" element={<ExchangePage />} />
             <Route path="/exchange/tasks" element={<TaskPage />} />
             <Route path="/exchange/redeem" element={<RedeemPage />} />
+            <Route path="/discount" element={<DiscountManager />} />
 
             <Route path="/PostDetail" element={<PostDetail />} />
             <Route path="/admin/userList" element={<UserListScreen />} />

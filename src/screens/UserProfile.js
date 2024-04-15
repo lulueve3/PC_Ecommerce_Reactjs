@@ -14,10 +14,74 @@ const UserProfile = () => {
 
     const [user, setUser] = useState({});
 
-    const [addresses, setAddresses] = useState([{ lastName: "hải", phone: "123", address: "việt nam" }, { lastName: "hải", phone: "123", address: "việt nam" }])
+    const [addresses, setAddresses] = useState([])
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [editedAddressIndex, setEditedAddressIndex] = useState(null);
+
+    useEffect(() => {
+        fetchAddresses();
+        getUserProfile();
+    }, []);
+
+    const fetchAddresses = async () => {
+        const accessToken = localStorage.getItem('accessToken') || null;
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        };
+
+        try {
+            const { data } = await axios.get('http://localhost:8080/api/customer/addresses', config);
+            setAddresses(data);
+        } catch (error) {
+            toast.error('Failed to fetch addresses');
+        }
+    };
+
+    const handleSaveEditedAddress = async (editedAddress) => {
+        const accessToken = localStorage.getItem('accessToken') || null;
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        };
+
+        try {
+            if (editedAddressIndex !== null) {
+                // Editing an existing address
+                await axios.patch(`http://localhost:8080/api/customer/addresses/${editedAddress.id}`, editedAddress, config);
+                toast.success('Address updated successfully');
+            } else {
+                // Adding a new address
+                await axios.post('http://localhost:8080/api/customer/addresses', editedAddress, config);
+                toast.success('Address added successfully');
+            }
+            fetchAddresses(); // Refresh the list
+            setShowEditModal(false);
+        } catch (error) {
+            toast.error('Failed to save address');
+        }
+    };
+
+    const handleRemoveAddress = async (id) => {
+        const accessToken = localStorage.getItem('accessToken') || null;
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        };
+
+        try {
+            await axios.delete(`http://localhost:8080/api/customer/addresses/${id}`, config);
+            toast.success('Address removed successfully');
+            fetchAddresses(); // Refresh the list
+        } catch (error) {
+            toast.error('Failed to remove address');
+        }
+    };
+
 
 
     const handleEditAddress = (index) => {
@@ -29,26 +93,26 @@ const UserProfile = () => {
         setEditedAddressIndex(null); // No index since it's a new address
         setShowEditModal(true);
     };
-    const handleSaveEditedAddress = (editedAddress) => {
-        // Update the user's addresses array with the edited address
-        const updatedAddresses = [...addresses];
-        updatedAddresses[editedAddressIndex] = editedAddress;
-        setAddresses(updatedAddresses);
+    // const handleSaveEditedAddress = (editedAddress) => {
+    //     // Update the user's addresses array with the edited address
+    //     const updatedAddresses = [...addresses];
+    //     updatedAddresses[editedAddressIndex] = editedAddress;
+    //     setAddresses(updatedAddresses);
 
-        // Close the modal
-        setShowEditModal(false);
-    };
+    //     // Close the modal
+    //     setShowEditModal(false);
+    // };
 
     const handleCancelEdit = () => {
         // Close the modal without saving changes
         setShowEditModal(false);
     };
 
-    const handleRemoveAddress = (index) => {
-        const updatedAddresses = [addresses];
-        updatedAddresses.splice(index, 1);
-        setUser({ ...user, addresses: updatedAddresses });
-    };
+    // const handleRemoveAddress = (index) => {
+    //     const updatedAddresses = [addresses];
+    //     updatedAddresses.splice(index, 1);
+    //     setUser({ ...user, addresses: updatedAddresses });
+    // };
 
     const handleAddAddress = () => {
         setShowEditModal(true);
@@ -177,7 +241,7 @@ const UserProfile = () => {
                                         Add New Address
                                     </Button>
                                     <div>
-                                        {addresses.map((address, index) => (
+                                        {Array.isArray(addresses) && addresses.map((address, index) => (
                                             <>
                                                 <div key={index} className="mb-2 d-flex justify-content-between">
                                                     <div>

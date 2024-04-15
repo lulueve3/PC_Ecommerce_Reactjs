@@ -80,7 +80,7 @@ const ProductScreen = ({ }) => {
             title: product.title,
             qty,
             price,
-            image: product.images[0].src,
+            image: product.images[0]?.src ? product.images[0].src : `${process.env.PUBLIC_URL}/imgNotFound.png`,
             inStock: product.variants[selectedButton].quantity
         }));
         toast.success('Add to cart success!', {

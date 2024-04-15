@@ -45,11 +45,19 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
         setSelectedCity(code);
         setSelectedDistrict('');
         setWards([]);
+        setEditedAddress((prevAddress) => ({
+            ...prevAddress,
+            city: event.target.options[event.target.selectedIndex].text,
+        }));
     };
 
     const handleDistrictChange = (event) => {
         const code = event.target.value;
         setSelectedDistrict(code);
+        setEditedAddress((prevAddress) => ({
+            ...prevAddress,
+            district: event.target.options[event.target.selectedIndex].text,
+        }));
     };
 
     const handleInputChange = (e) => {
@@ -86,12 +94,9 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
         if (selectedCity && selectedCity && selectedWard) {
             onSave([{
                 ...editedAddress,
-                address: getAddressString()
+                username: "admin@test.com",
+
             }]);
-            console.log({
-                ...editedAddress,
-                address: getAddressString()
-            });
         } else {
             // Hiển thị thông báo hoặc thực hiện các xử lý khác khi các trường không hợp lệ
             window.alert("Invalid address fields. Please fill in all required fields.");
@@ -116,7 +121,7 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                             <Form.Label>Name</Form.Label>
                             <Form.Control
                                 type="text"
-                                name="lastName"
+                                name="name"
                                 value={editedAddress.lastName}
                                 onChange={handleInputChange}
                                 required
@@ -147,7 +152,7 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                         {/* Add more form fields for other address properties */}
                         <Form.Group controlId="formCity">
                             <Form.Label>City</Form.Label>
-                            <select onChange={handleCityChange} value={selectedCity}>
+                            <select name="City" onChange={handleCityChange} value={selectedCity}>
                                 <option value="">
                                     Choose city
                                 </option>
@@ -163,7 +168,7 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
 
                         <Form.Group controlId="formDistrict">
                             <Form.Label>District</Form.Label>
-                            <select onChange={handleDistrictChange} value={selectedDistrict}>
+                            <select name="District" onChange={handleDistrictChange} value={selectedDistrict}>
 
                                 {districts.map(district => (
                                     <option key={district.code} value={district.code}>
@@ -176,9 +181,14 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                         <Form.Group controlId="formWard">
                             <Form.Label>Ward</Form.Label>
                             <select
+                                name="Ward"
                                 value={selectedWard}
                                 onChange={(e) => {
                                     setSelectedWard(e.target.value);
+                                    setEditedAddress((prevAddress) => ({
+                                        ...prevAddress,
+                                        ward: e.target.options[e.target.selectedIndex].text,
+                                    }));
                                 }}
                             >
 

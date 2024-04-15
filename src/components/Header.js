@@ -98,6 +98,9 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                     <LinkContainer to='/MyOrders'>
                                         <NavDropdown.Item>My Orders</NavDropdown.Item>
                                     </LinkContainer>
+                                    <LinkContainer to='/exchange/tasks'>
+                                        <NavDropdown.Item>Exchange</NavDropdown.Item>
+                                    </LinkContainer>
                                     <NavDropdown.Item onClick={logoutHandler}>Đăng xuất</NavDropdown.Item>
                                 </NavDropdown>
                             ) :
@@ -124,9 +127,13 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                     <LinkContainer to='/admin/orderList'>
                                         <NavDropdown.Item>Orders</NavDropdown.Item>
                                     </LinkContainer>
-                                    <LinkContainer to='/exchange/tasks'>
-                                        <NavDropdown.Item>Exchange</NavDropdown.Item>
+                                    <LinkContainer to='/discount'>
+                                        <NavDropdown.Item>Discount</NavDropdown.Item>
                                     </LinkContainer>
+                                    <LinkContainer to='/redeem'>
+                                        <NavDropdown.Item>Redeem</NavDropdown.Item>
+                                    </LinkContainer>
+
                                 </NavDropdown>
                             )}
 
