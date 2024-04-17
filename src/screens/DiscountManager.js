@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Table } from 'react-bootstrap';
 import DiscountModal from '../components/DiscountModal';
 import axios from 'axios';
@@ -6,77 +6,28 @@ import { toast } from 'react-toastify';
 
 const DiscountManager = () => {
     const [showModal, setShowModal] = useState(false);
-    const [discounts, setDiscounts] = useState([
-        // Sample discounts
-        {
-            id: 1,
-            title: 'Spring Sale',
-            usageLimit: 100,
-            value: 20,
-            valueType: 'PERCENTAGE',
-            maxDiscountValue: 50,
-            prerequisiteQuantityRange: 1,
-            prerequisiteSubtotalRange: 50,
-            prerequisiteCustomerIds: [101, 102],
-            startTime: '2024-04-01T00:00:00Z',
-            endTime: '2024-04-30T23:59:59Z'
-        },
-        {
-            "id": 1,
-            "title": "Spring Sale",
-            "usageLimit": 100,
-            "value": 20,
-            "valueType": "PERCENTAGE",
-            "maxDiscountValue": 50,
-            "prerequisiteQuantityRange": 1,
-            "prerequisiteSubtotalRange": 50,
-            "prerequisiteCustomerIds": [101, 102],
-            "startTime": "2024-04-01T00:00:00Z",
-            "endTime": "2024-04-30T23:59:59Z"
-        },
-        {
-            "id": 2,
-            "title": "Summer Sale",
-            "usageLimit": 200,
-            "value": 15,
-            "valueType": "PERCENTAGE",
-            "maxDiscountValue": 30,
-            "prerequisiteQuantityRange": 2,
-            "prerequisiteSubtotalRange": 100,
-            "prerequisiteCustomerIds": [103, 104],
-            "startTime": "2024-06-01T00:00:00Z",
-            "endTime": "2024-06-30T23:59:59Z"
-        },
-        {
-            "id": 3,
-            "title": "Weekend Sale",
-            "usageLimit": 50,
-            "value": 10,
-            "valueType": "PERCENTAGE",
-            "maxDiscountValue": 20,
-            "prerequisiteQuantityRange": 1,
-            "prerequisiteSubtotalRange": 50,
-            "prerequisiteCustomerIds": [105, 106, 107],
-            "startTime": "2024-04-15T00:00:00Z",
-            "endTime": "2024-04-17T23:59:59Z"
-        },
-        {
-            "id": 4,
-            "title": "Birthday Sale",
-            "usageLimit": 1,
-            "value": 100,
-            "valueType": "PERCENTAGE",
-            "maxDiscountValue": 100,
-            "prerequisiteQuantityRange": 1,
-            "prerequisiteSubtotalRange": 0,
-            "prerequisiteCustomerIds": [108],
-            "startTime": "2024-05-10T00:00:00Z",
-            "endTime": "2024-05-10T23:59:59Z"
-        }
-        // ... more sample discounts
-    ]);
+    const [discounts, setDiscounts] = useState([]);
     const [currentDiscount, setCurrentDiscount] = useState(null);
     const [isNew, setIsNew] = useState(true);
+
+    const fetchDiscounts = async () => {
+        const accessToken = localStorage.getItem('accessToken') || null;
+        try {
+            const response = await axios.get('http://localhost:8080/api/admin/price_rules', {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+            setDiscounts(response.data || []);
+        } catch (error) {
+            console.error('Error fetching discounts:', error);
+            toast.error('Error fetching discounts. Please try again.');
+        }
+    };
+
+    useEffect(() => {
+        fetchDiscounts();
+    }, []);
 
     const handleShowModal = (discount) => {
         setCurrentDiscount(discount || {
@@ -102,7 +53,12 @@ const DiscountManager = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/api/admin/price_rules/${id}`);
+            const accessToken = localStorage.getItem('accessToken') || null;
+            await axios.delete(`http://localhost:8080/api/admin/price_rules/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
             setDiscounts(discounts.filter(discount => discount.id !== id));
             toast.success('Discount deleted successfully!');
         } catch (error) {

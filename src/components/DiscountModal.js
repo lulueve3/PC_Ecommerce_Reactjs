@@ -14,10 +14,13 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
         // Prepare your discount data here, ensure proper formatting
         // Especially for prerequisiteCustomerIds, startTime, and endTime
         const discountData = {
-            ...discount
+            ...discount,
+            // Check and format startTime and endTime if they exist
+            startTime: discount.startTime ? new Date(discount.startTime).toISOString() : undefined,
+            endTime: discount.endTime ? new Date(discount.endTime).toISOString() : undefined
         };
-        const accessToken = localStorage.getItem('accessToken') || null;
 
+        const accessToken = localStorage.getItem('accessToken') || null;
 
         try {
             const response = isNew
