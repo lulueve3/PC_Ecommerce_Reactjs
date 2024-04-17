@@ -7,9 +7,9 @@ import localData from "./address.json"
 
 const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, onSave }) => {
     const [editedAddress, setEditedAddress] = useState({ ...address });
-    const [selectedCity, setSelectedCity] = useState(editedAddress.city || 0);
-    const [selectedDistrict, setSelectedDistrict] = useState(editedAddress.district || 0);
-    const [selectedWard, setSelectedWard] = useState(editedAddress.ward || 0);
+    const [selectedCity, setSelectedCity] = useState(editedAddress.city || "");
+    const [selectedDistrict, setSelectedDistrict] = useState(editedAddress.district || "");
+    const [selectedWard, setSelectedWard] = useState(editedAddress.ward || "");
     const [addressName, setAddressName] = useState("");
 
 
@@ -19,7 +19,12 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
     const [wards, setWards] = useState([]);
 
 
+    // EditAddress.js
+
+    // ...
+
     useEffect(() => {
+        // Khởi tạo maps cho cities, districts và wards
         const cityMap = {};
         const districtMap = {};
         const wardMap = {};
@@ -27,7 +32,6 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
         localData.forEach(item => {
             cityMap[item.CityCode] = item.CityName;
             if (item.CityCode.toString() === selectedCity.toString()) {
-
                 districtMap[item.DistrictCode] = item.DistrictName;
             }
             if (item.DistrictCode.toString() === selectedDistrict.toString()) {
@@ -38,7 +42,23 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
         setCities(Object.entries(cityMap).map(([code, name]) => ({ code, name })));
         setDistricts(Object.entries(districtMap).map(([code, name]) => ({ code, name })));
         setWards(Object.entries(wardMap).map(([code, name]) => ({ code, name })));
-    }, [selectedCity, selectedDistrict]);
+
+        // Đặt giá trị ban đầu cho selectedCity, selectedDistrict và selectedWard dựa trên editedAddress
+        if (address.city) {
+            const foundCity = Object.entries(cityMap).find(([_, name]) => name === address.city);
+            if (foundCity) setSelectedCity(foundCity[0]);
+        }
+        if (address.district) {
+            const foundDistrict = Object.entries(districtMap).find(([_, name]) => name === address.district);
+            if (foundDistrict) setSelectedDistrict(foundDistrict[0]);
+        }
+        if (address.ward) {
+            const foundWard = Object.entries(wardMap).find(([_, name]) => name === address.ward);
+            if (foundWard) setSelectedWard(foundWard[0]);
+        }
+    }, [selectedCity, selectedDistrict, address.city, address.district, address.ward]);
+
+    // ...
 
     const handleCityChange = (event) => {
         const code = event.target.value;
@@ -49,6 +69,7 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
             ...prevAddress,
             city: event.target.options[event.target.selectedIndex].text,
         }));
+        address.district = "";
     };
 
     const handleDistrictChange = (event) => {
@@ -58,6 +79,7 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
             ...prevAddress,
             district: event.target.options[event.target.selectedIndex].text,
         }));
+        address.ward = "";
     };
 
     const handleInputChange = (e) => {
@@ -92,11 +114,9 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
     const handleSave = () => {
         // Kiểm tra xem các trường có giá trị không
         if (selectedCity && selectedCity && selectedWard) {
-            onSave([{
-                ...editedAddress,
-                username: "admin@test.com",
-
-            }]);
+            onSave({
+                ...editedAddress
+            });
         } else {
             // Hiển thị thông báo hoặc thực hiện các xử lý khác khi các trường không hợp lệ
             window.alert("Invalid address fields. Please fill in all required fields.");
@@ -122,7 +142,7 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                             <Form.Control
                                 type="text"
                                 name="name"
-                                value={editedAddress.lastName}
+                                value={editedAddress.name}
                                 onChange={handleInputChange}
                                 required
                             />
@@ -150,26 +170,23 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                             />
                         </Form.Group>
                         {/* Add more form fields for other address properties */}
+                        {/*...*/}
                         <Form.Group controlId="formCity">
                             <Form.Label>City</Form.Label>
                             <select name="City" onChange={handleCityChange} value={selectedCity}>
-                                <option value="">
-                                    Choose city
-                                </option>
+                                <option value="">Choose city</option>
                                 {cities.map(city => (
-
                                     <option key={city.code} value={city.code}>
                                         {city.name}
                                     </option>
                                 ))}
                             </select>
-
                         </Form.Group>
 
                         <Form.Group controlId="formDistrict">
                             <Form.Label>District</Form.Label>
                             <select name="District" onChange={handleDistrictChange} value={selectedDistrict}>
-
+                                <option value="">Choose district</option>
                                 {districts.map(district => (
                                     <option key={district.code} value={district.code}>
                                         {district.name}
@@ -191,7 +208,7 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                                     }));
                                 }}
                             >
-
+                                <option value="">Choose ward</option>
                                 {wards.map((ward) => (
                                     <option key={ward.code} value={ward.code}>
                                         {ward.name}
@@ -199,13 +216,14 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                                 ))}
                             </select>
                         </Form.Group>
+                        {/*...*/}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={onCancel}>
                         Cancel
                     </Button>
-                    <Button variant="primary" onClick={handleSave}>
+                    <Button variant="primary" onClick={handleSave} disabled={!selectedCity || !selectedDistrict || !selectedWard}>
                         Save
                     </Button>
                 </Modal.Footer>

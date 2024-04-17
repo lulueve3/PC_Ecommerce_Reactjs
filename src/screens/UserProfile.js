@@ -18,6 +18,8 @@ const UserProfile = () => {
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [editedAddressIndex, setEditedAddressIndex] = useState(null);
+    const [editedAddress, setEditedAddress] = useState({});
+
 
     useEffect(() => {
         fetchAddresses();
@@ -34,7 +36,7 @@ const UserProfile = () => {
 
         try {
             const { data } = await axios.get('http://localhost:8080/api/customer/addresses', config);
-            setAddresses(data);
+            setAddresses(data.addresses);
         } catch (error) {
             toast.error('Failed to fetch addresses');
         }
@@ -85,8 +87,13 @@ const UserProfile = () => {
 
 
     const handleEditAddress = (index) => {
-        setEditedAddressIndex(index);
-        setShowEditModal(true);
+        const selectedAddress = addresses[index];
+        setEditedAddressIndex(index); // Lưu vị trí của địa chỉ đang được chỉnh sửa
+        setShowEditModal(true); // Hiển thị modal
+
+        // Cập nhật trạng thái để chứa thông tin địa chỉ được chọn
+        // Điều này sẽ truyền thông tin địa chỉ tới EditAddress component
+        setEditedAddress({ ...selectedAddress });
     };
 
     const handleAddNewAddress = () => {
@@ -245,9 +252,10 @@ const UserProfile = () => {
                                             <>
                                                 <div key={index} className="mb-2 d-flex justify-content-between">
                                                     <div>
-                                                        <p style={addressStyle}>{address.lastName}</p>
-                                                        <p style={addressStyle}>{address.phone}</p>
+                                                        <p style={addressStyle}>{address.name} - {address.phone}</p>
+                                                        <p style={addressStyle}>{address.street}</p>
                                                         <p style={addressStyle}>{address.address}</p>
+                                                        <p style={addressStyle}>{address.ward} - {address.district} - {address.city}</p>
                                                     </div>
                                                     <div>
                                                         <Button variant="secondary" onClick={() => handleEditAddress(index)}>

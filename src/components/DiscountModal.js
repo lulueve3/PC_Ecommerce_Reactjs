@@ -14,8 +14,7 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
         // Prepare your discount data here, ensure proper formatting
         // Especially for prerequisiteCustomerIds, startTime, and endTime
         const discountData = {
-            ...discount,
-            prerequisiteCustomerIds: [0]
+            ...discount
         };
         const accessToken = localStorage.getItem('accessToken') || null;
 
