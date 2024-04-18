@@ -4,6 +4,8 @@ import { Container, Card, Form, Button, Row, Col, Modal } from 'react-bootstrap'
 import ChangePasswordForm from '../components/ChangePasswordForm';
 import axios from 'axios';
 import localData from "./address.json"
+import { ToastContainer, toast } from 'react-toastify';
+
 
 const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, onSave }) => {
     const [editedAddress, setEditedAddress] = useState({ ...address });
@@ -72,6 +74,11 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
         address.district = "";
     };
 
+    const isValidPhone = (phone) => {
+        const phoneRegex = /^[0-9]{10,11}$/; // Regex kiểm tra số điện thoại ở dạng chuẩn Việt Nam
+        return phoneRegex.test(phone);
+    };
+
     const handleDistrictChange = (event) => {
         const code = event.target.value;
         setSelectedDistrict(code);
@@ -112,16 +119,22 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
 
 
     const handleSave = () => {
-        // Kiểm tra xem các trường có giá trị không
-        if (selectedCity && selectedCity && selectedWard) {
-            onSave({
-                ...editedAddress
-            });
-        } else {
-            // Hiển thị thông báo hoặc thực hiện các xử lý khác khi các trường không hợp lệ
-            window.alert("Invalid address fields. Please fill in all required fields.");
-            // Hiển thị thông báo hoặc thực hiện xử lý khác ở đây
+        if (!editedAddress.name || !editedAddress.street || !isValidPhone(editedAddress.phone)) {
+            // Check each field and show an error message if necessary
+            if (!editedAddress.name) {
+                toast.error('Name is required.');
+            }
+            if (!editedAddress.street) {
+                toast.error('Street is required.');
+            }
+            if (!isValidPhone(editedAddress.phone)) {
+                toast.error('Invalid phone number. Please enter a valid phone number.');
+            }
+            return; // Do not proceed with saving if validation fails
         }
+
+        // Proceed with onSave logic if all validations pass
+        onSave(editedAddress);
     };
 
 
@@ -223,7 +236,7 @@ const EditAddress = ({ address, handleAddAddress, handleEditAddress, onCancel, o
                     <Button variant="secondary" onClick={onCancel}>
                         Cancel
                     </Button>
-                    <Button variant="primary" onClick={handleSave} disabled={!selectedCity || !selectedDistrict || !selectedWard}>
+                    <Button variant="primary" onClick={handleSave} disabled={!editedAddress.name || !editedAddress.street || !isValidPhone(editedAddress.phone)}>
                         Save
                     </Button>
                 </Modal.Footer>

@@ -248,31 +248,30 @@ const UserProfile = () => {
                                         Add New Address
                                     </Button>
                                     <div>
-                                        {Array.isArray(addresses) && addresses.map((address, index) => (
-                                            <>
-                                                <div key={index} className="mb-2 d-flex justify-content-between">
-                                                    <div>
-                                                        <p style={addressStyle}>{address.name} - {address.phone}</p>
-                                                        <p style={addressStyle}>{address.street}</p>
-                                                        <p style={addressStyle}>{address.address}</p>
-                                                        <p style={addressStyle}>{address.ward} - {address.district} - {address.city}</p>
+                                        {Array.isArray(addresses) && addresses
+                                            .sort((a, b) => b.id - a.id)
+                                            .map((address, index) => (
+                                                <React.Fragment key={address.id}> {/* Use address.id instead of index for the key */}
+                                                    <div className="mb-2 d-flex justify-content-between">
+                                                        <div>
+                                                            <p style={addressStyle}>{address.name} - {address.phone}</p>
+                                                            <p style={addressStyle}>{address.street}</p>
+                                                            <p style={addressStyle}>{address.address}</p>
+                                                            <p style={addressStyle}>{address.ward} - {address.district} - {address.city}</p>
+                                                        </div>
+                                                        <div>
+                                                            <Button variant="secondary" onClick={() => handleEditAddress(index)}>
+                                                                Edit
+                                                            </Button>{' '}
+                                                            <Button variant="danger" onClick={() => handleRemoveAddress(address.id)}>
+                                                                Delete
+                                                            </Button>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <Button variant="secondary" onClick={() => handleEditAddress(index)}>
-                                                            Edit
-                                                        </Button>
-                                                        {' '}
-                                                        <Button variant="danger" onClick={() => handleRemoveAddress(index)}>
-                                                            Delete
-                                                        </Button>
-                                                    </div>
-
-                                                </div>
-                                                <hr />
-                                            </>
-
-
-                                        ))}
+                                                    <hr />
+                                                </React.Fragment>
+                                            ))
+                                        }
 
                                     </div>
                                 </Card.Body>

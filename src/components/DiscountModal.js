@@ -4,10 +4,16 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 
-const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
+const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew, onSubmitSuccess }) => {
     const handleInputChange = (event) => {
         const { name, value } = event.target;
-        setDiscount({ ...discount, [name]: value });
+
+        // If the input is for 'value' or 'maxDiscountValue', store it as a negative value
+        if ((name === 'value' || name === 'maxDiscountValue') && value) {
+            setDiscount({ ...discount, [name]: -Math.abs(value) });
+        } else {
+            setDiscount({ ...discount, [name]: value });
+        }
     };
 
     const handleSubmit = async () => {
@@ -15,7 +21,9 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
         // Especially for prerequisiteCustomerIds, startTime, and endTime
         const discountData = {
             ...discount,
-            // Check and format startTime and endTime if they exist
+            // Convert 'value' and 'maxDiscountValue' to negative before sending to the server
+            value: discount.value ? -Math.abs(discount.value) : discount.value,
+            maxDiscountValue: discount.maxDiscountValue ? -Math.abs(discount.maxDiscountValue) : discount.maxDiscountValue,
             startTime: discount.startTime ? new Date(discount.startTime).toISOString() : undefined,
             endTime: discount.endTime ? new Date(discount.endTime).toISOString() : undefined
         };
@@ -29,7 +37,7 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
                         'Authorization': `Bearer ${accessToken}`
                     }
                 })
-                : await axios.put(`http://localhost:8080/api/admin/price_rules/${discount.id}`, discountData, {
+                : await axios.post(`http://localhost:8080/api/admin/price_rules/${discount.id}`, discountData, {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     }
@@ -37,11 +45,14 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
 
             handleClose();
             toast.success('Discount saved successfully!');
+            onSubmitSuccess()
         } catch (error) {
             console.error('There was an error saving the discount:', error);
-            toast.error('Error saving discount. Please try again.');
+            toast.error(error.response.data?.message);
         }
     };
+
+
 
     return (
         <Modal show={show} onHide={handleClose}>
@@ -57,6 +68,7 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
                             name="title"
                             value={discount?.title}
                             onChange={handleInputChange}
+                            readOnly={!isNew}
                         />
                     </Form.Group>
 
@@ -67,7 +79,7 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
                             name="usageLimit"
                             value={discount?.usageLimit}
                             onChange={handleInputChange}
-                            min="0"
+                            min="1"
                         />
                     </Form.Group>
 
@@ -76,9 +88,11 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
                         <Form.Control
                             type="number"
                             name="value"
-                            value={discount?.value}
+                            value={Math.abs(discount?.value || 0)} // Convert to positive for display
                             onChange={handleInputChange}
-                            min="0"
+                            min="1"
+                            readOnly={!isNew}
+
                         />
                     </Form.Group>
 
@@ -89,6 +103,8 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
                             name="valueType"
                             value={discount?.valueType}
                             onChange={handleInputChange}
+                            disabled={!isNew}
+
                         >
                             <option value="PERCENTAGE">Percentage</option>
                             <option value="FIXED_AMOUNT">Fixed Amount</option>
@@ -100,9 +116,11 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
                         <Form.Control
                             type="number"
                             name="maxDiscountValue"
-                            value={discount?.maxDiscountValue}
+                            value={Math.abs(discount?.maxDiscountValue || 0)} // Convert to positive for display
                             onChange={handleInputChange}
-                            min="0"
+                            min="1"
+                            readOnly={!isNew}
+
                         />
                     </Form.Group>
 
@@ -113,7 +131,9 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
                             name="prerequisiteQuantityRange"
                             value={discount?.prerequisiteQuantityRange}
                             onChange={handleInputChange}
-                            min="0"
+                            min="1"
+                            readOnly={!isNew}
+
                         />
                     </Form.Group>
 
@@ -124,7 +144,9 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
                             name="prerequisiteSubtotalRange"
                             value={discount?.prerequisiteSubtotalRange}
                             onChange={handleInputChange}
-                            min="0"
+                            min="1"
+                            readOnly={!isNew}
+
                         />
                     </Form.Group>
 
@@ -152,6 +174,8 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew }) => {
                             name="startTime"
                             value={discount?.startTime}
                             onChange={handleInputChange}
+                            readOnly={!isNew}
+
                         />
                     </Form.Group>
 
