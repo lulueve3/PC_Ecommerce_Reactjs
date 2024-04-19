@@ -29,6 +29,63 @@ const CartScreen = () => {
         address: ""
     });
 
+    const [paymentMethod, setPaymentMethod] = useState('');
+
+
+    const [addresses, setAddresses] = useState([]);
+    const [selectedAddress, setSelectedAddress] = useState('');
+
+    const [discountCode, setDiscountCode] = useState('');
+    const [discountData, setDiscountData] = useState(null);
+
+    const applyDiscount = async () => {
+        try {
+            const accessToken = localStorage.getItem('accessToken') || null;
+
+            const { data } = await axios.get(`http://localhost:8080/api/admin/price_rules?page=0&size=10&sortBy=id&sortDirection=ASC&keyword=${discountCode}`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+            // Assuming the API returns an array and you want the first match
+            const discount = data.results.find((rule) => rule.title === discountCode);
+
+            if (discount) {
+                // Get the current date and time
+                const now = new Date();
+
+                // Parse discount start and end times
+                const startTime = new Date(discount.startTime);
+                const endTime = new Date(discount.endTime);
+
+                // Check if discount is within the valid period and usage limit has not been exceeded
+                if (now >= startTime && now <= endTime && (discount.usageLimit === null || discount.usageLimit > 0)) {
+                    setDiscountData(discount);
+                    toast.success(`Discount code applied`);
+                } else {
+                    setDiscountData(null);
+                    if (now < startTime) {
+                        toast.error('Discount code is not yet active.');
+                    } else if (now > endTime) {
+                        toast.error('Discount code has expired.');
+                    } else if (discount.usageLimit !== null && discount.usageLimit <= 0) {
+                        toast.error('Discount code usage limit has been reached.');
+                    }
+                }
+            } else {
+                setDiscountData(null);
+                toast.error('Invalid discount code.');
+            }
+        } catch (error) {
+            console.error('Error fetching discount data:', error);
+            toast.error('Error applying discount code. Please try again.');
+        }
+    };
+
+    const [discountedSubtotal, setDiscountedSubtotal] = useState(undefined);
+
+
+
     const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     const handleClosePaymentModal = () => setShowPaymentModal(false);
@@ -60,8 +117,51 @@ const CartScreen = () => {
     };
 
     useEffect(() => {
+        if (discountData) {
+            const originalSubtotal = selectedItems.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0);
+            let discountAmount = 0;
+
+            switch (discountData.valueType) {
+                case 'FIXED_AMOUNT':
+                    discountAmount = discountData.value;
+                    break;
+                case 'PERCENTAGE':
+                    discountAmount = (originalSubtotal * discountData.value) / 100;
+                    break;
+                default:
+                    discountAmount = 0;
+            }
+
+            const newSubtotal = originalSubtotal + discountAmount;
+            setDiscountedSubtotal(newSubtotal.toFixed(2));
+        } else {
+            setDiscountedSubtotal(undefined);
+        }
+    }, [discountData, selectedItems, cartItems]);
+
+    useEffect(() => {
         console.log(cartItems);
     }, [cartItems])
+
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            try {
+                const accessToken = localStorage.getItem('accessToken') || null;
+                const config = {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                };
+                const { data } = await axios.get('http://localhost:8080/api/customer/addresses', config);
+                setAddresses(data.addresses); // assuming 'data' is an array of address objects
+            } catch (error) {
+                console.error('Error fetching addresses:', error);
+                toast.error('Error fetching addresses. Please try again.');
+            }
+        };
+
+        fetchAddresses();
+    }, []);
 
     const sendEmail = (orders) => {
 
@@ -156,13 +256,11 @@ const CartScreen = () => {
 
 
     const createOrder = async () => {
-        const line_items = selectedItems.map(itemId => {
+        const lineItems = selectedItems.map(itemId => {
             const item = cartItems.find(item => item.id === itemId);
             return {
-                variant_id: itemId,
+                variantId: itemId,
                 quantity: item.qty,
-                title: item.title,
-                variant: item.variant
             };
         });
         const customer = {
@@ -170,17 +268,25 @@ const CartScreen = () => {
             last_name: customerInfo.lastName,
             email: userEmail ? userEmail : customerInfo.email
         }
+
+        const fullAddressDetails = addresses.find(addr => addr.id === Number(selectedAddress));
         const address = {
-            first_name: customerInfo.firstName,
-            last_name: customerInfo.lastName,
-            address: customerInfo.address,
-            phone: customerInfo.phone
+            "name": fullAddressDetails.name,
+            "city": fullAddressDetails.city,
+            "phone": fullAddressDetails.phone,
+            "street": fullAddressDetails.street,
+            "ward": fullAddressDetails.ward,
+            "district": fullAddressDetails.district
         }
+        const discountCode = discountData && discountData.title ? [discountData.title] : [0];
         const orders = {
-            line_items,
+            lineItems,
             customer,
-            address
+            address,
+            discountCode
         }
+
+        console.log(orders);
         try {
 
 
@@ -267,6 +373,16 @@ const CartScreen = () => {
 
     const checkoutHandler = () => {
 
+        if (!selectedAddress) {
+            toast.warning('Please select an address', {
+                // Toast options...
+            });
+            return;
+        }
+
+        const fullAddressDetails = addresses.find((addr) => addr.id === selectedAddress);
+
+
 
         if (selectedItems.length < 1) {
             toast.warning('Please select product to checkout', {
@@ -281,23 +397,17 @@ const CartScreen = () => {
             });
             return
         }
-        console.log(JSON.stringify(customerInfo));
-        if (!customerInfo.firstName || !customerInfo.lastName || (!customerInfo.email && !userEmail) || !customerInfo.phone || !customerInfo.address) {
-            toast.warning('Please fill in all customer information', {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
-            return;
+        console.log(JSON.stringify(fullAddressDetails));
+
+
+        if (paymentMethod === 'CreditCard') {
+            handleShowPaymentModal();
+        } else if (paymentMethod === 'COD') {
+            // Handle the COD order submission here
+            createOrder();
+        } else {
+            toast.warning('Please select a payment method');
         }
-
-
-        handleShowPaymentModal();
 
     }
 
@@ -329,8 +439,8 @@ const CartScreen = () => {
                     <StripeContainer success={success} onSuccess={createOrder} amount={selectedItems?.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0).toFixed(3)} />
                 </Modal.Body>
             </Modal>
-            <Row>
-                <Col md={9}>
+            <Row >
+                <Col md={8}>
                     <h1>Shopping Cart</h1>
                     {cartItems.length === 0 ? <Message>Your cart is empty <Link to="/">Go Back</Link> </Message> : (
                         <ListGroup variant='flush'>
@@ -417,12 +527,64 @@ const CartScreen = () => {
                         </Pagination>
                     </div>
                 </Col>
-                <Col md={3}>
+                <Col md={4}>
                     <Card>
                         <ListGroup variant='flush'>
                             <ListGroup.Item>
                                 <h3>Subtotal ({selectedItems.length})</h3>
-                                <h5>${selectedItems?.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0).toFixed(3)}</h5>
+                                {discountedSubtotal !== undefined ? (
+                                    <>
+                                        <h5 style={{ textDecoration: 'line-through' }}>
+                                            ${selectedItems.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0).toFixed(3)}
+                                        </h5>
+                                        <h5>${discountedSubtotal}</h5>
+                                    </>
+                                ) : (
+                                    <h5>
+                                        ${selectedItems.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0).toFixed(3)}
+                                    </h5>
+                                )}
+                            </ListGroup.Item>
+                            <ListGroup.Item>
+                                <Row>
+                                    <Col>
+                                        <Form.Group controlId="discountCode">
+                                            <Form.Label>Discount Code</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                value={discountCode}
+                                                onChange={(e) => setDiscountCode(e.target.value)}
+                                                placeholder="Enter discount code"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col className="d-flex align-items-end">
+                                        <Button onClick={applyDiscount} disabled={!discountCode.trim()}>Apply</Button>
+                                    </Col>
+                                </Row>
+                            </ListGroup.Item>
+                            <ListGroup.Item>
+                                <h4>Payment Method</h4>
+                                <Form>
+                                    <Form.Check
+                                        type="radio"
+                                        label="Visa/Credit card"
+                                        id="paymentMethodCreditCard"
+                                        name="paymentMethod"
+                                        value="CreditCard"
+                                        onChange={(e) => setPaymentMethod(e.target.value)}
+                                        checked={paymentMethod === 'CreditCard'}
+                                    />
+                                    <Form.Check
+                                        type="radio"
+                                        label="Cash on Delivery (COD)"
+                                        id="paymentMethodCOD"
+                                        name="paymentMethod"
+                                        value="COD"
+                                        onChange={(e) => setPaymentMethod(e.target.value)}
+                                        checked={paymentMethod === 'COD'}
+                                    />
+                                </Form>
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 {/* Checkout button */}
@@ -430,62 +592,30 @@ const CartScreen = () => {
 
                                 {/* Customer information form */}
                                 <Form className="mt-3">
-                                    <Form.Group controlId="formName">
-                                        <Form.Label>First Name</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            name="firstName"
-                                            value={customerInfo.firstName}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </Form.Group>
-                                    <Form.Group controlId="formName">
-                                        <Form.Label>Last Name</Form.Label>
-                                        <Form.Control
-                                            type="email"
-                                            name="lastName"
-                                            value={customerInfo.lastName}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </Form.Group>
-                                    <Form.Group controlId="formName">
-                                        <Form.Label>Email</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            name="email"
-                                            value={userEmail ? userEmail : customerInfo.email}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </Form.Group>
-                                    <Form.Group controlId="formPhone">
-                                        <Form.Label>Phone</Form.Label>
-                                        <Form.Control
-                                            type="number"
-                                            name="phone"
-                                            value={customerInfo.phone}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </Form.Group>
-                                    <Form.Group controlId="formAddress">
+                                    <Form.Group controlId="formAddressSelect">
                                         <Form.Label>Address</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            name="address"
-                                            value={customerInfo.address}
-                                            onChange={handleInputChange}
+                                        <Form.Select
+                                            value={selectedAddress}
+                                            onChange={(e) => setSelectedAddress(e.target.value)}
                                             required
-                                        />
+                                            style={{ width: '100%' }} // Set the width to 100% of the parent container
+                                        >
+                                            <option value="">Select Address</option>
+                                            {addresses?.map((address) => (
+                                                <option key={address.id} value={address.id}>
+                                                    {address.street} - {address.phone} - {address.ward} - {address.district} - {address.city}
+                                                </option>
+                                            ))}
+                                        </Form.Select>
                                     </Form.Group>
+
                                     <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>
                                         Checkout
                                     </Button>
 
                                 </Form>
                             </ListGroup.Item>
+
                         </ListGroup>
                     </Card>
                 </Col>
