@@ -2,19 +2,60 @@ import React from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { useEffect } from 'react';
 
 
 const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew, onSubmitSuccess }) => {
     const handleInputChange = (event) => {
         const { name, value } = event.target;
 
-        // If the input is for 'value' or 'maxDiscountValue', store it as a negative value
-        if ((name === 'value' || name === 'maxDiscountValue') && value) {
+        // If changing the valueType to PERCENTAGE, reset the discount value to 10
+        if (name === 'valueType' && value === 'PERCENTAGE') {
+            setDiscount({ ...discount, value: -1, valueType: value });
+        } else if (name === 'value' && discount?.valueType === 'PERCENTAGE') {
+            // If editing the value and the valueType is PERCENTAGE, enforce max value of 100
+            const newValue = Math.min(Math.abs(value), 100);
+            setDiscount({ ...discount, value: -newValue });
+        } else if (name === 'value' || name === 'maxDiscountValue') {
+            // If the input is for 'value' or 'maxDiscountValue', store it as a negative value
             setDiscount({ ...discount, [name]: -Math.abs(value) });
         } else {
+            // For all other inputs, store the value as is
             setDiscount({ ...discount, [name]: value });
         }
     };
+
+    const formatDateForInput = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        // Pad the month, date, hours, and minutes with leading zeros if necessary
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+    const defaultDiscountValues = {
+        title: '',
+        usageLimit: 1,
+        value: -1,
+        valueType: 'PERCENTAGE', // Assuming you want 'PERCENTAGE' as the default
+        maxDiscountValue: -1,
+        prerequisiteQuantityRange: 1,
+        prerequisiteSubtotalRange: 1,
+        startTime: Date.now(),
+        endTime: Date.now()
+    };
+
+    useEffect(() => {
+        // When adding a new discount, initialize it with default values
+        if (isNew && discount?.usageLimit === 0) {
+            setDiscount(defaultDiscountValues);
+        }
+    }, [isNew, discount, setDiscount]);
+
 
     const handleSubmit = async () => {
         // Prepare your discount data here, ensure proper formatting
@@ -48,7 +89,12 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew, onSubm
             onSubmitSuccess()
         } catch (error) {
             console.error('There was an error saving the discount:', error);
-            toast.error(error.response.data?.message);
+            if (error.response && error.response.data && error.response.data.message.includes('price_rule_title_key')) {
+                toast.error('The discount title already exists. Please use a different title.');
+            } else {
+                // If the error is not related to the title constraint, display the original error message
+                toast.error(error.response.data?.message || 'An unknown error occurred.');
+            }
         }
     };
 
@@ -88,10 +134,12 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew, onSubm
                         <Form.Control
                             type="number"
                             name="value"
-                            value={Math.abs(discount?.value || 0)} // Convert to positive for display
+                            value={Math.abs(discount?.value || 1)} // Convert to positive for display
                             onChange={handleInputChange}
                             min="1"
                             readOnly={!isNew}
+                            max={discount?.valueType === 'PERCENTAGE' ? 100 : undefined} // Set max to 100 if valueType is PERCENTAGE
+
 
                         />
                     </Form.Group>
@@ -103,6 +151,7 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew, onSubm
                             name="valueType"
                             value={discount?.valueType}
                             onChange={handleInputChange}
+
                             disabled={!isNew}
 
                         >
@@ -116,7 +165,7 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew, onSubm
                         <Form.Control
                             type="number"
                             name="maxDiscountValue"
-                            value={Math.abs(discount?.maxDiscountValue || 0)} // Convert to positive for display
+                            value={Math.abs(discount?.maxDiscountValue)} // Convert to positive for display
                             onChange={handleInputChange}
                             min="1"
                             readOnly={!isNew}
@@ -172,7 +221,7 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew, onSubm
                         <Form.Control
                             type="datetime-local"
                             name="startTime"
-                            value={discount?.startTime}
+                            value={formatDateForInput(discount?.startTime)}
                             onChange={handleInputChange}
                             readOnly={!isNew}
 
@@ -184,7 +233,7 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew, onSubm
                         <Form.Control
                             type="datetime-local"
                             name="endTime"
-                            value={discount?.endTime}
+                            value={formatDateForInput(discount?.endTime)}
                             onChange={handleInputChange}
                         />
                     </Form.Group>

@@ -283,7 +283,11 @@ const CartScreen = () => {
             lineItems,
             customer,
             address,
-            discountCode
+            discountCode,
+            totalQuantity: selectedItems.reduce((total, itemId) => {
+                const item = cartItems.find(item => item.id === itemId);
+                return total + item.qty;
+            }, 0)
         }
 
         console.log(orders);

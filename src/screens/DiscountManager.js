@@ -16,7 +16,7 @@ const DiscountManager = () => {
 
     // Updated fetchDiscounts function to include pagination
     const fetchDiscounts = async (page = 0) => {
-        const size = 1;
+        const size = 3;
         const accessToken = localStorage.getItem('accessToken') || null;
         try {
             const response = await axios.get(`http://localhost:8080/api/admin/price_rules?page=${page}&size=${size}`, {
