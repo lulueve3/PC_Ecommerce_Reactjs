@@ -390,7 +390,7 @@ const ProductCreateScreen = () => {
                                                     type='number'
                                                     className='form-control'
                                                     id={`variantPriceDefault`}
-                                                    value={(variants[0] && variants[0].price) || 1}  // Check if variants[0] exists before accessing price
+                                                    value={(variants[0] && variants[0].price)}  // Check if variants[0] exists before accessing price
                                                     onChange={(e) => handleVariantChange(0, 'price', e.target.value)}
                                                     onClick={(e) => e.target.select()}
                                                     required
@@ -404,7 +404,7 @@ const ProductCreateScreen = () => {
                                                     type='number'
                                                     className='form-control'
                                                     id={`variantPriceDefault`}
-                                                    value={(variants[0] && variants[0].compareAtPrice) || 0}
+                                                    value={(variants[0] && variants[0].compareAtPrice)}
                                                     onChange={(e) => handleVariantChange(0, 'compareAtPrice', e.target.value)}
                                                     onClick={(e) => e.target.select()}
                                                     min={0}
@@ -419,7 +419,7 @@ const ProductCreateScreen = () => {
                                                     type='number'
                                                     className='form-control'
                                                     id={`variantQuantityDefault`}
-                                                    value={(variants[0] && variants[0].quantity) || 1}  // Check if variants[0] exists before accessing quantity
+                                                    value={(variants[0] && variants[0].quantity)}  // Check if variants[0] exists before accessing quantity
                                                     onChange={(e) => handleVariantChange(0, 'quantity', e.target.value)}
                                                     min={1}
                                                     onClick={(e) => e.target.select()}

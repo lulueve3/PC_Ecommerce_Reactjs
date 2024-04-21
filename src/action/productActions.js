@@ -155,14 +155,9 @@ export const updateProduct = (id, { title, description, vendor, active, variants
         for (const variant of variants) {
             const variantId = variant.id; // Assuming the variant object has an 'id' property
 
-            const { updateVariant } = await axios.patch(`http://localhost:8080/api/admin/products/${id}/variants/${variantId}`, {
-                price: variant.price,
-                quantity: variant.quantity,
-                position: variant.position,
-                option1: variant.option1,
-                option2: variant.option2,
-                option3: variant.option3
-            }, config);
+            const { updateVariant } = await axios.patch(`http://localhost:8080/api/admin/products/${id}/variants/${variantId}`,
+                variant
+                , config);
         }
 
         const { data } = await axios.patch(`http://localhost:8080/api/admin/products/${id}`, {

@@ -51,6 +51,10 @@ const CartScreen = () => {
             const discount = data.results.find((rule) => rule.title === discountCode);
 
             if (discount) {
+                // Calculate total quantity and subtotal for selected items
+                const totalQuantity = selectedItems.reduce((total, itemId) => total + cartItems.find(item => item.id === itemId)?.qty, 0);
+                const subtotal = selectedItems.reduce((total, itemId) => total + (cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price), 0);
+
                 // Get the current date and time
                 const now = new Date();
 
@@ -58,8 +62,11 @@ const CartScreen = () => {
                 const startTime = new Date(discount.startTime);
                 const endTime = new Date(discount.endTime);
 
-                // Check if discount is within the valid period and usage limit has not been exceeded
-                if (now >= startTime && now <= endTime && (discount.usageLimit === null || discount.usageLimit > 0)) {
+                // Check prerequisites and if discount is within the valid period and usage limit has not been exceeded
+                if (now >= startTime && now <= endTime &&
+                    (discount.usageLimit === null || discount.usageLimit > 0) &&
+                    totalQuantity >= discount.prerequisiteQuantityRange &&
+                    subtotal >= discount.prerequisiteSubtotalRange) {
                     setDiscountData(discount);
                     toast.success(`Discount code applied`);
                 } else {
@@ -70,6 +77,10 @@ const CartScreen = () => {
                         toast.error('Discount code has expired.');
                     } else if (discount.usageLimit !== null && discount.usageLimit <= 0) {
                         toast.error('Discount code usage limit has been reached.');
+                    } else if (totalQuantity < discount.prerequisiteQuantityRange) {
+                        toast.error(`Discount requires a minimum quantity of ${discount.prerequisiteQuantityRange}.`);
+                    } else if (subtotal < discount.prerequisiteSubtotalRange) {
+                        toast.error(`Discount requires a minimum subtotal of $${discount.prerequisiteSubtotalRange.toFixed(2)}.`);
                     }
                 }
             } else {
@@ -118,21 +129,28 @@ const CartScreen = () => {
 
     useEffect(() => {
         if (discountData) {
-            const originalSubtotal = selectedItems.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0);
+            const originalSubtotal = selectedItems.reduce((acc, itemId) =>
+                acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0);
             let discountAmount = 0;
 
             switch (discountData.valueType) {
                 case 'FIXED_AMOUNT':
+                    // Apply the fixed amount discount directly
                     discountAmount = discountData.value;
                     break;
                 case 'PERCENTAGE':
-                    discountAmount = (originalSubtotal * discountData.value) / 100;
+                    // Calculate the percentage discount
+                    const percentageDiscount = (originalSubtotal * discountData.value) / 100;
+                    // If a max discount value is set, use the minimum of the percentage discount and max discount value
+                    discountAmount = discountData.maxDiscountValue
+                        ? Math.max(percentageDiscount, discountData.maxDiscountValue)
+                        : percentageDiscount;
                     break;
                 default:
                     discountAmount = 0;
             }
 
-            const newSubtotal = originalSubtotal + discountAmount;
+            const newSubtotal = originalSubtotal + discountAmount; // Subtract discount from subtotal
             setDiscountedSubtotal(newSubtotal.toFixed(2));
         } else {
             setDiscountedSubtotal(undefined);
@@ -155,8 +173,14 @@ const CartScreen = () => {
                 const { data } = await axios.get('http://localhost:8080/api/customer/addresses', config);
                 setAddresses(data.addresses); // assuming 'data' is an array of address objects
             } catch (error) {
-                console.error('Error fetching addresses:', error);
-                toast.error('Error fetching addresses. Please try again.');
+                if (error.response && error.response.status === 401) {
+                    console.error('Unauthorized access:', error);
+                    toast.error('Session expired. Please log in again.');
+                    localStorage.removeItem('accessToken'); // Remove the token from storage
+                    navigate('/login'); // Redirect to the login page
+                } else {
+                    console.error('Error fetching addresses:', error);
+                }
             }
         };
 
@@ -327,7 +351,6 @@ const CartScreen = () => {
 
 
         } catch (error) {
-            console.log(error.response.data.message);
             if (error.response.data.message === "Stock doesn't have enough quantity")
 
                 toast.error("Stock doesn't have enough quantity!", {

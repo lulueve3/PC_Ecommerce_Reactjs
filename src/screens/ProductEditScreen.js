@@ -120,7 +120,6 @@ const ProductEditScreen = () => {
             collectionIds: selectedCollections
         });
 
-        console.log(variants);
 
         dispatch(
             updateProduct(productId, {
@@ -456,7 +455,7 @@ const ProductEditScreen = () => {
                 </Link>
                 <div className='text-center'><h1>Create Product</h1></div>
                 {loadingUpdate && <Loader />}
-                {errorUpdate && <Message variant='danger'>{errorUpdate}</Message>}
+                {/* {errorUpdate && <Message variant='danger'>{errorUpdate}</Message>} */}
                 <form onSubmit={submitHandler}>
                     <Card className='mb-3'>
                         <Card.Body>
@@ -684,7 +683,7 @@ const ProductEditScreen = () => {
 
 
                     <button type='submit' className='btn btn-primary my-2' disabled={uploading}>
-                        {uploading ? 'Uploading...' : 'Create'}
+                        {uploading ? 'Uploading...' : 'Update'}
                     </button>
                 </form>
             </div>
