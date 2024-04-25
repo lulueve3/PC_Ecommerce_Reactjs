@@ -8,7 +8,7 @@ const Product = ({ product }) => {
     return (
         <Card className='my-3 p-2 rounded ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }} >
             <Link to={`/product/${product.id}`}>
-                <Card.Img src={product.images[0]?.src} variant='top' style={{ objectFit: 'contain', width: '200px', height: '200px' }} />
+                <Card.Img src={product.image?.src} variant='top' style={{ objectFit: 'contain', width: '200px', height: '200px' }} />
             </Link>
             <Card.Body className='p-2' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
                 <Link to={`/product/${product.id}`} style={{ width: '100%', height: '100%', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px', textAlign: 'center' }}>

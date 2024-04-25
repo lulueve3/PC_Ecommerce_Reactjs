@@ -150,7 +150,7 @@ const CartScreen = () => {
                     discountAmount = 0;
             }
 
-            const newSubtotal = originalSubtotal + discountAmount; // Subtract discount from subtotal
+            const newSubtotal = Math.max(0, originalSubtotal + discountAmount); // Subtract discount from subtotal, ensure it's not less than 0
             setDiscountedSubtotal(newSubtotal.toFixed(2));
         } else {
             setDiscountedSubtotal(undefined);
@@ -302,12 +302,12 @@ const CartScreen = () => {
             "ward": fullAddressDetails.ward,
             "district": fullAddressDetails.district
         }
-        const discountCode = discountData && discountData.title ? [discountData.title] : [0];
+        const discountCodes = discountData && discountData.title ? [discountData.title] : [0];
         const orders = {
             lineItems,
             customer,
             address,
-            discountCode,
+            discountCodes,
             totalQuantity: selectedItems.reduce((total, itemId) => {
                 const item = cartItems.find(item => item.id === itemId);
                 return total + item.qty;
