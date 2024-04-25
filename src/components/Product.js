@@ -1,35 +1,48 @@
-import React from 'react'
-import { Card } from 'react-bootstrap'
-import Rating from './Rating'
-import { Link } from 'react-router-dom'
-
+import React from 'react';
+import { Card } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 const Product = ({ product }) => {
+    const { price, compareAtPrice } = product.variants[0];
+    const hasDiscount = compareAtPrice && compareAtPrice > price;
+    const discountPercentage = hasDiscount
+        ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
+        : 0;
+
     return (
-        <Card className='my-3 p-2 rounded ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }} >
+        <Card className='my-3 p-3 rounded'>
             <Link to={`/product/${product.id}`}>
-                <Card.Img src={product.image?.src} variant='top' style={{ objectFit: 'contain', width: '200px', height: '200px' }} />
+                <Card.Img
+                    src={product.image?.src}
+                    variant='top'
+                    style={{ objectFit: 'contain', width: '200px', height: '200px' }}
+                />
             </Link>
-            <Card.Body className='p-2' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
-                <Link to={`/product/${product.id}`} style={{ width: '100%', height: '100%', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px', textAlign: 'center' }}>
-                    <Card.Title as='div' style={{ height: '100%', width: '100%' }}>
-                        <p style={{ height: '90px', fontSize: '0.9rem', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {product.title}
-                        </p>
+            <Card.Body>
+                <Link to={`/product/${product.id}`}>
+                    <Card.Title as='div'>
+                        <strong>{product.title}</strong>
                     </Card.Title>
                 </Link>
+                {hasDiscount && (
+                    <div>
+                        <Card.Text as='div' style={{ textDecoration: 'line-through' }}>
+                            ${compareAtPrice.toFixed(2)}
+                        </Card.Text>
+                        <Card.Text as='h4' className='text-success'>
+                            ${price.toFixed(2)}{' '}
+                            <small className='text-muted'>({discountPercentage}%)</small>
+                        </Card.Text>
+                    </div>
+                )}
+                {!hasDiscount && (
+                    <Card.Text as='h4' className='text-success'>
+                        ${price.toFixed(2)}
+                    </Card.Text>
+                )}
             </Card.Body>
-
-
-
-            <Card.Text as='h4'>
-                <div className='my-2 text-success'>
-                    ${product.variants[0].price}
-                </div>
-            </Card.Text>
-
         </Card>
-    )
-}
+    );
+};
 
-export default Product
+export default Product;
