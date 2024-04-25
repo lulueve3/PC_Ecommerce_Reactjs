@@ -309,7 +309,7 @@ const ProductEditScreen = () => {
             };
 
             await axios.post(`http://localhost:8080/api/admin/products/${productId}/images`, {
-                position: index,
+                position: images.length + index,
                 src: imageUrl,
                 width: 0,
                 height: 0
@@ -341,7 +341,7 @@ const ProductEditScreen = () => {
                 setImages((prevImages) => [
                     ...prevImages,
                     {
-                        position: index,
+                        position: images.length + index,
                         src: imageUrl,
                     },
                 ]);
@@ -354,7 +354,59 @@ const ProductEditScreen = () => {
         }
     };
 
+    const handleReplaceImage = async (e, imageId) => {
+        const file = e.target.files[0];
+        if (!file) {
+            return; // No file selected, so return early
+        }
 
+        try {
+            setUploading(true);
+
+            const data = new FormData();
+            data.append('file', file);
+            data.append('upload_preset', 'rctjv3j1');
+            data.append('cloud_name', 'dommm7bzh');
+
+            const response = await axios.post('https://api.cloudinary.com/v1_1/dommm7bzh/image/upload', data);
+            const newImageUrl = response.data.secure_url;
+
+            const accessToken = localStorage.getItem('accessToken');
+            if (!accessToken) {
+                toast.error('Authentication error. Please log in again.');
+                setUploading(false);
+                return;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+
+            // Assuming your API endpoint for updating an image looks like this
+            await axios.patch(`http://localhost:8080/api/admin/products/${productId}/images/${imageId}`, {
+                src: newImageUrl,
+                // Include other properties that your API might require
+            }, config);
+
+            // Update the src attribute of the image with the specified ID
+            setImages((prevImages) => {
+                return prevImages.map((img) => {
+                    if (img.id === imageId) {
+                        return { ...img, src: newImageUrl };
+                    }
+                    return img;
+                });
+            });
+
+        } catch (error) {
+            console.error('Error replacing image:', error);
+            toast.error('Error replacing image. Please try again.');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleRemoveImage = async (e, idToRemove) => {
         e.preventDefault();
@@ -397,7 +449,13 @@ const ProductEditScreen = () => {
                 theme: "light",
             });
         }
-        setImages((prevImages) => prevImages.filter((image) => image.id !== idToRemove));
+        setImages((prevImages) => {
+            const updatedImages = prevImages.filter((image) => image.id !== idToRemove);
+            return updatedImages.map((image, index) => ({
+                ...image,
+                position: index // Reset position based on new index
+            }));
+        });
     };
 
     const updateCollection = async () => {
@@ -453,7 +511,7 @@ const ProductEditScreen = () => {
                 <Link to='/admin/productlist' className='btn btn-light my-3'>
                     Go Back
                 </Link>
-                <div className='text-center'><h1>Create Product</h1></div>
+                <div className='text-center'><h1>Edit Product</h1></div>
                 {loadingUpdate && <Loader />}
                 {/* {errorUpdate && <Message variant='danger'>{errorUpdate}</Message>} */}
                 <form onSubmit={submitHandler}>
@@ -525,20 +583,24 @@ const ProductEditScreen = () => {
                         <Card.Body>
                             <div className='mb-3'>
                                 <input type='file' onChange={(e) => handleImageChange(e)} multiple />
-                                {!images || images.length === 0 ? null : (
-                                    <div>
-                                        {images.map((image, index) => (
-                                            <div key={index}>
-                                                <img
-                                                    src={image.src}
-                                                    alt={`Uploaded Image ${index + 1}`}
-                                                    style={{ width: '150px', height: '150px', marginRight: '10px' }}
-                                                />
-                                                <button onClick={() => handleRemoveImage(index)}>Remove</button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                {images
+                                    .sort((a, b) => a.position - b.position)
+                                    .map((image, index) => (
+                                        <div key={image.id}>
+                                            <img
+                                                src={image.src}
+                                                alt={`Uploaded Image ${image.position + 1}`}
+                                                style={{ width: '150px', height: '150px', marginRight: '10px' }}
+                                            />
+                                            <input
+                                                type="file"
+                                                onChange={(e) => handleReplaceImage(e, image.id)}
+                                                style={{ marginRight: '10px' }}
+                                            />
+                                            {image.position !== 0 && (
+                                                <button onClick={(e) => handleRemoveImage(e, image.id)}>Remove</button>
+                                            )}                                        </div>
+                                    ))}
                             </div>
                         </Card.Body>
                     </Card>
