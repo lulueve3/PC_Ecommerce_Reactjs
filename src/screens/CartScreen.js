@@ -93,7 +93,7 @@ const CartScreen = () => {
         }
     };
 
-    const [discountedSubtotal, setDiscountedSubtotal] = useState(undefined);
+    const [discountedSubtotal, setDiscountedSubtotal] = useState(0);
 
 
 
@@ -157,9 +157,6 @@ const CartScreen = () => {
         }
     }, [discountData, selectedItems, cartItems]);
 
-    useEffect(() => {
-        console.log(cartItems);
-    }, [cartItems])
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -213,33 +210,24 @@ const CartScreen = () => {
     };
 
 
-    const OrderConfirmationEmail = ({ line_items, customer, address }) => {
+    const OrderConfirmationEmail = ({ lineItems, customer, address }) => {
+
+
         const html = `
-          <div>
-            <h2>Order Confirmation</h2>
-      
-            <h3>Customer Information</h3>
-            <p>
-              <strong>Name:</strong> ${customer.first_name} ${customer.last_name}
-            </p>
-            <p>
-              <strong>Email:</strong> ${customer.email}
-            </p>
-      
-            <h3>Shipping Address</h3>
-            <p>
-              <strong>Address:</strong> ${address.address}
-            </p>
-            <p>
-              <strong>Phone:</strong> ${address.phone}
-            </p>
-            <p>
-              <strong>Created Time:</strong> ${new Date()}
-            </p>
-      
-      
-            <h3>Ordered Items</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #ddd;">
+            <div>
+                <h2>Order Confirmation</h2>
+    
+                <h3>Customer Information</h3>
+                <p><strong>Name:</strong> ${customer.first_name} ${customer.last_name}</p>
+                <p><strong>Email:</strong> ${customer.email}</p>
+    
+                <h3>Shipping Address</h3>
+                <p><strong>Address:</strong> ${address.address}</p>
+                <p><strong>Phone:</strong> ${address.phone}</p>
+                <p><strong>Created Time:</strong> ${new Date()}</p>
+    
+                <h3>Ordered Items</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #ddd;">
   <thead>
     <tr style="background-color: #f2f2f2;">
     <th style="padding: 10px; text-align: left;">Product Name</th>
@@ -249,7 +237,7 @@ const CartScreen = () => {
     </tr>
   </thead>
   <tbody>
-    ${line_items
+    ${lineItems
                 .map(
                     (item) => `
           <tr key=${item.variant_id} style="border-bottom: 1px solid #ddd;">
@@ -265,14 +253,21 @@ const CartScreen = () => {
                 .join('')}
   </tbody>
 </table>
-
-      
-<p style="font-size: 18px; color: green;">Total Order Amount: $${line_items
-                .reduce((total, item) => total + cartItems.find(cartItem => cartItem.id === item.variant_id)?.price * item.quantity, 0)
-                .toFixed(2)}</p>
-
-  <p style="font-size: 16px; color: green;">Thank you for shopping with us!</p>
-          </div>
+    
+                ${discountCode ? `
+                    <h3>Discount</h3>
+                    <p><strong>Discount Code:</strong> ${discountCode}</p>
+                    <p><strong>Original Subtotal:</strong> $${selectedItems.reduce((acc, itemId) => acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0).toFixed(3)}</p>
+                ` : ''}
+    
+                <h3>Total Order Amount</h3>
+                <p style="font-size: 18px; color: green;">$${Number(discountedSubtotal).toFixed(3)}</p>
+    
+                <h3>Payment Method</h3>
+                <p>${paymentMethod}</p>
+    
+                <p style="font-size: 16px; color: green;">Thank you for shopping with us!</p>
+            </div>
         `;
         return html;
     };
@@ -283,8 +278,11 @@ const CartScreen = () => {
         const lineItems = selectedItems.map(itemId => {
             const item = cartItems.find(item => item.id === itemId);
             return {
-                variantId: itemId,
+                variant_id: itemId,
                 quantity: item.qty,
+                title: item.title,
+                variant: item.variant,
+                variantId: itemId
             };
         });
         const customer = {
@@ -315,6 +313,7 @@ const CartScreen = () => {
         }
 
         console.log(orders);
+
         try {
 
 
@@ -349,9 +348,12 @@ const CartScreen = () => {
 
             setSelectedItems([])
 
+            setDiscountedSubtotal(undefined);
+
 
         } catch (error) {
-            if (error.response.data.message === "Stock doesn't have enough quantity")
+            console.log(error);
+            if (error.response.data?.message === "Stock doesn't have enough quantity")
 
                 toast.error("Stock doesn't have enough quantity!", {
                     position: "top-right",
@@ -376,6 +378,7 @@ const CartScreen = () => {
                     theme: "light",
                 });
         }
+
     }
 
     const accessToken = localStorage.getItem('accessToken') || null;
@@ -390,7 +393,6 @@ const CartScreen = () => {
             const decodedToken = jwtDecode(accessToken);
             setUserEmail(decodedToken.e);
 
-            console.log(decodedToken);
         } catch (error) {
             console.error('Error decoding access token:', error);
         }
@@ -424,7 +426,6 @@ const CartScreen = () => {
             });
             return
         }
-        console.log(JSON.stringify(fullAddressDetails));
 
 
         if (paymentMethod === 'CreditCard') {
