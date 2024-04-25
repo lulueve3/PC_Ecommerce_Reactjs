@@ -12,6 +12,7 @@ import { EditorState, convertToRaw, ContentState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { convertToHTML, convertFromHTML } from 'draft-convert';
+import { ToastContainer, toast } from 'react-toastify';
 
 
 
@@ -86,7 +87,8 @@ const ProductCreateScreen = () => {
                 collectionIds: selectedCollections
             })
         );
-        navigate('/admin/productlist');
+        if (successCreate) navigate('/admin/productlist');
+        else toast.error(errorCreate);
 
     };
 
@@ -235,7 +237,7 @@ const ProductCreateScreen = () => {
                 setImages((prevImages) => [
                     ...prevImages,
                     {
-                        position: index,
+                        position: index + 1,
                         src: imageUrl,
                     },
                 ]);
@@ -264,13 +266,13 @@ const ProductCreateScreen = () => {
     return (
         <>
             <div>
+                <ToastContainer />
                 <Link to='/admin/productlist' className='btn btn-light my-3'>
                     Go Back
                 </Link>
                 <div className='text-center'><h1>Create Product</h1></div>
 
                 {loadingCreate && <Loader />}
-                {errorCreate && <Message variant='danger'>{errorCreate}</Message>}
                 <form onSubmit={submitHandler}>
                     <Card className='mb-3'>
                         <Card.Body>
