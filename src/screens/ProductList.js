@@ -73,8 +73,6 @@ const ProductListScreen = () => {
             </Row>
             {loadingDelete && <Loader />}
             {errorDelete && <Message variant='danger'>{errorDelete}</Message>}
-            {loadingCreate && <Loader />}
-            {errorCreate && <Message variant='danger'>{errorCreate}</Message>}
             {loading ? <Loader /> : error ? <Message variant='danger'>{error}</Message> : (
                 <>
                     <Table striped bordered hover responsive className='table-sm'>
@@ -93,7 +91,7 @@ const ProductListScreen = () => {
                                 <tr>
                                     <td><Link to={`/product/${product.id}`}>{product.id}
                                     </Link></td>
-                                    <td><Link to={`/product/${product.id}`}><Image src={product.images[0]?.src} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px', margin: '5px' }} /></Link></td>
+                                    <td><Link to={`/product/${product.id}`}><Image src={product.image?.src} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px', margin: '5px' }} /></Link></td>
                                     <td>{product.title}</td>
                                     <td>{product.variants[0]?.price}</td>
                                     <td>{product.active ? 'true' : 'false'}</td>

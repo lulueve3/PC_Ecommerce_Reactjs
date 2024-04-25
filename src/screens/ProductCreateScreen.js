@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import FormContainer from '../components/FormContainer';
-import { createProduct } from '../action/productActions';
+import { createProduct, resetCreateProduct } from '../action/productActions';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import axios from 'axios'
 import Select from 'react-select';
@@ -62,6 +62,21 @@ const ProductCreateScreen = () => {
         handleOptionChangeToVariant();
     }, [options]);
 
+    useEffect(() => {
+        if (errorCreate) {
+            toast.error(errorCreate);
+        }
+    }, [errorCreate]);
+
+    useEffect(() => {
+        if (successCreate) {
+            toast.success('Product created successfully');
+            navigate('/admin/productlist');
+            dispatch(resetCreateProduct());
+
+        }
+    }, [navigate, successCreate]);
+
     const submitHandler = (e) => {
         e.preventDefault();
         console.log({
@@ -87,8 +102,6 @@ const ProductCreateScreen = () => {
                 collectionIds: selectedCollections
             })
         );
-        if (successCreate) navigate('/admin/productlist');
-        else toast.error(errorCreate);
 
     };
 
@@ -237,7 +250,7 @@ const ProductCreateScreen = () => {
                 setImages((prevImages) => [
                     ...prevImages,
                     {
-                        position: index + 1,
+                        position: images.length + index,
                         src: imageUrl,
                     },
                 ]);
