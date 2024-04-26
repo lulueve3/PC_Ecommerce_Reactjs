@@ -56,6 +56,11 @@ const ProductScreen = ({ }) => {
         return { __html: htmlString };
     };
 
+    function getVariantName(variant) {
+        // Lọc ra các chuỗi không rỗng và nối chúng lại với nhau bằng dấu gạch ngang
+        return variant.options.filter(option => option).join('-');
+    }
+
     useEffect(() => {
         if (product && product.variants) {
             setPrice(product.variants[0].price);
@@ -209,7 +214,7 @@ const ProductScreen = ({ }) => {
                                                                 type="button"
                                                                 onClick={() => handleButtonClick(index, variant.price)}
                                                             >
-                                                                {variant.option1 + ' ' + variant.option2 + " " + variant.option3}
+                                                                {getVariantName(variant)}
                                                             </Button>
                                                         ))}
                                                     </>

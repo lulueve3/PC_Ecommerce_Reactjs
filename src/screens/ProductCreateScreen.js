@@ -90,6 +90,19 @@ const ProductCreateScreen = () => {
             collectionIds: selectedCollections
         });
 
+        // Check each variant to ensure that compareAtPrice is greater than price
+        const isVariantPricingValid = variants.every(variant => {
+            console.log(variant.price);
+            // If compareAtPrice is not set, or if it's greater than price, it's valid
+            return !variant.compareAtPrice || variant.compareAtPrice > variant.price;
+        });
+
+        // If any variant fails the validation, show an error and return early
+        if (!isVariantPricingValid) {
+            toast.error('Compare-at price must be greater than the price for all variants.');
+            return;
+        }
+
         dispatch(
             createProduct({
                 title,

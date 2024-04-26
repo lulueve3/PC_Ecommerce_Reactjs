@@ -128,6 +128,11 @@ const CartScreen = () => {
     };
 
     useEffect(() => {
+        // Filter out selected items that are not in cartItems
+        setSelectedItems(prevSelectedItems => prevSelectedItems.filter(itemId => cartItems.some(item => item.id === itemId)));
+    }, [cartItems]);
+
+    useEffect(() => {
         if (discountData) {
             const originalSubtotal = selectedItems.reduce((acc, itemId) =>
                 acc + cartItems.find(item => item.id === itemId)?.qty * cartItems.find(item => item.id === itemId)?.price, 0);
@@ -468,80 +473,76 @@ const CartScreen = () => {
                 </Modal.Body>
             </Modal>
             <Row >
-                <Col md={8}>
+                <Col md={12} lg={8}>
                     <h1>Shopping Cart</h1>
                     {cartItems.length === 0 ? <Message>Your cart is empty <Link to="/">Go Back</Link> </Message> : (
                         <ListGroup variant='flush'>
                             {currentCartItems.reverse().map(item => (
-                                <ListGroup.Item key={item.id}>
-                                    <Row>
-                                        {/* Column 1: Image */}
-                                        <Col md={3}>
-                                            <Link to={`/product/${item.productId}`}>
-                                                <Image src={item.image} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px' }} />
-                                            </Link>
-                                        </Col>
-
-                                        {/* Column 2: Title */}
-                                        <Col md={3}>
-                                            <Link
-                                                to={`/product/${item.productId}`}
-                                                style={{
-                                                    display: 'block',
-                                                    maxWidth: '100%',
-                                                    wordWrap: 'break-word',
-                                                    wordBreak: 'break-all'
-                                                }}
-                                            >
-                                                {item.title}
-                                                <br />
-                                                {item.variant}
-                                            </Link>
-                                        </Col>
-
-                                        {/* Column 3: Price */}
-                                        <Col md={2}>
-                                            {item.price} $
-                                        </Col>
-
-                                        {/* Column 4: Quantity */}
-                                        <Col md={2}>
-                                            <input
-                                                type="number"
-                                                value={item.qty}
-                                                min={1}
-                                                max={item.inStock}
-                                                onChange={(e) => {
-                                                    const newValue = Math.min(Math.max(1, parseInt(e.target.value, 10)), item.inStock);
-                                                    editQuantityHandler(item.id, newValue);
-                                                }}
-                                                className="form-control text-center"
-                                                style={{ width: '100%' }}
+                                <ListGroup.Item key={item.id} className="d-flex align-items-center">
+                                    {/* Column 1: Image */}
+                                    <div className="col-md-2 mb-3">
+                                        <Link to={`/product/${item.productId}`}>
+                                            <Image
+                                                src={item.image}
+                                                fluid
+                                                rounded
+                                                style={{ maxWidth: '100px', maxHeight: '100px' }} // Set max width and height for the image
                                             />
-                                        </Col>
+                                        </Link>
+                                    </div>
 
-                                        {/* Column 5: Remove and Select */}
-                                        <Col md={2}>
-                                            <Button
-                                                type='button'
-                                                variant='light'
-                                                onClick={() => removeFromCartHandler(item.id)}
-                                                className='me-2'
-                                            >
-                                                <i className='fas fa-trash'></i>
-                                            </Button>
-                                            <input
+                                    {/* Column 2: Title */}
+                                    <div className="col-md-3 mb-3">
+                                        <Link to={`/product/${item.productId}`}>
+                                            {item.title}
+                                            <br />
+                                            {item.variant}
+                                        </Link>
+                                    </div>
+
+                                    {/* Column 3: Quantity */}
+                                    <div className="col-md-2 mb-3">
+                                        <Form.Control
+                                            type="number"
+                                            value={item.qty}
+                                            min={1}
+                                            max={item.inStock}
+                                            onChange={(e) => {
+                                                const newValue = Math.min(Math.max(1, parseInt(e.target.value, 10)), item.inStock);
+                                                editQuantityHandler(item.id, newValue);
+                                            }}
+                                            className="form-control text-center"
+                                        />
+                                    </div>
+
+                                    {/* Column 4: Price */}
+                                    <div className="col-md-2 mb-3 text-sm-center">
+                                        ${item.price}
+                                    </div>
+
+                                    {/* Column 5: Remove and Select */}
+                                    <div className="col-md-3 d-flex align-items-center justify-content-center">
+                                        <Button
+                                            type='button'
+                                            variant='light'
+                                            onClick={() => removeFromCartHandler(item.id)}
+                                        >
+                                            <i className='fas fa-trash'></i>
+                                        </Button>
+                                        <div className="ml-2 align-self-center mx-3 mb-3">
+                                            <Form.Check
                                                 type='checkbox'
-                                                id={item.id}
+                                                id={`select-${item.id}`}
                                                 checked={selectedItems.includes(item.id)}
                                                 onChange={() => toggleSelectItem(item.id)}
                                             />
-                                        </Col>
+                                        </div>
+                                    </div>
 
-                                        {/* Vertical Separator Column */}
-                                        <Col md={1} className="separator-column"></Col>
-                                    </Row>
                                 </ListGroup.Item>
+
+
+
                             ))}
                         </ListGroup>
                     )}
@@ -555,7 +556,7 @@ const CartScreen = () => {
                         </Pagination>
                     </div>
                 </Col>
-                <Col md={4}>
+                <Col md={12} lg={4}>
                     <Card>
                         <ListGroup variant='flush'>
                             <ListGroup.Item>

@@ -82,7 +82,7 @@ const ProductListScreen = () => {
                                 <th>IMAGE</th>
                                 <th>TITLE</th>
                                 <th>PRICE</th>
-                                <th>ACTIVE</th>
+                                <th>Price 2</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -94,7 +94,7 @@ const ProductListScreen = () => {
                                     <td><Link to={`/product/${product.id}`}><Image src={product.image?.src} fluid rounded style={{ maxWidth: '150px', maxHeight: '150px', margin: '5px' }} /></Link></td>
                                     <td>{product.title}</td>
                                     <td>{product.variants[0]?.price}</td>
-                                    <td>{product.active ? 'true' : 'false'}</td>
+                                    <td>{product.variants[0]?.compareAtPrice}</td>
                                     <td>
                                         <Button variant='light' className='btn-sm' onClick={() => handleEdit(product.id)}>
                                             <i className='fas fa-edit'></i>
