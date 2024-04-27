@@ -5,9 +5,12 @@ import { format } from 'date-fns';
 import { useParams, useNavigate } from 'react-router-dom'
 
 
-const MyOrders = () => {
-    const { id } = useParams();
 
+const MyOrders = () => {
+
+
+
+    const { id } = useParams();
 
     const [orders, setOrders] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -15,6 +18,7 @@ const MyOrders = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [productDetails, setProductDetails] = useState([]);
+
 
 
     const formatTime = (time) => {
@@ -44,7 +48,7 @@ const MyOrders = () => {
 
     useEffect(() => {
         const fetchProductDetailsForOrder = async (order) => {
-            const productDetailsPromises = order.line_items.map(async (item) => {
+            const productDetailsPromises = order.lineItems.map(async (item) => {
                 const productId = item.productId;
                 await fetchProductDetails(productId);
             });
@@ -65,7 +69,7 @@ const MyOrders = () => {
             return [];
         }
 
-        const productIdsInOrder = order.line_items.map((item) => item.productId);
+        const productIdsInOrder = order.lineItems.map((item) => item.productId);
 
         const productsInOrder = productDetails.filter((product) =>
             productIdsInOrder.includes(product.id)
@@ -73,6 +77,7 @@ const MyOrders = () => {
 
         return productsInOrder;
     };
+
 
     const findVariantById = (productId, variantId) => {
         const product = productDetails.find((product) => product.id === productId);
@@ -99,7 +104,7 @@ const MyOrders = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {order.line_items.map((item) => {
+                        {order.lineItems.map((item) => {
                             const product = productDetails.find(
                                 (product) => product.id === item.productId
                             );
@@ -172,7 +177,7 @@ const MyOrders = () => {
         const order = orders.find(order => order.id === orderId);
 
         if (order) {
-            order.line_items.forEach(item => {
+            order.lineItems.forEach(item => {
                 sum += item.price * item.quantity;
             });
         }
@@ -201,7 +206,7 @@ const MyOrders = () => {
         let sum = 0;
 
         if (order) {
-            order.line_items.forEach(item => {
+            order.lineItems.forEach(item => {
                 sum += item.price * item.quantity;
             });
         }

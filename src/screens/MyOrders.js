@@ -13,10 +13,10 @@ const MyOrders = () => {
 
 
     const formatTime = (time) => {
-        const dateObject = new Date(time);
-        return format(dateObject, "dd/MM/yyyy HH:mm:ss"); // Có thể sửa đổi định dạng tùy ý
-
-    }
+        console.log(time);
+        const formattedTime = format(new Date(time), "dd/MM/yyyy HH:mm:ss");
+        return formattedTime;
+    };
 
 
     const fetchOrders = async (page = 0, size = 10) => {
@@ -37,7 +37,7 @@ const MyOrders = () => {
 
     useEffect(() => {
         const fetchProductDetailsForOrder = async (order) => {
-            const productDetailsPromises = order.line_items.map(async (item) => {
+            const productDetailsPromises = order.lineItems.map(async (item) => {
                 const productId = item.productId;
                 await fetchProductDetails(productId);
             });
@@ -58,7 +58,7 @@ const MyOrders = () => {
             return [];
         }
 
-        const productIdsInOrder = order.line_items.map((item) => item.productId);
+        const productIdsInOrder = order.lineItems.map((item) => item.productId);
 
         const productsInOrder = productDetails.filter((product) =>
             productIdsInOrder.includes(product.id)
@@ -92,7 +92,7 @@ const MyOrders = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {order.line_items.map((item) => {
+                        {order.lineItems?.map((item) => {
                             const product = productDetails.find(
                                 (product) => product.id === item.productId
                             );
@@ -165,7 +165,7 @@ const MyOrders = () => {
         const order = orders.find(order => order.id === orderId);
 
         if (order) {
-            order.line_items.forEach(item => {
+            order.lineItems.forEach(item => {
                 sum += item.price * item.quantity;
             });
         }
@@ -194,7 +194,7 @@ const MyOrders = () => {
         let sum = 0;
 
         if (order) {
-            order.line_items.forEach(item => {
+            order.lineItems.forEach(item => {
                 sum += item.price * item.quantity;
             });
         }
@@ -217,7 +217,8 @@ const MyOrders = () => {
                         <th>Customer Name</th>
                         <th>Total Amount</th>
                         <th>Created Time</th>
-                        <th>Actions</th>
+                        <th>Status</th>
+                        <th>Detail</th>
                         {/* Thêm các cột khác tùy thuộc vào dữ liệu đơn hàng */}
                     </tr>
                 </thead>
@@ -225,9 +226,10 @@ const MyOrders = () => {
                     {orders?.map(order => (
                         <tr key={order.id}>
                             <td>{order.id}</td>
-                            <td>{order.address.first_name + " " + order.address.last_name}</td>
+                            <td>{`${order.customer.firstName} ${order.customer.lastName}`}</td>
                             <td>{totalOrderById(order.id)}</td>
-                            <td>{formatTime(order.created_time)}</td>
+                            <td>{formatTime(order.createdAt)}</td>
+                            <td>{order.fulfillmentStatus}</td>
                             <td>
                                 <Button variant="info" onClick={() => handleViewDetails(order.id)}>
                                     View Details

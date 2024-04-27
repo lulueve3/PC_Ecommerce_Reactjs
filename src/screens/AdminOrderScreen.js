@@ -11,117 +11,19 @@ const AdminOrderScrren = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [productDetails, setProductDetails] = useState([]);
-    const [filterStatus, setFilterStatus] = useState("All"); // Thêm state để lưu trữ trạng thái lọc
-    const [orderCounts, setOrderCounts] = useState([
-        { status: "New", count: 0 },
-        { status: "Accept", count: 0 },
-        { status: "Shipping", count: 0 },
-        { status: "Done", count: 0 }
-    ]);
+    const [filterStatus, setFilterStatus] = useState("All");
+    const [orderCounts, setOrderCounts] = useState([]);
 
-    // Tính số lượng đơn hàng ở mỗi trạng thái
-    useEffect(() => {
-        const countOrdersByStatus = () => {
-            const counts = [
-                { status: "New", count: 0 },
-                { status: "Accept", count: 0 },
-                { status: "Shipping", count: 0 },
-                { status: "Done", count: 0 }
-            ];
-
-            orders.forEach(order => {
-                const index = counts.findIndex(item => item.status === order.status);
-                if (index !== -1) {
-                    counts[index].count++;
-                }
-            });
-
-            setOrderCounts(counts);
-        };
-
-        countOrdersByStatus();
-    }, [orders]);
-
-
-    const filterOrdersByStatus = (status) => {
-        if (status === "All") {
-            setOrders(sampleOrders); // Hiển thị tất cả đơn hàng nếu lọc theo "All"
-        } else {
-            const filteredOrders = sampleOrders.filter(order => order.status === status);
-            setOrders(filteredOrders); // Hiển thị đơn hàng phù hợp với trạng thái được chọn
-        }
+    const FulfillmentStatus = {
+        SHIPPED: 'SHIPPED',
+        PARTIAL: 'PARTIAL',
+        UNSHIPPED: 'UNSHIPPED',
+        ANY: 'ANY',
+        UNFULFILLED: 'UNFULFILLED'
     };
 
-    useEffect(() => {
-        fetchOrders();
-    }, []);
+    const [fulfillmentStatusFilter, setFulfillmentStatusFilter] = useState(FulfillmentStatus.UNFULFILLED); // State for fulfillment status filter
 
-    const sampleOrders = [
-        {
-            id: 1,
-            address: {
-                first_name: "John",
-                last_name: "Doe"
-            },
-            line_items: [
-                {
-                    productId: 1,
-                    variantId: 1,
-                    price: 10,
-                    quantity: 2
-                },
-                {
-                    productId: 2,
-                    variantId: 1,
-                    price: 15,
-                    quantity: 1
-                }
-            ],
-            created_time: "2024-03-27 10:00:00",
-            status: "New" // Thêm trạng thái cho đơn hàng mới
-        },
-        {
-            id: 2,
-            address: {
-                first_name: "Jane",
-                last_name: "Smith"
-            },
-            line_items: [
-                {
-                    productId: 3,
-                    variantId: 1,
-                    price: 20,
-                    quantity: 3
-                }
-            ],
-            created_time: "2024-03-26 14:30:00",
-            status: "New" // Thêm trạng thái cho đơn hàng mới
-        },
-        // Add more sample orders here...
-    ];
-
-    const changeOrderStatus = (orderId, newStatus) => {
-        setOrders(prevOrders =>
-            prevOrders.map(order =>
-                order.id === orderId ? { ...order, status: newStatus } : order
-            )
-        );
-    };
-
-    const getOrderStatusColor = (status) => {
-        switch (status) {
-            case "New":
-                return "yellow";
-            case "Accept":
-                return "purple";
-            case "Shipping":
-                return "orange";
-            case "Done":
-                return "green";
-            default:
-                return "";
-        }
-    };
 
 
 
@@ -134,45 +36,51 @@ const AdminOrderScrren = () => {
                 }
             });
 
-            //setOrders(response.data.results);
-
+            setOrders(response.data.results);
             setTotalPages(response.data.page.totalPages);
+
+            // Đếm số lượng đơn hàng theo fulfillmentStatus
+            const counts = response.data.results.reduce((acc, order) => {
+                acc[order.fulfillmentStatus] = (acc[order.fulfillmentStatus] || 0) + 1;
+                return acc;
+            }, {});
+            setOrderCounts(counts);
         } catch (error) {
-            setOrders(sampleOrders)
             console.error('Error fetching orders:', error);
         }
     };
 
     useEffect(() => {
-        const fetchProductDetailsForOrder = async (order) => {
-            const productDetailsPromises = order.line_items.map(async (item) => {
-                const productId = item.productId;
-                await fetchProductDetails(productId);
+
+        fetchOrders();
+    }, []);
+
+
+
+
+    const changeOrderStatus = async (orderId, newStatus) => {
+        try {
+            const accessToken = localStorage.getItem('accessToken') || null;
+            await axios.put(`http://localhost:8080/api/admin/orders/${orderId}`, { fulfillmentStatus: newStatus }, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
             });
 
-            await Promise.all(productDetailsPromises);
-        };
-
-        orders?.forEach((order) => {
-            fetchProductDetailsForOrder(order);
-        });
-    }, [orders]);
-
-
-    const getProductsByOrderId = (orderId) => {
-        const order = orders.find((order) => order.id === orderId);
-
-        if (!order) {
-            return [];
+            // Update the order status locally
+            setOrders(prevOrders =>
+                prevOrders.map(order =>
+                    order.id === orderId ? { ...order, fulfillmentStatus: newStatus } : order
+                )
+            );
+        } catch (error) {
+            console.error('Error updating order status:', error);
         }
+    };
 
-        const productIdsInOrder = order.line_items.map((item) => item.productId);
-
-        const productsInOrder = productDetails.filter((product) =>
-            productIdsInOrder.includes(product.id)
-        );
-
-        return productsInOrder;
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        fetchOrders(pageNumber - 1);
     };
 
     const findVariantById = (productId, variantId) => {
@@ -183,8 +91,21 @@ const AdminOrderScrren = () => {
         return null;
     };
 
-    const getOrderProduct = (orderId) => {
+    const handleFulfillmentStatusChange = (event) => {
+        setFulfillmentStatusFilter(event.target.value);
+        fetchOrders(0, 10, event.target.value);
+    };
+
+    useEffect(() => {
+        fetchOrders(0, 10, fulfillmentStatusFilter);
+    }, [fulfillmentStatusFilter]);
+
+
+
+    const getOrderProducts = (orderId) => {
         const order = orders.find((order) => order.id === orderId);
+
+        console.log(order);
 
         return (
             <div>
@@ -194,18 +115,17 @@ const AdminOrderScrren = () => {
                         <tr>
                             <th>Product Name</th>
                             <th>Image</th>
-                            <th>Variant</th>
+                            <th>Variant Title</th>
                             <th>Price</th>
                             <th>Quantity</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {order.line_items.map((item) => {
+                        {order.lineItems?.map((item) => {
                             const product = productDetails.find(
                                 (product) => product.id === item.productId
                             );
                             const variant = findVariantById(item.productId, item.variantId);
-                            console.log(variant);
 
                             return (
                                 <tr key={item.productId}>
@@ -218,28 +138,18 @@ const AdminOrderScrren = () => {
                                         {product ? product.title : 'Product Not Found'}
                                     </td>
                                     <td>
-                                        {product ? (
+                                        {product && product.image ? (
                                             <img
-                                                src={product.image ? product.image.src : 'URL_DEFAULT_IMAGE'} // Thay thế 'URL_DEFAULT_IMAGE' bằng URL hình ảnh mặc định nếu không có hình ảnh
+                                                src={product.image.src}
                                                 alt={product.title || 'Product Image'}
-                                                style={{ maxWidth: '100px', maxHeight: '100px' }} // Thay đổi kích thước hình ảnh tùy ý
+                                                style={{ maxWidth: '100px', maxHeight: '100px' }}
                                             />
                                         ) : (
-                                            'Product Not Found'
+                                            'No Image'
                                         )}
                                     </td>
-                                    <td>
-                                        {variant && (
-                                            <>
-                                                {variant.option1 && <span>{variant.option1}</span>}
-                                                {variant.option2 && <span>{variant.option2}</span>}
-                                                {variant.option3 && <span>{variant.option3}</span>}
-                                                {!variant.option1 && !variant.option2 && !variant.option3 && <span>No Options</span>}
-                                            </>
-                                        )}
-                                        {!variant && 'Variant Not Found'}
-                                    </td>
-                                    <td>{item.price}</td>
+                                    <td>{variant ? variant.title : 'Variant Not Found'}</td>
+                                    <td>${item.price}</td>
                                     <td>{item.quantity}</td>
                                 </tr>
                             );
@@ -252,6 +162,32 @@ const AdminOrderScrren = () => {
 
 
 
+    const handleViewDetails = async (orderId) => {
+        const order = orders.find(order => order.id === orderId);
+        setSelectedOrder(order);
+
+        // Gọi fetchProductDetails cho từng productId trong line_items
+        order.lineItems.forEach(async (item) => {
+            await fetchProductDetails(item.productId);
+        });
+
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+    };
+
+    const totalOrderById = (orderId) => {
+        const order = orders.find(order => order.id === orderId);
+
+        if (order) {
+            return order.subtotalPrice;
+        }
+
+        return 0;
+    };
+
     const fetchProductDetails = async (productId) => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
@@ -261,69 +197,20 @@ const AdminOrderScrren = () => {
                 }
             });
 
-            setProductDetails((prevProductDetails) => [...prevProductDetails, response.data]);
-
+            setProductDetails(prevProductDetails => [...prevProductDetails, response.data]);
         } catch (error) {
             console.error('Error fetching product details:', error);
         }
     };
-    const totalOrderById = (orderId) => {
-        let sum = 0;
-
-        const order = orders.find(order => order.id === orderId);
-
-        if (order) {
-            order.line_items.forEach(item => {
-                sum += item.price * item.quantity;
-            });
-        }
-
-        return sum;
-    };
-
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
-        fetchOrders(pageNumber - 1);
-    };
-
-    const handleViewDetails = async (orderId) => {
-        const order = orders.find(order => order.id === orderId);
-        setSelectedOrder(order);
-        await fetchProductDetails(orderId);
-
-        setShowModal(true);
-        setShowModal(true);
-    };
-
-    const handleCloseModal = () => {
-        setShowModal(false);
-    };
-    const totalOrderAmount = (order) => {
-        let sum = 0;
-
-        if (order) {
-            order.line_items.forEach(item => {
-                sum += item.price * item.quantity;
-            });
-        }
-
-        return sum;
-    };
-
-
-    useEffect(() => {
-        fetchOrders();
-    }, []);
 
     return (
         <div>
             <h2>My Orders</h2>
-            {/* Dropdown để lọc theo trạng thái */}
             <DropdownButton id="filter-dropdown" title={`Filter by Status: ${filterStatus}`}>
                 <Dropdown.Item onClick={() => setFilterStatus("All")}>All</Dropdown.Item>
-                {orderCounts.map((item, index) => (
-                    <Dropdown.Item key={index} onClick={() => setFilterStatus(item.status)}>
-                        {item.status} ({item.count})
+                {Object.keys(orderCounts).map(status => (
+                    <Dropdown.Item key={status} onClick={() => setFilterStatus(status)}>
+                        {status} ({orderCounts[status]})
                     </Dropdown.Item>
                 ))}
             </DropdownButton>
@@ -335,40 +222,29 @@ const AdminOrderScrren = () => {
                         <th>Total Amount</th>
                         <th>Created Time</th>
                         <th>Actions</th>
-                        {/* Thêm các cột khác tùy thuộc vào dữ liệu đơn hàng */}
                     </tr>
                 </thead>
                 <tbody>
-                    {orders?.map(order => (
-                        <tr key={order.id} style={{ backgroundColor: getOrderStatusColor(order.status) }}>
+                    {orders.map(order => (
+                        <tr key={order.id}>
                             <td>{order.id}</td>
-                            <td>{order.address.first_name + " " + order.address.last_name}</td>
+                            <td>{`${order.customer.firstName} ${order.customer.lastName}`}</td>
                             <td>{totalOrderById(order.id)}</td>
-                            <td>{order.created_time}</td>
+                            <td>{order.createdAt}</td>
                             <td>
-                                <DropdownButton id={`dropdown-button-${order.id}`} title={order.status}>
-                                    {order.status === "New" && (
-                                        <>
-                                            <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Accept")}>Accept</Dropdown.Item>
-                                            <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Cancel")}>Cancel</Dropdown.Item>
-                                        </>
+                                <DropdownButton id={`dropdown-button-${order.id}`} title={order.fulfillmentStatus}>
+                                    {order.fulfillmentStatus === "UNFULFILLED" && (
+                                        <Dropdown.Item onClick={() => changeOrderStatus(order.id, "FULFILLED")}>Mark as Fulfilled</Dropdown.Item>
                                     )}
-                                    {order.status === "Accept" && (
-                                        <>
-                                            <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Shipping")}>Shipping</Dropdown.Item>
-                                            <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Cancel")}>Cancel</Dropdown.Item>
-                                        </>
-                                    )}
-                                    {order.status === "Shipping" && (
-                                        <Dropdown.Item onClick={() => changeOrderStatus(order.id, "Done")}>Done</Dropdown.Item>
+                                    {order.fulfillmentStatus === "FULFILLED" && (
+                                        <Dropdown.Item onClick={() => changeOrderStatus(order.id, "UNFULFILLED")}>Mark as Unfulfilled</Dropdown.Item>
                                     )}
                                 </DropdownButton>
+                                <Button onClick={() => handleViewDetails(order.id)}>View Details</Button>
                             </td>
-                            {/* Thêm các cột khác tùy thuộc vào dữ liệu đơn hàng */}
                         </tr>
                     ))}
                 </tbody>
-
             </Table>
 
             <div className='d-flex justify-content-center'>
@@ -393,10 +269,9 @@ const AdminOrderScrren = () => {
                     {selectedOrder && (
                         <>
                             <h5>Order ID: {selectedOrder.id}</h5>
-                            <p>Total Amount: ${totalOrderAmount(selectedOrder)}</p>
+                            <p>Total Amount: ${totalOrderById(selectedOrder.id)}</p>
                             <div>
-                                {/* Hiển thị thông tin chi tiết của từng sản phẩm trong đơn hàng */}
-                                {getOrderProduct(selectedOrder.id)}
+                                {getOrderProducts(selectedOrder.id)}
                             </div>
                         </>
                     )}
