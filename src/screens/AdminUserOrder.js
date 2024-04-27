@@ -237,9 +237,9 @@ const MyOrders = () => {
                     {orders?.map(order => (
                         <tr key={order.id}>
                             <td>{order.id}</td>
-                            <td>{order.address.first_name + " " + order.address.last_name}</td>
+                            <td>{`${order.address.name}`}</td>
                             <td>{totalOrderById(order.id)}</td>
-                            <td>{formatTime(order.created_time)}</td>
+                            <td>{formatTime(order.createdAt)}</td>
                             <td>
                                 <Button variant="info" onClick={() => handleViewDetails(order.id)}>
                                     View Details

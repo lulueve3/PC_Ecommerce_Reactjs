@@ -228,7 +228,7 @@ const AdminOrderScrren = () => {
                     {orders.map(order => (
                         <tr key={order.id}>
                             <td>{order.id}</td>
-                            <td>{`${order.customer.firstName} ${order.customer.lastName}`}</td>
+                            <td>{`${order.address.name}`}</td>
                             <td>{totalOrderById(order.id)}</td>
                             <td>{order.createdAt}</td>
                             <td>
@@ -270,6 +270,7 @@ const AdminOrderScrren = () => {
                         <>
                             <h5>Order ID: {selectedOrder.id}</h5>
                             <p>Total Amount: ${totalOrderById(selectedOrder.id)}</p>
+                            <p>Email: {selectedOrder.customer.email} </p>
                             <div>
                                 {getOrderProducts(selectedOrder.id)}
                             </div>

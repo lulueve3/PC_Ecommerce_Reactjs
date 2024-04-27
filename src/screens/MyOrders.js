@@ -226,7 +226,7 @@ const MyOrders = () => {
                     {orders?.map(order => (
                         <tr key={order.id}>
                             <td>{order.id}</td>
-                            <td>{`${order.customer.firstName} ${order.customer.lastName}`}</td>
+                            <td>{`${order.address.name}`}</td>
                             <td>{totalOrderById(order.id)}</td>
                             <td>{formatTime(order.createdAt)}</td>
                             <td>{order.fulfillmentStatus}</td>
