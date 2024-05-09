@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Table, Form, Modal } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import BuildDetailsModal from '../components/BuildDetailsModal'
 import axios from 'axios';
 
 
@@ -15,6 +16,11 @@ const BuildPcScrenn = () => {
     const [totalPrice, setTotalPrice] = useState(0);
     const [selectedVariants, setSelectedVariants] = useState({});
     const [buildCode, setBuildCode] = useState('');
+    const [loadingBuild, setLoadingBuild] = useState(false);
+    const [showBuildDetailsModal, setShowBuildDetailsModal] = useState(false);
+
+
+
 
     useEffect(() => {
         console.log(selectedVariants);
@@ -30,6 +36,18 @@ const BuildPcScrenn = () => {
         powerSupply: [],
         case: []
     });
+
+    const productCollections = [
+        { id: 52, name: 'MOTHERBOARD' },
+        { id: 53, name: 'CPU' },
+        { id: 54, name: 'COOLER' },
+        { id: 55, name: 'RAM' },
+        { id: 56, name: 'SSD' },
+        { id: 57, name: 'VGA' },
+        { id: 58, name: 'Power_Supply' },
+        { id: 59, name: 'Case' }
+    ];
+
 
     const convertSelectedVariantsToItemsArray = (selectedVariants) => {
         const items = Object.keys(selectedVariants).map((partType) => {
@@ -60,10 +78,6 @@ const BuildPcScrenn = () => {
         case: ''
     });
 
-    const handleShowModal = (product) => {
-        setModalContent(product);
-        setShowModal(true);
-    };
 
     const handleSelectionChange = (componentType, selectedProductId) => {
         const product = productSelections[componentType].find(p => p.id === parseInt(selectedProductId));
@@ -153,25 +167,28 @@ const BuildPcScrenn = () => {
     const fetchComponents = async () => {
         // Danh sách các loại thành phần có thể của PC
         const componentTypes = ['MOTHERBOARD', 'CPU', 'COOLER', 'RAM', 'SSD', 'HDD', 'VGA', 'POWER_SUPPLY', 'CASE'];
+        const collectionIds = [52, 53, 54, 55, 56, 57, 58, 59]; // Thay thế bằng các id thực tế của collection nếu có
+
 
         try {
             // Một object tạm thời để lưu trữ các lựa chọn sản phẩm
             let newProductSelections = {};
 
-            // Lặp qua từng loại thành phần và thực hiện các API call tương ứng
-            for (const type of componentTypes) {
+            // Lặp qua từng id của collection và thực hiện các API call tương ứng
+            for (const collection of productCollections) {
                 const response = await axios.get(`http://localhost:8080/api/products`, {
                     params: {
                         page: 0,
                         size: 100,
                         sortBy: 'id',
                         sortDirection: 'ASC',
-                        keyword: type // Sử dụng từ khóa tương ứng với loại thành phần
+                        collectionIds: collection.id // Sử dụng id của collection thay vì keyword
                     }
                 });
                 // Cập nhật object tạm thời với dữ liệu mới
-                newProductSelections[type] = response.data.results;
+                newProductSelections[collection.name] = response.data.results;
             }
+
 
             // Cập nhật state 'productSelections' với dữ liệu mới từ tất cả các API call
             setProductSelections(newProductSelections);
@@ -181,39 +198,6 @@ const BuildPcScrenn = () => {
         }
     };
 
-    const fetchPcBuild = async () => {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/pc-builds/code/${buildCode}`);
-            const buildData = response.data;
-            console.log(buildData);
-
-            // Now, set the selected components and variants based on the fetched data
-            const newSelectedProducts = {};
-            const newSelectedVariants = {};
-
-            buildData.items.forEach(item => {
-                const partType = item.partType.toLowerCase(); // Adjust this if necessary to match your state keys
-                newSelectedProducts[partType] = {
-                    id: item.part.id,
-                    title: item.part.title,
-                    variants: [{ id: item.id, title: item.part.variantTitle, price: item.part.price }]
-                };
-                newSelectedVariants[partType] = {
-                    id: item.id,
-                    quantity: item.quantity,
-                    price: item.part.price
-                };
-            });
-
-            setSelectedProducts(newSelectedProducts);
-            setSelectedVariants(newSelectedVariants);
-            calculateTotalPrice(newSelectedVariants); // Recalculate the total price based on the loaded build
-
-        } catch (error) {
-            console.error('Error fetching PC build:', error);
-            toast.error('Failed to fetch PC build. Please try again.');
-        }
-    };
 
     useEffect(() => {
         // Gọi hàm để lấy thông tin sản phẩm cho tất cả các loại thành phần khi component được mount
@@ -246,22 +230,6 @@ const BuildPcScrenn = () => {
 
     return (
         <div className="px-0 py-3 col-12">
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{modalContent.title}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <p>Giá: ${modalContent.price}</p>
-                    <p>Số lượng: {modalContent.quantity}</p>
-                    {/* Hiển thị hình ảnh nếu có */}
-                    {modalContent.image && <img src={modalContent.image} alt={modalContent.title} />}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Close
-                    </Button>
-                </Modal.Footer>
-            </Modal>
 
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
                 <Form.Group controlId="formBuildCode" style={{ display: 'flex', flex: 1, alignItems: 'center', marginRight: '10px' }}>
@@ -274,7 +242,12 @@ const BuildPcScrenn = () => {
                         style={{ flex: 1 }}
                     />
                 </Form.Group>
-                <Button variant="primary" onClick={fetchPcBuild}>Load Build</Button>
+                <Button variant="primary" onClick={() => setShowBuildDetailsModal(true)}>Load Build</Button>
+                <BuildDetailsModal
+                    show={showBuildDetailsModal}
+                    onHide={() => setShowBuildDetailsModal(false)}
+                    buildCode={buildCode}
+                />
             </div>
 
             <Table striped bordered hover className="table-custom">
@@ -286,13 +259,13 @@ const BuildPcScrenn = () => {
                         <th>Price</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {Object.keys(productSelections).map((componentType) => {
                         const product = productSelections[componentType]?.find(p => p.id === selectedProducts[componentType]?.id);
                         const variants = selectedProducts[componentType]?.variants || [];
                         const variant = selectedVariants[componentType];
 
-                        console.log(componentType);
                         return (
                             <tr key={componentType}>
                                 {/* ... Các cell khác như trước */}
@@ -302,13 +275,14 @@ const BuildPcScrenn = () => {
                                         // If a product and variant are selected, display titles
                                         <>
                                             <div>{product.title}</div>
-                                            <div>{variant.title || 'Default Title'}</div>
-                                        </>
+                                            <div>{variant.title !== 'Default Title' ? variant.title : ''}</div>                                        </>
                                     ) : (
                                         <>
                                             <Form.Select
                                                 value={selectedProducts[componentType]?.id || ''}
                                                 onChange={(e) => handleSelectionChange(componentType, e.target.value)}
+                                                hidden={loadingBuild}
+
                                             >
                                                 <option value="">Select {componentType}</option>
                                                 {productSelections[componentType]?.map(product => (
@@ -325,6 +299,8 @@ const BuildPcScrenn = () => {
                                         <Form.Select
                                             value={selectedVariants[componentType]?.id || ''}
                                             onChange={(e) => handleVariantChange(componentType, e.target.value)}
+                                            hidden={loadingBuild}
+
                                         >
                                             <option value="">Select Variant</option>
                                             {variants.map(variant => (
