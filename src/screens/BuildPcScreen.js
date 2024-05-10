@@ -245,7 +245,9 @@ const BuildPcScrenn = () => {
                 <Button variant="primary" onClick={() => setShowBuildDetailsModal(true)}>Load Build</Button>
                 <BuildDetailsModal
                     show={showBuildDetailsModal}
-                    onHide={() => setShowBuildDetailsModal(false)}
+                    onHide={() => {
+                        setShowBuildDetailsModal(false)
+                    }}
                     buildCode={buildCode}
                 />
             </div>
