@@ -9,6 +9,7 @@ import { jwtDecode } from 'jwt-decode';
 import { ToastContainer, toast } from 'react-toastify';
 import StripeContainer from '../components/StripeContainer'
 import emailjs from '@emailjs/browser'
+import EditAddress from '../components/EditAddress'
 
 
 const ITEMS_PER_PAGE = 5; // Adjust as needed
@@ -18,6 +19,8 @@ const CartScreen = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const qty = new URLSearchParams(location.search).get('qty') ? new URLSearchParams(location.search).get('qty') : 1;
+    // Add this state near your other states
+    const [showAddressForm, setShowAddressForm] = useState(false);
 
     const dispatch = useDispatch();
 
@@ -28,6 +31,23 @@ const CartScreen = () => {
         phone: "",
         address: ""
     });
+
+    const [newAddress, setNewAddress] = useState({
+        name: '',
+        street: '',
+        city: '',
+        district: '',
+        ward: '',
+        phone: ''
+    });
+
+    const handleNewAddressChange = (e) => {
+        const { name, value } = e.target;
+        setNewAddress((prevAddress) => ({
+            ...prevAddress,
+            [name]: value,
+        }));
+    };
 
     const [paymentMethod, setPaymentMethod] = useState('');
 
@@ -199,6 +219,45 @@ const CartScreen = () => {
         emailjs.send('service_6g2chws', 'template_928whlk', templateParams, 'PSjw63Ie2cQ9NAUsO');
     };
 
+    const handleAddAddress = async (newAddress) => {
+        try {
+            // Add call to the API to add the new address
+            // For example, using the axios library:
+            const accessToken = localStorage.getItem('accessToken');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+            const { data } = await axios.post('http://localhost:8080/api/customer/addresses', newAddress, config);
+            setAddresses([...addresses, data]); // Update your addresses state
+            toast.success('New address added successfully!');
+        } catch (error) {
+            console.error('Error adding new address:', error);
+            toast.error('Failed to add new address. Please try again.');
+        }
+    };
+
+    const handleEditAddress = async (addressId, updatedAddress) => {
+        try {
+            // Add call to the API to update the address
+            // For example, using the axios library:
+            const accessToken = localStorage.getItem('accessToken');
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            };
+            const { data } = await axios.put(`http://localhost:8080/api/customer/addresses/${addressId}`, updatedAddress, config);
+            // Update your addresses state with the new address data
+            setAddresses(addresses.map(addr => (addr.id === addressId ? data : addr)));
+            toast.success('Address updated successfully!');
+        } catch (error) {
+            console.error('Error updating address:', error);
+            toast.error('Failed to update address. Please try again.');
+        }
+    };
+
 
     useEffect(() => {
         if (id) {
@@ -296,7 +355,9 @@ const CartScreen = () => {
             email: userEmail ? userEmail : customerInfo.email
         }
 
-        const fullAddressDetails = addresses.find(addr => addr.id === Number(selectedAddress));
+        const fullAddressDetails = newAddress?.street
+            ? newAddress : addresses.find(addr => addr.id === Number(selectedAddress))
+
         const address = {
             "name": fullAddressDetails.name,
             "city": fullAddressDetails.city,
@@ -311,6 +372,7 @@ const CartScreen = () => {
             customer,
             address,
             discountCodes,
+            paymentMethod: paymentMethod,
             totalQuantity: selectedItems.reduce((total, itemId) => {
                 const item = cartItems.find(item => item.id === itemId);
                 return total + item.qty;
@@ -407,7 +469,7 @@ const CartScreen = () => {
 
     const checkoutHandler = () => {
 
-        if (!selectedAddress) {
+        if (!selectedAddress && !newAddress) {
             toast.warning('Please select an address', {
                 // Toast options...
             });
@@ -600,7 +662,7 @@ const CartScreen = () => {
                                         label="Visa/Credit card"
                                         id="paymentMethodCreditCard"
                                         name="paymentMethod"
-                                        value="CreditCard"
+                                        value="OTHER"
                                         onChange={(e) => setPaymentMethod(e.target.value)}
                                         checked={paymentMethod === 'CreditCard'}
                                     />
@@ -625,7 +687,17 @@ const CartScreen = () => {
                                         <Form.Label>Address</Form.Label>
                                         <Form.Select
                                             value={selectedAddress}
-                                            onChange={(e) => setSelectedAddress(e.target.value)}
+                                            onChange={(e) => {
+                                                setSelectedAddress(e.target.value);
+                                                setNewAddress({
+                                                    name: '',
+                                                    street: '',
+                                                    city: '',
+                                                    district: '',
+                                                    ward: '',
+                                                    phone: ''
+                                                })
+                                            }}
                                             required
                                             style={{ width: '100%' }} // Set the width to 100% of the parent container
                                         >
@@ -637,6 +709,32 @@ const CartScreen = () => {
                                             ))}
                                         </Form.Select>
                                     </Form.Group>
+
+
+                                    {/* Add Address Button */}
+
+                                    <Button variant="primary" className='my-2' size="sm" onClick={() => setShowAddressForm(true)}>
+                                        New Address
+                                    </Button>
+                                    {newAddress?.street && (
+                                        <p> {newAddress.street} - {newAddress.phone} - {newAddress.ward} - {newAddress.district} - {newAddress.city}
+                                        </p>
+                                    )}
+
+
+                                    {/* New Address Form */}
+                                    {showAddressForm && (
+                                        <EditAddress
+                                            address={newAddress}
+                                            handleAddAddress={() => { }} // Not needed anymore
+                                            handleEditAddress={() => { }} // Not needed anymore
+                                            onCancel={() => setShowAddressForm(false)}
+                                            onSave={(address) => {
+                                                setNewAddress(address); // Save the new address to state
+                                                setShowAddressForm(false); // Hide the form upon saving
+                                            }}
+                                        />
+                                    )}
 
                                     <Button type='button' className='btn-block' disabled={cartItems.length === 0} onClick={checkoutHandler}>
                                         Checkout

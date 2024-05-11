@@ -19,7 +19,7 @@ const DiscountManager = () => {
         const size = 3;
         const accessToken = localStorage.getItem('accessToken') || null;
         try {
-            const response = await axios.get(`http://localhost:8080/api/admin/price_rules?page=${page}&size=${size}`, {
+            const response = await axios.get(`http://localhost:8080/api/admin/price_rules?page=${page}&size=${size}&sortDirection=DESC`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
