@@ -1,23 +1,72 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Button, Modal, Card } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Button, Modal, Card, Pagination } from 'react-bootstrap';
 import SearchBar from '../components/SearchBar';
 import CreatePostForm from '../components/CreatePostForm';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+
 
 
 
 
 const QnAPScreen = () => {
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [samplePosts, setSamplePosts] = useState([
-        { id: 1, title: 'Sample Post 1', content: 'Content of Sample Post 1' },
-        { id: 2, title: 'Sample Post 2', content: 'Content of Sample Post 2' },
-        { id: 3, title: 'Sample Post 3', content: 'Content of Sample Post 3' }
-    ]);
+    const [posts, setPosts] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [searchKeyword, setSearchKeyword] = useState('');
 
 
-    const handleCreatePost = (newPost) => {
-        // Logic tạo bài đăng mới
+    const fetchPosts = async (page = 0, keyword = '') => {
+        try {
+            const accessToken = localStorage.getItem('accessToken') || null;
+            const response = await axios.get(`http://localhost:8080/api/forums/questions`, {
+                params: {
+                    page: page,
+                    size: 2,
+                    sortBy: 'id',
+                    sortDirection: 'DESC',
+                    keyword: keyword // Add the search keyword to the request parameters
+                },
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                }
+            });
+            setPosts(response.data.results);
+            setTotalPages(response.data.page.totalPages); // Update the total pages
+        } catch (error) {
+            console.error('Failed to fetch posts:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchPosts(currentPage - 1, searchKeyword);
+    }, [currentPage, searchKeyword]);
+
+    const handleSearch = (keyword) => {
+        setSearchKeyword(keyword);
+        setCurrentPage(1); // Reset to the first page
+        fetchPosts(0, keyword);
+    };
+
+
+
+    const handleCreatePost = async (newPost) => {
+        try {
+            const accessToken = localStorage.getItem('accessToken') || null;
+
+            const response = await axios.post('http://localhost:8080/api/forums/questions', newPost, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`, // Replace YOUR_TOKEN_HERE with the actual token
+                }
+            });
+            console.log('Post created:', response.data);
+            setShowCreateForm(false);
+            // Optionally, fetch posts again to show the new post
+            fetchPosts();
+        } catch (error) {
+            console.error('Failed to create post:', error);
+        }
     };
 
     return (
@@ -36,7 +85,7 @@ const QnAPScreen = () => {
                             color: 'black'
                         }} className='mb-4' onClick={() => setShowCreateForm(true)}>Create Post</Button>
                     </div>
-                    <SearchBar handleSearch={() => { }} fullWidth={true} />
+                    <SearchBar handleSearch={handleSearch} fullWidth={true} />
                 </Col>
             </Row>
             <Modal show={showCreateForm} onHide={() => setShowCreateForm(false)}>
@@ -48,7 +97,7 @@ const QnAPScreen = () => {
                 </Modal.Body>
             </Modal>
             <Row>
-                {samplePosts?.map(post => (
+                {posts?.map(post => (
                     <Col key={post.id} md={6} className="mb-4">
                         <Link to={`/PostDetail`} style={{ textDecoration: 'none', color: 'inherit' }}>
                             <Card style={{
@@ -59,13 +108,24 @@ const QnAPScreen = () => {
                             }}>
                                 <Card.Body>
                                     <Card.Title style={{ fontWeight: 'bold' }}>{post.title}</Card.Title>
-                                    <Card.Text>{post.content}</Card.Text>
+                                    <Card.Text>{post.description}</Card.Text>
                                 </Card.Body>
                             </Card>
                         </Link>
                     </Col>
                 ))}
             </Row>
+            <Pagination className="justify-content-center">
+                <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
+                <Pagination.Prev onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1} />
+                {[...Array(totalPages).keys()].map(n => (
+                    <Pagination.Item key={n + 1} active={n + 1 === currentPage} onClick={() => setCurrentPage(n + 1)}>
+                        {n + 1}
+                    </Pagination.Item>
+                ))}
+                <Pagination.Next onClick={() => setCurrentPage(prev => prev + 1)} disabled={currentPage === totalPages} />
+                <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
+            </Pagination>
         </Container >
     );
 };

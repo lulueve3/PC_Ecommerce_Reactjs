@@ -30,6 +30,7 @@ import ExchangePage from './screens/ExchangeScreen';
 import TaskPage from './components/TaskPage';
 import RedeemPage from './components/RedeemPage';
 import DiscountManager from './screens/DiscountManager';
+import AdminQnAScreen from './screens/AdminQnAScreen';
 
 
 
@@ -86,6 +87,7 @@ function App() {
             <Route path="/admin/userList/:id" element={<AdminUserOrder />} />
 
             <Route path="/admin/productList" element={<PrivateRoute><ProductListScreen /></PrivateRoute>} />
+            <Route path="/admin/AdminQnA" element={<PrivateRoute><AdminQnAScreen /></PrivateRoute>} />
             <Route path="/admin/orderList" element={<PrivateRoute><AdminOrderScrren /></PrivateRoute>} />
             <Route path="/admin/Dashboard" element={<PrivateRoute><DashboardScreen /></PrivateRoute>} />
             <Route path="/admin/collection" element={<PrivateRoute><CollectionScreen /></PrivateRoute>} />

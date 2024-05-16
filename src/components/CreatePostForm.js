@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 
 const CreatePostForm = ({ handleCreatePost }) => {
     const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
+    const [description, setDescription] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        handleCreatePost({ title, content });
+        handleCreatePost({ title, description });
         setTitle('');
-        setContent('');
+        setDescription('');
     };
 
     return (
@@ -18,7 +18,7 @@ const CreatePostForm = ({ handleCreatePost }) => {
                 <input
                     type="text"
                     className="form-control"
-                    id="title"
+                    id="Title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Title"
@@ -28,10 +28,10 @@ const CreatePostForm = ({ handleCreatePost }) => {
                 <label htmlFor="content">Content</label>
                 <textarea
                     className="form-control"
-                    id="content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Content"
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Description"
                 ></textarea>
             </div>
             <button type="submit" className="btn btn-primary">Create Post</button>
