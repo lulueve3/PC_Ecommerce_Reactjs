@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Button, Card, Form } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Container, Row, Col, Button, Card } from 'react-bootstrap';
+
 
 
 const PostDetail = ({ handleBack }) => {
 
     //Xử lý nhập code4
     const [newCode, setNewCode] = useState('');
+    const [questionDetail, setQuestionDetail] = useState(null);
+
+    // useEffect(() => {
+    //     const fetchQuestionDetail = async () => {
+    //         try {
+    //             const response = await axios.get(`http://localhost:8080/api/forums/questions/${questionId}`);
+    //             setQuestionDetail(response.data);
+    //         } catch (error) {
+    //             console.error('Failed to fetch question detail:', error);
+    //         }
+    //     };
+
+    //     fetchQuestionDetail();
+    // }, [questionId]); // Chỉ thực thi khi questionId thay đổi
 
     const handleSubmitCode = () => {
         if (isValidSyntax(newCode)) {

@@ -366,7 +366,7 @@ const CartScreen = () => {
             "ward": fullAddressDetails.ward,
             "district": fullAddressDetails.district
         }
-        const discountCodes = discountData && discountData.title ? [discountData.title] : [0];
+        const discountCodes = discountData && discountData.title ? [discountData.title] : [];
         const orders = {
             lineItems,
             customer,

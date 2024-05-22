@@ -21,9 +21,6 @@ const AdminQnAScreen = () => {
                     size: 10,
                     sortBy: 'id',
                     sortDirection: 'DESC'
-                },
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
                 }
             });
 

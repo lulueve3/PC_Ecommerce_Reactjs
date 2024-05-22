@@ -23,7 +23,7 @@ const QnAPScreen = () => {
             const response = await axios.get(`http://localhost:8080/api/forums/questions`, {
                 params: {
                     page: page,
-                    size: 2,
+                    size: 10,
                     sortBy: 'id',
                     sortDirection: 'DESC',
                     keyword: keyword // Add the search keyword to the request parameters

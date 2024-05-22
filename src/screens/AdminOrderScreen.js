@@ -61,16 +61,44 @@ const AdminOrderScrren = () => {
     const changeOrderStatus = async (orderId, newStatus) => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            await axios.put(`http://localhost:8080/api/admin/orders/${orderId}`, { fulfillmentStatus: newStatus }, {
+
+            // Tìm đơn hàng trong state dựa trên orderId
+            const orderToUpdate = orders.find(order => order.id === orderId);
+
+            if (!orderToUpdate) {
+                console.error('Order not found');
+                return;
+            }
+
+            // Cập nhật chỉ trạng thái fulfillmentStatus, giữ nguyên các thông tin khác
+            const updatedOrderPayload = {
+                ...orderToUpdate, // Sử dụng spread operator để sao chép tất cả thông tin hiện có
+                fulfillmentStatus: newStatus, // Cập nhật chỉ trạng thái mới cho fulfillmentStatus
+            };
+
+            // Xóa các thông tin không cần thiết trước khi gửi payload
+            delete updatedOrderPayload.id;
+            delete updatedOrderPayload.createdAt;
+            delete updatedOrderPayload.updatedAt;
+            delete updatedOrderPayload.discountApplications;
+            delete updatedOrderPayload.lineItems;
+            delete updatedOrderPayload.subtotalPrice;
+            delete updatedOrderPayload.totalDiscountPrice;
+            delete updatedOrderPayload.totalPrice;
+
+            // Gọi API cập nhật trạng thái đơn hàng
+            await axios.patch(`http://localhost:8080/api/admin/orders/${orderId}`, updatedOrderPayload, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
 
-            // Update the order status locally
+            // Cập nhật state của orders để phản ánh thay đổi trên giao diện người dùng
             setOrders(prevOrders =>
                 prevOrders.map(order =>
-                    order.id === orderId ? { ...order, fulfillmentStatus: newStatus } : order
+                    order.id === orderId
+                        ? { ...order, fulfillmentStatus: newStatus } // Cập nhật trạng thái mới
+                        : order
                 )
             );
         } catch (error) {
@@ -225,7 +253,7 @@ const AdminOrderScrren = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {orders.map(order => (
+                    {orders?.map(order => (
                         <tr key={order.id}>
                             <td>{order.id}</td>
                             <td>{`${order.address.name}`}</td>
