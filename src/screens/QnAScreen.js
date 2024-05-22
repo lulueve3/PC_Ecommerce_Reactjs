@@ -99,7 +99,7 @@ const QnAPScreen = () => {
             <Row>
                 {posts?.map(post => (
                     <Col key={post.id} md={6} className="mb-4">
-                        <Link to={`/PostDetail`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <Link to={`/PostDetail/${post.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                             <Card style={{
                                 backgroundColor: 'white',
                                 height: '12rem',

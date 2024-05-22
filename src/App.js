@@ -82,7 +82,7 @@ function App() {
             <Route path="/exchange/redeem" element={<RedeemPage />} />
             <Route path="/discount" element={<DiscountManager />} />
 
-            <Route path="/PostDetail" element={<PostDetail />} />
+            <Route path="/PostDetail/:id" element={<PostDetail />} />
             <Route path="/admin/userList" element={<UserListScreen />} />
             <Route path="/admin/userList/:id" element={<AdminUserOrder />} />
 
