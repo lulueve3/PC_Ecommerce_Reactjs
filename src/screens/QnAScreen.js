@@ -4,6 +4,8 @@ import SearchBar from '../components/SearchBar';
 import CreatePostForm from '../components/CreatePostForm';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 
@@ -61,11 +63,14 @@ const QnAPScreen = () => {
                 }
             });
             console.log('Post created:', response.data);
+            toast.success('Post created successfully!');
             setShowCreateForm(false);
             // Optionally, fetch posts again to show the new post
             fetchPosts();
         } catch (error) {
             console.error('Failed to create post:', error);
+            toast.error('Failed to fetch posts. Please try again later.');
+
         }
     };
 
@@ -126,6 +131,8 @@ const QnAPScreen = () => {
                 <Pagination.Next onClick={() => setCurrentPage(prev => prev + 1)} disabled={currentPage === totalPages} />
                 <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
             </Pagination>
+            <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+
         </Container >
     );
 };

@@ -74,13 +74,23 @@ const PostDetail = ({ handleBack }) => {
     // Trạng thái của form nhập comment mới
     const [newComment, setNewComment] = useState('');
 
-    const handleLike = (commentId) => {
-        setComments(prevComments => prevComments.map(comment => {
-            if (comment.id === commentId) {
-                return { ...comment, likes: comment.likes + 1 };
-            }
-            return comment;
-        }));
+    const handleLike = async (answerId) => {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await axios.post(`http://localhost:8080/api/forums/answers/${answerId}`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+            // Assuming the API returns the updated answer with the new like count
+            const updatedAnswer = response.data;
+            // Update the answers in the state with the new like count
+            setAnswers(answers.map(answer => answer.id === answerId ? updatedAnswer : answer));
+            toast.success('You liked an answer!');
+        } catch (error) {
+            console.error('Failed to like the answer:', error);
+            toast.error('Failed to like the answer. Please try again.');
+        }
     };
 
     const handleDislike = (commentId) => {

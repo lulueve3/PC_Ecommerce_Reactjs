@@ -17,10 +17,13 @@ const AdminQnAScreen = () => {
             const accessToken = localStorage.getItem('accessToken') || null;
             const response = await axios.get('http://localhost:8080/api/admin/forums/questions', {
                 params: {
-                    page: page,
+                    page: page, // Make sure 'page' variable is defined or passed as an argument
                     size: 10,
                     sortBy: 'id',
                     sortDirection: 'DESC'
+                },
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
                 }
             });
 
