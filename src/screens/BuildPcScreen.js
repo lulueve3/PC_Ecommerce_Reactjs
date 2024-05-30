@@ -88,11 +88,17 @@ const BuildPcScrenn = () => {
         }));
 
         // Nếu chỉ có một variant, tự động chọn nó và cập nhật selectedVariants
+
+
         if (product && product.variants && product.variants.length === 1) {
             const singleVariant = product.variants[0];
+            const updatedVariant = {
+                ...singleVariant,
+                quantity: 1
+            };
             setSelectedVariants(prevVariants => ({
                 ...prevVariants,
-                [componentType]: singleVariant
+                [componentType]: updatedVariant
             }));
         } else {
             // Reset variant selection when a new product is selected
@@ -110,9 +116,14 @@ const BuildPcScrenn = () => {
         const product = selectedProducts[componentType];
         const variant = product?.variants.find(v => v.id === parseInt(selectedVariantId));
 
+        const updatedVariant = {
+            ...variant,
+            quantity: 1 // Default quantity is set to 1
+        };
+
         setSelectedVariants(prevVariants => ({
             ...prevVariants,
-            [componentType]: variant || null
+            [componentType]: updatedVariant || null
         }));
 
         // Tính toán tổng giá trị các variant đã chọn
