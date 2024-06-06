@@ -50,7 +50,7 @@ const AdminRewardScreen = () => {
                     sortDirection: 'ASC'
                 }
             });
-            setRewards(response.data);
+            setRewards(response.data.results);
         } catch (error) {
             toast.error('Failed to fetch rewards');
         }
@@ -71,7 +71,7 @@ const AdminRewardScreen = () => {
                 </tr>
             </thead>
             <tbody>
-                {rewards.map((reward) => (
+                {rewards?.map((reward) => (
                     <tr key={reward.id}>
                         <td>{reward.id}</td>
                         <td>{reward.title}</td>
@@ -118,7 +118,7 @@ const AdminRewardScreen = () => {
                 onSave={onSave}
             />
             <ToastContainer />
-            {/* Render the table or list of rewards here */}
+            {renderRewardsTable()}
         </div>
     );
 };
