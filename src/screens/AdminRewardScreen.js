@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Modal, Form } from 'react-bootstrap';
+import { Button, Modal, Form, Table } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import RewardModal from '../components/RewardModal'
 
@@ -55,6 +55,56 @@ const AdminRewardScreen = () => {
             toast.error('Failed to fetch rewards');
         }
     };
+
+    const renderRewardsTable = () => (
+        <Table striped bordered hover>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Quantity</th>
+                    <th>Cost</th>
+                    <th>Start At</th>
+                    <th>End At</th>
+                    {/* Include other columns as necessary */}
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {rewards.map((reward) => (
+                    <tr key={reward.id}>
+                        <td>{reward.id}</td>
+                        <td>{reward.title}</td>
+                        <td>{reward.quantity}</td>
+                        <td>{reward.cost}</td>
+                        <td>{new Date(reward.startAt).toLocaleString()}</td>
+                        <td>{new Date(reward.endAt).toLocaleString()}</td>
+                        {/* Render other reward properties as necessary */}
+                        <td>
+                            <Button
+                                variant="primary"
+                                onClick={() => {
+                                    setCurrentReward(reward);
+                                    setShowModal(true);
+                                }}
+                            >
+                                Edit
+                            </Button>
+                            {' '}
+                            <Button
+                                variant="danger"
+                                onClick={() => {
+                                    // Add your delete handler here
+                                }}
+                            >
+                                Delete
+                            </Button>
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </Table>
+    );
 
     // Handler functions for POST, DELETE, PATCH, and opening the modal would go here...
 
