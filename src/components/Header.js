@@ -130,11 +130,11 @@ const Header = ({ handleLoginLogout, isLoggedIn }) => {
                                     <LinkContainer to='/admin/AdminQnA'>
                                         <NavDropdown.Item>QnA</NavDropdown.Item>
                                     </LinkContainer>
-                                    <LinkContainer to='/discount'>
+                                    <LinkContainer to='/admin/discount'>
                                         <NavDropdown.Item>Discount</NavDropdown.Item>
                                     </LinkContainer>
-                                    <LinkContainer to='/redeem'>
-                                        <NavDropdown.Item>Redeem</NavDropdown.Item>
+                                    <LinkContainer to='/admin/Reward'>
+                                        <NavDropdown.Item>Reward</NavDropdown.Item>
                                     </LinkContainer>
 
                                 </NavDropdown>

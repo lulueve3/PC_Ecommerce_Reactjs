@@ -31,6 +31,7 @@ import TaskPage from './components/TaskPage';
 import RedeemPage from './components/RedeemPage';
 import DiscountManager from './screens/DiscountManager';
 import AdminQnAScreen from './screens/AdminQnAScreen';
+import AdminRewardScreen from './screens/AdminRewardScreen';
 
 
 
@@ -80,13 +81,14 @@ function App() {
             <Route path="/Exchange" element={<ExchangePage />} />
             <Route path="/exchange/tasks" element={<TaskPage />} />
             <Route path="/exchange/redeem" element={<RedeemPage />} />
-            <Route path="/discount" element={<DiscountManager />} />
 
             <Route path="/PostDetail/:id" element={<PostDetail />} />
             <Route path="/admin/userList" element={<UserListScreen />} />
             <Route path="/admin/userList/:id" element={<AdminUserOrder />} />
 
             <Route path="/admin/productList" element={<PrivateRoute><ProductListScreen /></PrivateRoute>} />
+            <Route path="/admin/Reward" element={<PrivateRoute><AdminRewardScreen /></PrivateRoute>} />
+            <Route path="/admin/discount" element={<PrivateRoute><DiscountManager /></PrivateRoute>} />
             <Route path="/admin/AdminQnA" element={<PrivateRoute><AdminQnAScreen /></PrivateRoute>} />
             <Route path="/admin/orderList" element={<PrivateRoute><AdminOrderScrren /></PrivateRoute>} />
             <Route path="/admin/Dashboard" element={<PrivateRoute><DashboardScreen /></PrivateRoute>} />

@@ -268,7 +268,7 @@ const AdminOrderScrren = () => {
                                         <Dropdown.Item onClick={() => changeOrderStatus(order.id, "UNFULFILLED")}>Mark as Unfulfilled</Dropdown.Item>
                                     )}
                                 </DropdownButton>
-                                <Button onClick={() => handleViewDetails(order.id)}>View Details</Button>
+                                <Button onClick={() => handleViewDetails(order.id)}>Details</Button>
                             </td>
                         </tr>
                     ))}
