@@ -7,14 +7,14 @@ export const listProducts = (keyword = '', page = '0', category = '') => async (
         dispatch({ type: PRODUCT_LIST_REQUEST })
 
         if (category !== '') {
-            const { data } = await axios.get(`http://localhost:8080/api/collections/${category}/products?page=${page ? page : 0}&size=8&keyword=${keyword}&sortDirection=DESC`)
+            const { data } = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/collections/${category}/products?page=${page ? page : 0}&size=8&keyword=${keyword}&sortDirection=DESC`)
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
             })
 
         } else {
-            const { data } = await axios.get(`http://localhost:8080/api/products?keyword=${keyword}&page=${page ? page : 0}&size=8&sortDirection=DESC`)
+            const { data } = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/products?keyword=${keyword}&page=${page ? page : 0}&size=8&sortDirection=DESC`)
             dispatch({
                 type: PRODUCT_LIST_SUCCESS,
                 payload: data
@@ -38,7 +38,7 @@ export const listProductDetail = (id) => async (dispatch) => {
 
     try {
 
-        const { data } = await axios.get(`http://localhost:8080/api/products/${id}`);
+        const { data } = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/products/${id}`);
 
         dispatch({
             type: PRODUCT_DETAILS_SUCCESS,
@@ -76,7 +76,7 @@ export const deleteProduct = (id) => async (dispatch) => {
             }
         };
 
-        await axios.patch(`http://localhost:8080/api/admin/products/${id}`, {
+        await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/products/${id}`, {
             active: false
         }, config);
 
@@ -115,7 +115,7 @@ export const createProduct = (product) => async (dispatch) => {
             }
         };
 
-        const { data } = await axios.post(`http://localhost:8080/api/admin/products`, { ...product }, config);
+        const { data } = await axios.post(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/products`, { ...product }, config);
 
         dispatch({
             type: PRODUCT_CREATE_SUCCESS,
@@ -156,12 +156,12 @@ export const updateProduct = (id, { title, description, vendor, active, variants
         for (const variant of variants) {
             const variantId = variant.id; // Assuming the variant object has an 'id' property
 
-            const { updateVariant } = await axios.patch(`http://localhost:8080/api/admin/products/${id}/variants/${variantId}`,
+            const { updateVariant } = await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/products/${id}/variants/${variantId}`,
                 variant
                 , config);
         }
 
-        const { data } = await axios.patch(`http://localhost:8080/api/admin/products/${id}`, {
+        const { data } = await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/products/${id}`, {
             title,
             description,
             vendor,

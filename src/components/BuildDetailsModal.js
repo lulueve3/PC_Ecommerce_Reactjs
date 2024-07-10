@@ -37,7 +37,7 @@ const BuildDetailsModal = ({ show, onHide, buildCode }) => {
 
         setLoadingBuild(true);
         try {
-            const response = await axios.get(`http://localhost:8080/api/pc-builds/code/${buildCode}`);
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/pc-builds/code/${buildCode}`);
             setBuildDetails(response.data); // Assume response.data contains the build details
             console.log(response);
         } catch (error) {

@@ -30,7 +30,7 @@ const AdminOrderScrren = () => {
     const fetchOrders = async (page = 0, size = 10) => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            const response = await axios.get(`http://localhost:8080/api/admin/orders?page=${page}&size=${size}&sortBy=id&sortDirection=DESC`, {
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/orders?page=${page}&size=${size}&sortBy=id&sortDirection=DESC`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -87,7 +87,7 @@ const AdminOrderScrren = () => {
             delete updatedOrderPayload.totalPrice;
 
             // Gọi API cập nhật trạng thái đơn hàng
-            await axios.patch(`http://localhost:8080/api/admin/orders/${orderId}`, updatedOrderPayload, {
+            await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/orders/${orderId}`, updatedOrderPayload, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -219,7 +219,7 @@ const AdminOrderScrren = () => {
     const fetchProductDetails = async (productId) => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            const response = await axios.get(`http://localhost:8080/api/products/${productId}`, {
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/products/${productId}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }

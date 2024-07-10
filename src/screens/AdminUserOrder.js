@@ -33,7 +33,7 @@ const MyOrders = () => {
     const fetchOrders = async (page = 0, size = 10) => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            const response = await axios.get(`http://localhost:8080/api/admin/customers/${id}/orders?page=${page}&size=${size}&sortBy=id&sortDirection=DESC`, {
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/customers/${id}/orders?page=${page}&size=${size}&sortBy=id&sortDirection=DESC`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -159,7 +159,7 @@ const MyOrders = () => {
     const fetchProductDetails = async (productId) => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            const response = await axios.get(`http://localhost:8080/api/products/${productId}`, {
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/products/${productId}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }

@@ -42,7 +42,7 @@ const DashboardScreen = () => {
                 }
             };
             const response = await axios.get(
-                `http://localhost:8080/api/admin/analysis/order/report?startTime=${year}-01-01T00:00:00.000Z&endTime=${year + 1}-01-01T00:00:00.000Z`,
+                `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/analysis/order/report?startTime=${year}-01-01T00:00:00.000Z&endTime=${year + 1}-01-01T00:00:00.000Z`,
                 config
             );
 
@@ -112,7 +112,7 @@ const DashboardScreen = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            const response = await axios.get('http://localhost:8080/api/admin/analysis/product', config);
+            const response = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/analysis/product', config);
             setStatistics(prevStatistics => ({ ...prevStatistics, productCount: response.data.total }));
 
         } catch (error) {
@@ -140,7 +140,7 @@ const DashboardScreen = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            const response = await axios.get('http://localhost:8080/api/admin/analysis/customer', config);
+            const response = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/analysis/customer', config);
             setStatistics(prevStatistics => ({ ...prevStatistics, userCount: response.data.total }));
 
         } catch (error) {
@@ -157,7 +157,7 @@ const DashboardScreen = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            const response = await axios.get('http://localhost:8080/api/admin/analysis/order', config);
+            const response = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/analysis/order', config);
             setStatistics(prevStatistics => ({ ...prevStatistics, orderCount: response.data.total, revenue: response.data.totalValue }));
         } catch (error) {
             console.error('Error fetching statistics:', error);

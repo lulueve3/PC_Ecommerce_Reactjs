@@ -50,7 +50,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
                         }
                     }
 
-                    const { data } = await axios.post('http://localhost:8080/api/auth/register', { email, password, firstname: firstName, lastname: lastName, phone }, config)
+                    const { data } = await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/auth/register', { email, password, firstname: firstName, lastname: lastName, phone }, config)
 
                     localStorage.setItem('accessToken', (data.accessToken))
                     handleLoginLogout(true);

@@ -23,10 +23,10 @@ const AdminRewardScreen = () => {
         try {
             if (currentReward) {
                 // If editing, send a PATCH request
-                await axios.patch(`http://localhost:8080/api/admin/forums/${currentReward.id}`, rewardData, config);
+                await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/forums/${currentReward.id}`, rewardData, config);
             } else {
                 // If creating a new reward, send a POST request
-                await axios.post('http://localhost:8080/api/admin/forums', rewardData, config);
+                await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/forums', rewardData, config);
             }
             toast.success('Reward saved successfully!');
             setShowModal(false);
@@ -39,7 +39,7 @@ const AdminRewardScreen = () => {
     const fetchRewards = async () => {
         const accessToken = localStorage.getItem('accessToken') || null;
         try {
-            const response = await axios.get('http://localhost:8080/api/admin/forums', {
+            const response = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/forums', {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 },

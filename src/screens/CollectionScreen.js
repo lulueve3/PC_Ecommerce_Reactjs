@@ -26,7 +26,7 @@ const CollectionsPage = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            const response = await axios.get(`http://localhost:8080/api/admin/collections?page=${page}&size=${size}&sortBy=id&sortDirection=ASC`, config);
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/collections?page=${page}&size=${size}&sortBy=id&sortDirection=ASC`, config);
             setCollections(response.data.results);
             setTotalPages(response.data.page.totalPages);
 
@@ -60,14 +60,14 @@ const CollectionsPage = () => {
             };
             if (editedCollection.id) {
                 // If _id exists, it means we are editing an existing collection
-                await axios.patch(`http://localhost:8080/api/admin/collections/${editedCollection.id}`, {
+                await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/collections/${editedCollection.id}`, {
                     title: editedCollection.title,
                     active: true,
                     description: "string"
                 }, config);
             } else {
                 // If _id doesn't exist, it means we are adding a new collection
-                await axios.post('http://localhost:8080/api/admin/collections',
+                await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/collections',
                     {
                         ...editedCollection,
                         active: true
@@ -105,7 +105,7 @@ const CollectionsPage = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            await axios.delete(`http://localhost:8080/api/admin/collections/${id}`, config);
+            await axios.delete(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/collections/${id}`, config);
             getCollections();
         } catch (error) {
             console.error('Error deleting collection:', error);

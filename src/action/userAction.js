@@ -13,7 +13,7 @@ export const login = (email, password) => async (dispatch) => {
             }
         }
 
-        const { data } = await axios.post('http://localhost:8080/api/auth/authenticate', { email, password }, config)
+        const { data } = await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/auth/authenticate', { email, password }, config)
 
         dispatch({
             type: USER_LOGIN_SUCCESS,
@@ -50,7 +50,7 @@ export const listUsers = () => async (dispatch, getState) => {
             }
         }
 
-        const { data } = await axios.post('http://localhost:8080/api/users', config)
+        const { data } = await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/users', config)
 
         dispatch({
             type: USER_LIST_SUCCESS,

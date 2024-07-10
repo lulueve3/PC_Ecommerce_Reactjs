@@ -187,7 +187,7 @@ const BuildPcScrenn = () => {
 
             // Lặp qua từng id của collection và thực hiện các API call tương ứng
             for (const collection of productCollections) {
-                const response = await axios.get(`http://localhost:8080/api/products`, {
+                const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/products`, {
                     params: {
                         page: 0,
                         size: 100,
@@ -221,7 +221,7 @@ const BuildPcScrenn = () => {
         try {
             const convertedItems = convertSelectedVariantsToItemsArray(selectedVariants);
             console.log(convertedItems);
-            const response = await axios.post('http://localhost:8080/api/pc-builds', convertedItems);
+            const response = await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/pc-builds', convertedItems);
 
             // Đặt code mới từ title của response
             setGeneratedCode(response.data.title);

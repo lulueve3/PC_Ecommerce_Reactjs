@@ -48,7 +48,7 @@ const SearchScreen = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            const response = await axios.get('http://localhost:8080/api/collections', config);
+            const response = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/collections', config);
             setCollections(response.data.results);
             console.log(response.data.results);
         } catch (error) {

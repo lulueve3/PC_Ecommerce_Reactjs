@@ -17,7 +17,7 @@ const PostDetail = ({ handleBack }) => {
 
     const fetchQuestionDetail = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/api/forums/questions/${id}`);
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/forums/questions/${id}`);
             setQuestionDetail(response.data);
             setAnswers(response.data.answers); // Set the answers state
 
@@ -50,7 +50,7 @@ const PostDetail = ({ handleBack }) => {
 
     const checkCode = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/api/pc-builds/code/${newCode}`);
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/pc-builds/code/${newCode}`);
             if (response.status === 200) {
                 setIsCodeValid(true);
             } else {
@@ -77,7 +77,7 @@ const PostDetail = ({ handleBack }) => {
     const handleLike = async (answerId) => {
         try {
             const accessToken = localStorage.getItem('accessToken');
-            const response = await axios.post(`http://localhost:8080/api/forums/answers/${answerId}`, {}, {
+            const response = await axios.post(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/forums/answers/${answerId}`, {}, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                 },
@@ -107,7 +107,7 @@ const PostDetail = ({ handleBack }) => {
         // Assume there's an API endpoint to submit a new comment
         try {
             const accessToken = localStorage.getItem('accessToken') || null; // Replace null with the actual way you handle tokens
-            await axios.post(`http://localhost:8080/api/forums/questions/${id}/answers`,
+            await axios.post(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/forums/questions/${id}/answers`,
                 { content: newCode },
                 {
                     headers: {

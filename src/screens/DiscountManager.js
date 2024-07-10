@@ -19,7 +19,7 @@ const DiscountManager = () => {
         const size = 3;
         const accessToken = localStorage.getItem('accessToken') || null;
         try {
-            const response = await axios.get(`http://localhost:8080/api/admin/price_rules?page=${page}&size=${size}&sortDirection=DESC`, {
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules?page=${page}&size=${size}&sortDirection=DESC`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -65,7 +65,7 @@ const DiscountManager = () => {
             const updatedDiscount = {
                 endTime: new Date().toISOString(), // Set the end time to now
             };
-            await axios.put(`http://localhost:8080/api/admin/price_rules/${id}`, updatedDiscount, {
+            await axios.put(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules/${id}`, updatedDiscount, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -103,7 +103,7 @@ const DiscountManager = () => {
     const handleDelete = async (id) => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            await axios.delete(`http://localhost:8080/api/admin/price_rules/${id}`, {
+            await axios.delete(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }

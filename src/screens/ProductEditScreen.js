@@ -166,7 +166,7 @@ const ProductEditScreen = () => {
                 }
             };
 
-            const { data } = await axios.get(`http://localhost:8080/api/admin/collections?page=0&size=100&sortBy=id&sortDirection=ASC`, config);
+            const { data } = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/collections?page=0&size=100&sortBy=id&sortDirection=ASC`, config);
             console.log(data);
             setListCollections(data.results)
         }
@@ -321,7 +321,7 @@ const ProductEditScreen = () => {
                 }
             };
 
-            await axios.post(`http://localhost:8080/api/admin/products/${productId}/images`, {
+            await axios.post(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/products/${productId}/images`, {
                 position: images.length + index,
                 src: imageUrl,
                 width: 0,
@@ -398,7 +398,7 @@ const ProductEditScreen = () => {
             };
 
             // Assuming your API endpoint for updating an image looks like this
-            await axios.patch(`http://localhost:8080/api/admin/products/${productId}/images/${imageId}`, {
+            await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/products/${productId}/images/${imageId}`, {
                 src: newImageUrl,
                 // Include other properties that your API might require
             }, config);
@@ -448,7 +448,7 @@ const ProductEditScreen = () => {
                 }
             };
 
-            await axios.delete(`http://localhost:8080/api/admin/products/${productId}/images/${idToRemove}`, config);
+            await axios.delete(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/products/${productId}/images/${idToRemove}`, config);
 
         } catch (error) {
             toast.warning('Delete Image faild!', {
@@ -497,7 +497,7 @@ const ProductEditScreen = () => {
                 }
             };
 
-            await axios.patch(`http://localhost:8080/api/admin/products/${productId}/collections`,
+            await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/products/${productId}/collections`,
                 {
                     productId: 1,
                     collectionIds: selectedCollections

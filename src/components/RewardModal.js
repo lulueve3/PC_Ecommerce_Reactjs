@@ -40,7 +40,7 @@ const RewardModal = ({ show, onHide, currentReward, onSave }) => {
 
     const handleCheckDiscount = async (priceRuleTitle) => {
         try {
-            const response = await axios.get(`http://localhost:8080/api/discounts/${priceRuleTitle}`);
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/discounts/${priceRuleTitle}`);
 
             // Get the current time
             const now = new Date();

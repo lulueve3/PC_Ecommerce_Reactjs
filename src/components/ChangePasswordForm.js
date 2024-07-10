@@ -60,7 +60,7 @@ const ChangePasswordForm = () => {
         }
 
         try {
-            const response = await axios.patch(`http://localhost:8080/api/customer/password`, data, config);
+            const response = await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/customer/password`, data, config);
 
             if (response.status === 200) {
                 // Change password success

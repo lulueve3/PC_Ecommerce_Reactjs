@@ -75,7 +75,7 @@ export default function PaymentForm({ amount, onSuccess, success }) {
         if (!error) {
             try {
                 const { id } = paymentMethod
-                const response = await axios.post("http://localhost:8080/api/payment/create-payment-intent", {
+                const response = await axios.post("http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/payment/create-payment-intent", {
                     amount: Number(amount) * 100,
                     id
                 })

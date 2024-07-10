@@ -35,7 +35,7 @@ const UserProfile = () => {
         };
 
         try {
-            const { data } = await axios.get('http://localhost:8080/api/customer/addresses', config);
+            const { data } = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/customer/addresses', config);
             setAddresses(data.addresses);
         } catch (error) {
             toast.error('Failed to fetch addresses');
@@ -53,11 +53,11 @@ const UserProfile = () => {
         try {
             if (editedAddressIndex !== null) {
                 // Editing an existing address
-                await axios.patch(`http://localhost:8080/api/customer/addresses/${editedAddress.id}`, editedAddress, config);
+                await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/customer/addresses/${editedAddress.id}`, editedAddress, config);
                 toast.success('Address updated successfully');
             } else {
                 // Adding a new address
-                await axios.post('http://localhost:8080/api/customer/addresses', editedAddress, config);
+                await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/customer/addresses', editedAddress, config);
                 toast.success('Address added successfully');
             }
             fetchAddresses(); // Refresh the list
@@ -76,7 +76,7 @@ const UserProfile = () => {
         };
 
         try {
-            await axios.delete(`http://localhost:8080/api/customer/addresses/${id}`, config);
+            await axios.delete(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/customer/addresses/${id}`, config);
             toast.success('Address removed successfully');
             fetchAddresses(); // Refresh the list
         } catch (error) {
@@ -138,7 +138,7 @@ const UserProfile = () => {
             };
 
 
-            const { data } = await axios.get('http://localhost:8080/api/customer', config)
+            const { data } = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/customer', config)
             setUser(data)
 
         } catch (error) {

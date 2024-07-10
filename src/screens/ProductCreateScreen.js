@@ -134,7 +134,7 @@ const ProductCreateScreen = () => {
                 }
             };
 
-            const { data } = await axios.get(`http://localhost:8080/api/admin/collections?page=0&size=100&sortBy=id&sortDirection=ASC`, config);
+            const { data } = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/collections?page=0&size=100&sortBy=id&sortDirection=ASC`, config);
             console.log(data);
             setListCollections(data.results)
         }

@@ -15,7 +15,7 @@ const AdminQnAScreen = () => {
     const fetchQuestions = async () => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            const response = await axios.get('http://localhost:8080/api/admin/forums/questions', {
+            const response = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/forums/questions', {
                 params: {
                     page: page, // Make sure 'page' variable is defined or passed as an argument
                     size: 10,
@@ -48,7 +48,7 @@ const AdminQnAScreen = () => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
 
-            const response = await axios.patch(`http://localhost:8080/api/admin/forums/questions/${id}`,
+            const response = await axios.patch(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/forums/questions/${id}`,
                 { active: approved }, // Assuming the QuestionDto contains an 'approved' field
                 {
                     headers: {

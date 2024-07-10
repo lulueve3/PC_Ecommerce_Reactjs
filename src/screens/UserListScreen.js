@@ -32,7 +32,7 @@ const UserListScreen = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            const response = await axios.get('http://localhost:8080/api/admin/customers?page=0&size=10&sortBy=id&sortDirection=ASC', config);
+            const response = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/customers?page=0&size=10&sortBy=id&sortDirection=ASC', config);
             setUserList(response.data.results);
             console.log(response.data.results);
         } catch (error) {

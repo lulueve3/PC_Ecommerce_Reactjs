@@ -22,7 +22,7 @@ const QnAPScreen = () => {
     const fetchPosts = async (page = 0, keyword = '') => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
-            const response = await axios.get(`http://localhost:8080/api/forums/questions`, {
+            const response = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/forums/questions`, {
                 params: {
                     page: page,
                     size: 10,
@@ -57,7 +57,7 @@ const QnAPScreen = () => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
 
-            const response = await axios.post('http://localhost:8080/api/forums/questions', newPost, {
+            const response = await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/forums/questions', newPost, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`, // Replace YOUR_TOKEN_HERE with the actual token
                 }

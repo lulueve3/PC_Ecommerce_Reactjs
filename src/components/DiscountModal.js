@@ -73,12 +73,12 @@ const DiscountModal = ({ show, handleClose, discount, setDiscount, isNew, onSubm
 
         try {
             const response = isNew
-                ? await axios.post('http://localhost:8080/api/admin/price_rules', discountData, {
+                ? await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules', discountData, {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     }
                 })
-                : await axios.post(`http://localhost:8080/api/admin/price_rules/${discount.id}`, discountData, {
+                : await axios.post(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules/${discount.id}`, discountData, {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     }

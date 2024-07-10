@@ -62,7 +62,7 @@ const CartScreen = () => {
         try {
             const accessToken = localStorage.getItem('accessToken') || null;
 
-            const { data } = await axios.get(`http://localhost:8080/api/admin/price_rules?page=0&size=10&sortBy=id&sortDirection=ASC&keyword=${discountCode}`, {
+            const { data } = await axios.get(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules?page=0&size=10&sortBy=id&sortDirection=ASC&keyword=${discountCode}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -192,7 +192,7 @@ const CartScreen = () => {
                         'Authorization': `Bearer ${accessToken}`,
                     },
                 };
-                const { data } = await axios.get('http://localhost:8080/api/customer/addresses', config);
+                const { data } = await axios.get('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/customer/addresses', config);
                 setAddresses(data.addresses); // assuming 'data' is an array of address objects
             } catch (error) {
                 if (error.response && error.response.status === 401) {
@@ -229,7 +229,7 @@ const CartScreen = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            const { data } = await axios.post('http://localhost:8080/api/customer/addresses', newAddress, config);
+            const { data } = await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/customer/addresses', newAddress, config);
             setAddresses([...addresses, data]); // Update your addresses state
             toast.success('New address added successfully!');
         } catch (error) {
@@ -248,7 +248,7 @@ const CartScreen = () => {
                     'Authorization': `Bearer ${accessToken}`
                 }
             };
-            const { data } = await axios.put(`http://localhost:8080/api/customer/addresses/${addressId}`, updatedAddress, config);
+            const { data } = await axios.put(`http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/customer/addresses/${addressId}`, updatedAddress, config);
             // Update your addresses state with the new address data
             setAddresses(addresses.map(addr => (addr.id === addressId ? data : addr)));
             toast.success('Address updated successfully!');
@@ -393,7 +393,7 @@ const CartScreen = () => {
             };
 
 
-            const { data } = await axios.post('http://localhost:8080/api/orders', orders)
+            const { data } = await axios.post('http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/orders', orders)
 
             const removeFunctions = selectedItems.map(itemId => () => removeFromCartHandler(itemId));
 
