@@ -73,12 +73,7 @@ const CartScreen = () => {
       const accessToken = localStorage.getItem("accessToken") || null;
 
       const { data } = await axios.get(
-        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/discounts/${discountCode}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/discounts/${discountCode}`
       );
       // Assuming the API returns an array and you want the first match
       const discount = data;
