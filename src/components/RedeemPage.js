@@ -32,8 +32,15 @@ const RedeemPage = () => {
   useEffect(() => {
     const fetchRedeemOptions = async () => {
       try {
+        const accessToken = localStorage.getItem("accessToken") || null;
+
         const response = await axios.get(
-          "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards?page=0&size=10&sortBy=id&sortDirection=ASC"
+          "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards?page=0&size=10&sortBy=id&sortDirection=ASC",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
         setRedeemOptions(response.data.results);
       } catch (error) {

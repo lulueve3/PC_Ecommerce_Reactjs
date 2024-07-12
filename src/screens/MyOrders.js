@@ -88,7 +88,7 @@ const MyOrders = () => {
         return acc;
       }, 0) || 0;
 
-    const discountedTotal = order.subtotalPrice - totalDiscount;
+    const discountedTotal = order.subtotalPrice + totalDiscount;
 
     return (
       <div>

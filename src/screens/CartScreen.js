@@ -553,7 +553,13 @@ const CartScreen = () => {
   }, [accessToken]);
 
   const checkoutHandler = () => {
-    if (!selectedAddress && !newAddress) {
+    let selectAd = false;
+    if (!isNaN(parseInt(selectedAddress))) selectAd = true;
+    else selectAd = false;
+
+    console.log(!selectAd);
+    console.log(newAddress.name === "");
+    if (!selectAd && newAddress.name === "") {
       toast.warning("Please select an address", {
         // Toast options...
       });
@@ -582,7 +588,7 @@ const CartScreen = () => {
       handleShowPaymentModal();
     } else if (paymentMethod === "COD") {
       // Handle the COD order submission here
-      createOrder();
+      // createOrder();
     } else {
       toast.warning("Please select a payment method");
     }

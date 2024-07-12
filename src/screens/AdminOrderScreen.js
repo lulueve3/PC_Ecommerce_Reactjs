@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Table, Pagination, Modal, Button } from "react-bootstrap";
 import { Dropdown, DropdownButton } from "react-bootstrap";
+import { format } from "date-fns";
 
 import axios from "axios";
 
@@ -143,7 +144,7 @@ const AdminOrderScrren = () => {
         return acc;
       }, 0) || 0;
 
-    const discountedTotal = order.subtotalPrice - totalDiscount;
+    const discountedTotal = order.subtotalPrice + totalDiscount;
 
     return (
       <div>
@@ -266,6 +267,11 @@ const AdminOrderScrren = () => {
     setShowModal(false);
   };
 
+  const formatTime = (time) => {
+    const dateObject = new Date(time);
+    return format(dateObject, "dd/MM/yyyy HH:mm:ss"); // Có thể sửa đổi định dạng tùy ý
+  };
+
   const totalOrderById = (orderId) => {
     const order = orders.find((order) => order.id === orderId);
 
@@ -329,7 +335,7 @@ const AdminOrderScrren = () => {
               <td>{order.id}</td>
               <td>{`${order.address.name}`}</td>
               <td>{totalOrderById(order.id)}</td>
-              <td>{order.createdAt}</td>
+              <td>{formatTime(order.createdAt)}</td>
               <td>
                 <DropdownButton
                   id={`dropdown-button-${order.id}`}
