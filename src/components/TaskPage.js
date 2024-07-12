@@ -46,15 +46,15 @@ const TaskPage = () => {
         </Row>
         <Card>
           <Card.Body>
-            <Card.Title>Task 1</Card.Title>
-            <Card.Text>Description of Task 1</Card.Text>
+            <Card.Title>Like</Card.Title>
+            <Card.Text>like a comment</Card.Text>
             <Button variant="primary">Complete Task</Button>
           </Card.Body>
         </Card>
         <Card>
           <Card.Body>
-            <Card.Title>Task 2</Card.Title>
-            <Card.Text>Description of Task 2</Card.Text>
+            <Card.Title>Comment</Card.Title>
+            <Card.Text>comment on a post</Card.Text>
             <Button variant="primary">Complete Task</Button>
           </Card.Body>
         </Card>
