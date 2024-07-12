@@ -51,9 +51,12 @@ const SearchScreen = () => {
     CPU: [],
     RAM: [],
     VGA: [],
-    MOTHERBOARD: [],
-    COOLER: [],
-    CASE: [],
+    Others: [],
+    // MOTHERBOARD: [],
+    // COOLER: [],
+    // CASE: [],
+    // SSD: [],
+    // HDD: [],
   };
 
   collections.forEach((collection) => {
@@ -63,7 +66,12 @@ const SearchScreen = () => {
     console.log(collectionType);
     if (collectionType) {
       categoriesGroupedByType[collectionType].push(collection);
-      console.log("true");
+    } else if (
+      ["MOTHERBOARD", "COOLER", "SSD", "HDD", "Case", "Power_Supply"].some(
+        (type) => collection.title.includes(type)
+      )
+    ) {
+      categoriesGroupedByType.Others.push(collection);
     }
   });
 
