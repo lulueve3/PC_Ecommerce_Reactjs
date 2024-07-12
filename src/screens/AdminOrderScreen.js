@@ -309,7 +309,7 @@ const AdminOrderScrren = () => {
 
   return (
     <div>
-      <h2>My Orders</h2>
+      <h2>Orders</h2>
       <DropdownButton
         id="filter-dropdown"
         title={`Filter by Status: ${filterStatus}`}
