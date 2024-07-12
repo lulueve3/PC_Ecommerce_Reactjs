@@ -151,15 +151,6 @@ const BuildPcScrenn = () => {
     setTotalPrice(price);
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedCode);
-    setCopied(true);
-    toast.success("copied!");
-    setTimeout(() => {
-      setCopied(false);
-    }, 3000);
-  };
-
   const fetchComponents = async () => {
     const collectionIds = [52, 53, 55, 63, 56, 57, 58, 54, 59];
 
