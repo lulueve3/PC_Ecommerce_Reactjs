@@ -35,9 +35,6 @@ const QnAPScreen = () => {
             sortDirection: "DESC",
             keyword: keyword, // Add the search keyword to the request parameters
           },
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
         }
       );
 

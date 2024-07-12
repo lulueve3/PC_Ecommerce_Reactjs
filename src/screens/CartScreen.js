@@ -588,7 +588,7 @@ const CartScreen = () => {
       handleShowPaymentModal();
     } else if (paymentMethod === "COD") {
       // Handle the COD order submission here
-      // createOrder();
+      createOrder();
     } else {
       toast.warning("Please select a payment method");
     }
