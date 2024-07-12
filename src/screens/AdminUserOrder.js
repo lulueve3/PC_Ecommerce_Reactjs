@@ -77,8 +77,20 @@ const MyOrders = () => {
     return null;
   };
 
-  const getOrderProduct = (orderId) => {
+  const getOrderProducts = (orderId) => {
     const order = orders.find((order) => order.id === orderId);
+
+    const totalDiscount =
+      order.discountApplications?.reduce((acc, discount) => {
+        if (discount.valueType === "FIXED_AMOUNT") {
+          return acc + discount.value;
+        } else if (discount.valueType === "PERCENTAGE") {
+          return acc + order.subtotalPrice * (discount.value / 100);
+        }
+        return acc;
+      }, 0) || 0;
+
+    const discountedTotal = order.subtotalPrice + totalDiscount;
 
     return (
       <div>
@@ -94,7 +106,7 @@ const MyOrders = () => {
             </tr>
           </thead>
           <tbody>
-            {order.lineItems.map((item) => {
+            {order.lineItems?.map((item) => {
               const product = productDetails.find(
                 (product) => product.id === item.productId
               );
@@ -131,9 +143,15 @@ const MyOrders = () => {
                   <td>
                     {variant && (
                       <>
-                        {variant.option1 && <span>{variant.option1}</span>}
-                        {variant.option2 && <span>{variant.option2}</span>}
-                        {variant.option3 && <span>{variant.option3}</span>}
+                        {variant.option1 && (
+                          <span>{variant.option1 + "-"}</span>
+                        )}
+                        {variant.option2 && (
+                          <span>{variant.option2 + "-"}</span>
+                        )}
+                        {variant.option3 && (
+                          <span>{variant.option3 + "-"}</span>
+                        )}
                         {!variant.option1 &&
                           !variant.option2 &&
                           !variant.option3 && <span>No Options</span>}
@@ -148,6 +166,37 @@ const MyOrders = () => {
             })}
           </tbody>
         </Table>
+        {order.discountApplications &&
+          order.discountApplications.length > 0 && (
+            <div>
+              <h6>
+                Discount Codes:{" "}
+                {order.discountApplications.map(
+                  (discount, index) => discount.discountCode
+                )}
+              </h6>
+            </div>
+          )}
+        <div>
+          <h6>
+            Address: {order.address.name}, {order.address.street},{" "}
+            {order.address.ward}, {order.address.district}, {order.address.city}
+          </h6>
+          <h6>Phone: {order.address.phone}</h6>
+        </div>
+        <div>
+          <h5>
+            Total Amount:{" "}
+            {order.subtotalPrice !== discountedTotal ? (
+              <span style={{ textDecoration: "line-through" }}>
+                ${order.subtotalPrice}
+              </span>
+            ) : (
+              <span>${order.subtotalPrice}</span>
+            )}{" "}
+            <span style={{ color: "green" }}>${discountedTotal}</span>
+          </h5>
+        </div>
       </div>
     );
   };
@@ -173,17 +222,13 @@ const MyOrders = () => {
     }
   };
   const totalOrderById = (orderId) => {
-    let sum = 0;
-
     const order = orders.find((order) => order.id === orderId);
 
     if (order) {
-      order.lineItems.forEach((item) => {
-        sum += item.price * item.quantity;
-      });
+      return order.subtotalPrice;
     }
 
-    return sum;
+    return 0;
   };
 
   const handlePageChange = (pageNumber) => {
@@ -194,9 +239,12 @@ const MyOrders = () => {
   const handleViewDetails = async (orderId) => {
     const order = orders.find((order) => order.id === orderId);
     setSelectedOrder(order);
-    await fetchProductDetails(orderId);
 
-    setShowModal(true);
+    // Gọi fetchProductDetails cho từng productId trong line_items
+    order.lineItems.forEach(async (item) => {
+      await fetchProductDetails(item.productId);
+    });
+
     setShowModal(true);
   };
 
@@ -281,7 +329,7 @@ const MyOrders = () => {
               <p>Total Amount: ${totalOrderAmount(selectedOrder)}</p>
               <div>
                 {/* Hiển thị thông tin chi tiết của từng sản phẩm trong đơn hàng */}
-                {getOrderProduct(selectedOrder.id)}
+                {getOrderProducts(selectedOrder.id)}
               </div>
             </>
           )}

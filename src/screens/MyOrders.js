@@ -75,7 +75,7 @@ const MyOrders = () => {
     return null;
   };
 
-  const getOrderProduct = (orderId) => {
+  const getOrderProducts = (orderId) => {
     const order = orders.find((order) => order.id === orderId);
 
     const totalDiscount =
@@ -185,9 +185,13 @@ const MyOrders = () => {
         <div>
           <h5>
             Total Amount:{" "}
-            <span style={{ textDecoration: "line-through" }}>
-              ${order.subtotalPrice}
-            </span>{" "}
+            {order.subtotalPrice !== discountedTotal ? (
+              <span style={{ textDecoration: "line-through" }}>
+                ${order.subtotalPrice}
+              </span>
+            ) : (
+              <span></span>
+            )}{" "}
             <span style={{ color: "green" }}>${discountedTotal}</span>
           </h5>
         </div>
@@ -326,7 +330,7 @@ const MyOrders = () => {
               <p>Total Amount: ${totalOrderAmount(selectedOrder)}</p>
               <div>
                 {/* Hiển thị thông tin chi tiết của từng sản phẩm trong đơn hàng */}
-                {getOrderProduct(selectedOrder.id)}
+                {getOrderProducts(selectedOrder.id)}
               </div>
             </>
           )}

@@ -241,9 +241,13 @@ const AdminOrderScrren = () => {
         <div>
           <h5>
             Total Amount:{" "}
-            <span style={{ textDecoration: "line-through" }}>
-              ${order.subtotalPrice}
-            </span>{" "}
+            {order.subtotalPrice !== discountedTotal ? (
+              <span style={{ textDecoration: "line-through" }}>
+                ${order.subtotalPrice}
+              </span>
+            ) : (
+              <span></span>
+            )}{" "}
             <span style={{ color: "green" }}>${discountedTotal}</span>
           </h5>
         </div>

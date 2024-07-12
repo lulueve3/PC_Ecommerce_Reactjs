@@ -584,7 +584,7 @@ const CartScreen = () => {
       return;
     }
 
-    if (paymentMethod === "OTHER") {
+    if (paymentMethod === "CARD") {
       handleShowPaymentModal();
     } else if (paymentMethod === "COD") {
       // Handle the COD order submission here
@@ -793,9 +793,9 @@ const CartScreen = () => {
                     label="Visa/Credit card"
                     id="paymentMethodCreditCard"
                     name="paymentMethod"
-                    value="OTHER"
+                    value="CARD"
                     onChange={(e) => setPaymentMethod(e.target.value)}
-                    checked={paymentMethod === "OTHER"}
+                    checked={paymentMethod === "CARD"}
                   />
                   <Form.Check
                     type="radio"
