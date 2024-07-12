@@ -35,8 +35,7 @@ const SearchScreen = () => {
         },
       };
       const response = await axios.get(
-        "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/collections?page=0&size=100&sortBy=id&sortDirection=ASC",
-        config
+        "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/collections?page=0&size=100&sortBy=id&sortDirection=ASC"
       );
       setCollections(response.data.results);
       console.log(response.data.results);

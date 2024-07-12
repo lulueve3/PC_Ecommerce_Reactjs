@@ -396,9 +396,7 @@ const BuildPcScrenn = () => {
               marginLeft: "10px",
             }}
           >
-            <Button variant="secondary" onClick={copyToClipboard}>
-              {generatedCode}
-            </Button>
+            <Button variant="secondary">{generatedCode}</Button>
           </div>
         )}
       </div>
