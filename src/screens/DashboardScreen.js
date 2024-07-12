@@ -16,7 +16,7 @@ const DashboardScreen = () => {
     revenue: 0,
   });
 
-  const [selectedYear, setSelectedYear] = useState(2023);
+  const [selectedYear, setSelectedYear] = useState(2024);
   const [orderReport, setOrderReport] = useState([]);
 
   const handleChangeYear = (year) => {
@@ -26,7 +26,7 @@ const DashboardScreen = () => {
   };
 
   useEffect(() => {
-    fetchOrderReport(2023);
+    fetchOrderReport(2024);
   }, []);
 
   const fetchOrderReport = async (year) => {
