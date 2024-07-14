@@ -76,7 +76,7 @@ const HomeScreen = () => {
           <Link to="/buid-pc">
             <Card className="rounded-card">
               <Card.Img
-                src={`${process.env.PUBLIC_URL}/BuildPC.jpg`}
+                src={`${process.env.PUBLIC_URL}/buildpc.jpg`}
                 alt="Build PC"
               />
             </Card>
