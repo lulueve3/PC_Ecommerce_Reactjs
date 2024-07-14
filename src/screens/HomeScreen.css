@@ -1,0 +1,44 @@
+.custom-carousel-bg {
+  background-color: #e3e6e6;
+  padding: 20px; /* Optional: Add padding to give some spacing */
+  border-radius: 10px; /* Optional: Add rounded corners */
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: black; /* Change control icons to black */
+  background-size: 100%, 100%;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  color: black; /* Change the color of the control buttons */
+}
+
+.visually-hidden {
+  color: black;
+  font-style: oblique;
+}
+
+.rounded-card {
+  border-radius: 15px;
+  overflow: hidden;
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.rounded-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-row {
+  background-color: rgba(117, 142, 205, 0.3); /* Độ mờ là 0.5 */
+  border-radius: 15px;
+  margin-bottom: 5px;
+}

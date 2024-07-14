@@ -99,7 +99,7 @@ const AdminRewardScreen = () => {
                   setShowModal(true);
                 }}
               >
-                Edit
+                Detail
               </Button>{" "}
               <Button
                 variant="danger"
@@ -107,7 +107,7 @@ const AdminRewardScreen = () => {
                   // Add your delete handler here
                 }}
               >
-                Delete
+                Disable
               </Button>
             </td>
           </tr>

@@ -1,0 +1,12 @@
+/* Add this to your CSS file, e.g., CartScreen.css */
+.d-flex.align-items-center.product-item {
+  background-color: #f7f7f7;
+  border-radius: 15px; /* Adjust this value to get the desired roundness */
+  padding: 15px; /* Add some padding for better spacing */
+  margin-bottom: 15px; /* Add some margin to separate items */
+}
+
+.price {
+  font-weight: bold;
+  font-size: 1.2rem; /* Adjust the size as needed */
+}

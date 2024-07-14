@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Table, Pagination, Modal, Button } from "react-bootstrap";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 import { format } from "date-fns";
+import "./AdminOrderScreen.css";
 
 import axios from "axios";
 
-const AdminOrderScrren = () => {
+const AdminOrderScreen = () => {
   const [orders, setOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -14,30 +15,46 @@ const AdminOrderScrren = () => {
   const [productDetails, setProductDetails] = useState([]);
   const [filterStatus, setFilterStatus] = useState("All");
   const [orderCounts, setOrderCounts] = useState([]);
+  const [fulfillmentStatusFilter, setFulfillmentStatusFilter] = useState("ANY"); // State for fulfillment status filter
 
-  const FulfillmentStatus = {
-    SHIPPED: "SHIPPED",
-    PARTIAL: "PARTIAL",
-    UNSHIPPED: "UNSHIPPED",
-    ANY: "ANY",
-    UNFULFILLED: "UNFULFILLED",
+  const getClassByFulfillmentStatus = (status) => {
+    switch (status) {
+      case "UNFULFILLED":
+        return "tr-unfulfilled";
+      case "FULFILLED":
+        return "tr-fulfilled";
+      case "SHIPPED":
+        return "tr-shipped";
+      default:
+        return "";
+    }
   };
 
-  const [fulfillmentStatusFilter, setFulfillmentStatusFilter] = useState(
-    FulfillmentStatus.UNFULFILLED
-  ); // State for fulfillment status filter
+  const FulfillmentStatus = {
+    ANY: "ANY",
+    UNFULFILLED: "UNFULFILLED",
+    FULFILLED: "FULFILLED",
+    SHIPPED: "SHIPPED",
+  };
 
-  const fetchOrders = async (page = 0, size = 10) => {
+  const fetchOrders = async (
+    page = 0,
+    size = 10,
+    fulfillmentStatus = "ANY"
+  ) => {
     try {
       const accessToken = localStorage.getItem("accessToken") || null;
-      const response = await axios.get(
-        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/orders?page=${page}&size=${size}&sortBy=id&sortDirection=DESC`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      let apiUrl = `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/orders?page=${page}&size=${size}&sortBy=id&sortDirection=DESC`;
+
+      if (fulfillmentStatus !== "ANY") {
+        apiUrl += `&fulfillmentStatus=${fulfillmentStatus}`;
+      }
+
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       setOrders(response.data.results);
       setTotalPages(response.data.page.totalPages);
@@ -111,8 +128,16 @@ const AdminOrderScrren = () => {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    fetchOrders(pageNumber - 1);
+    fetchOrders(pageNumber - 1, 10, fulfillmentStatusFilter);
   };
+
+  const handleFulfillmentStatusChange = (event) => {
+    setFulfillmentStatusFilter(event.target.value);
+  };
+
+  useEffect(() => {
+    fetchOrders(0, 10, fulfillmentStatusFilter);
+  }, [fulfillmentStatusFilter]);
 
   const findVariantById = (productId, variantId) => {
     const product = productDetails.find((product) => product.id === productId);
@@ -121,15 +146,6 @@ const AdminOrderScrren = () => {
     }
     return null;
   };
-
-  const handleFulfillmentStatusChange = (event) => {
-    setFulfillmentStatusFilter(event.target.value);
-    fetchOrders(0, 10, event.target.value);
-  };
-
-  useEffect(() => {
-    fetchOrders(0, 10, fulfillmentStatusFilter);
-  }, [fulfillmentStatusFilter]);
 
   const getOrderProducts = (orderId) => {
     const order = orders.find((order) => order.id === orderId);
@@ -160,64 +176,47 @@ const AdminOrderScrren = () => {
             </tr>
           </thead>
           <tbody>
-            {order.lineItems?.map((item) => {
-              const product = productDetails.find(
-                (product) => product.id === item.productId
-              );
-              const variant = findVariantById(item.productId, item.variantId);
-              console.log(variant);
-
-              return (
-                <tr key={item.productId}>
-                  <td
-                    style={{
-                      display: "block",
-                      maxWidth: "100%",
-                      wordWrap: "break-word",
-                      wordBreak: "break-all",
-                    }}
-                  >
-                    {product ? product.title : "Product Not Found"}
-                  </td>
-                  <td>
-                    {product ? (
-                      <img
-                        src={
-                          product.image
-                            ? product.image.src
-                            : "URL_DEFAULT_IMAGE"
-                        } // Thay thế 'URL_DEFAULT_IMAGE' bằng URL hình ảnh mặc định nếu không có hình ảnh
-                        alt={product.title || "Product Image"}
-                        style={{ maxWidth: "100px", maxHeight: "100px" }} // Thay đổi kích thước hình ảnh tùy ý
-                      />
-                    ) : (
-                      "Product Not Found"
-                    )}
-                  </td>
-                  <td>
-                    {variant && (
-                      <>
-                        {variant.option1 && (
-                          <span>{variant.option1 + "-"}</span>
-                        )}
-                        {variant.option2 && (
-                          <span>{variant.option2 + "-"}</span>
-                        )}
-                        {variant.option3 && (
-                          <span>{variant.option3 + "-"}</span>
-                        )}
-                        {!variant.option1 &&
-                          !variant.option2 &&
-                          !variant.option3 && <span>No Options</span>}
-                      </>
-                    )}
-                    {!variant && "Variant Not Found"}
-                  </td>
-                  <td>{item.price}</td>
-                  <td>{item.quantity}</td>
-                </tr>
-              );
-            })}
+            {orders?.map((order) => (
+              <tr
+                key={order.id}
+                className={getClassByFulfillmentStatus(order.fulfillmentStatus)}
+              >
+                <td>{order.id}</td>
+                <td>{`${order.address.name}`}</td>
+                <td>{totalOrderById(order.id)}</td>
+                <td>{formatTime(order.createdAt)}</td>
+                <td>
+                  <div className="d-flex align-items-center">
+                    <DropdownButton
+                      id={`dropdown-button-${order.id}`}
+                      title={order.fulfillmentStatus}
+                      className="mr-2" // Để tạo khoảng cách giữa Dropdown và Button
+                    >
+                      {order.fulfillmentStatus === "UNFULFILLED" && (
+                        <Dropdown.Item
+                          onClick={() =>
+                            changeOrderStatus(order.id, "FULFILLED")
+                          }
+                        >
+                          Mark as Fulfilled
+                        </Dropdown.Item>
+                      )}
+                      {/* Hiển thị các Dropdown.Item phù hợp với trạng thái khác */}
+                      {order.fulfillmentStatus === "FULFILLED" && (
+                        <Dropdown.Item
+                          onClick={() => changeOrderStatus(order.id, "SHIPPED")}
+                        >
+                          Mark as SHIPPED
+                        </Dropdown.Item>
+                      )}
+                    </DropdownButton>
+                    <Button onClick={() => handleViewDetails(order.id)}>
+                      Details
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </Table>
         {order.discountApplications &&
@@ -310,19 +309,21 @@ const AdminOrderScrren = () => {
   return (
     <div>
       <h2>Orders</h2>
+
       <DropdownButton
-        id="filter-dropdown"
-        title={`Filter by Status: ${filterStatus}`}
+        id="filter-fulfillment-status"
+        title={`Filter by Fulfillment Status: ${fulfillmentStatusFilter}`}
       >
-        <Dropdown.Item onClick={() => setFilterStatus("All")}>
-          All
-        </Dropdown.Item>
-        {Object.keys(orderCounts).map((status) => (
-          <Dropdown.Item key={status} onClick={() => setFilterStatus(status)}>
-            {status} ({orderCounts[status]})
+        {Object.values(FulfillmentStatus).map((status) => (
+          <Dropdown.Item
+            key={status}
+            onClick={() => setFulfillmentStatusFilter(status)}
+          >
+            {status}
           </Dropdown.Item>
         ))}
       </DropdownButton>
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -341,28 +342,32 @@ const AdminOrderScrren = () => {
               <td>{totalOrderById(order.id)}</td>
               <td>{formatTime(order.createdAt)}</td>
               <td>
-                <DropdownButton
-                  id={`dropdown-button-${order.id}`}
-                  title={order.fulfillmentStatus}
-                >
-                  {order.fulfillmentStatus === "UNFULFILLED" && (
-                    <Dropdown.Item
-                      onClick={() => changeOrderStatus(order.id, "FULFILLED")}
-                    >
-                      Mark as Fulfilled
-                    </Dropdown.Item>
-                  )}
-                  {order.fulfillmentStatus === "FULFILLED" && (
-                    <Dropdown.Item
-                      onClick={() => changeOrderStatus(order.id, "UNFULFILLED")}
-                    >
-                      Mark as Unfulfilled
-                    </Dropdown.Item>
-                  )}
-                </DropdownButton>
-                <Button onClick={() => handleViewDetails(order.id)}>
-                  Details
-                </Button>
+                <div className="d-flex align-items-center">
+                  <DropdownButton
+                    id={`dropdown-button-${order.id}`}
+                    title={order.fulfillmentStatus}
+                    className="mr-2" // Để tạo khoảng cách giữa Dropdown và Button
+                  >
+                    {order.fulfillmentStatus === "UNFULFILLED" && (
+                      <Dropdown.Item
+                        onClick={() => changeOrderStatus(order.id, "FULFILLED")}
+                      >
+                        Mark as Fulfilled
+                      </Dropdown.Item>
+                    )}
+                    {/* Hiển thị các Dropdown.Item phù hợp với trạng thái khác */}
+                    {order.fulfillmentStatus === "FULFILLED" && (
+                      <Dropdown.Item
+                        onClick={() => changeOrderStatus(order.id, "SHIPPED")}
+                      >
+                        Mark as SHIPPED
+                      </Dropdown.Item>
+                    )}
+                  </DropdownButton>
+                  <Button onClick={() => handleViewDetails(order.id)}>
+                    Details
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}
@@ -409,4 +414,4 @@ const AdminOrderScrren = () => {
   );
 };
 
-export default AdminOrderScrren;
+export default AdminOrderScreen;

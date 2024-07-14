@@ -20,6 +20,7 @@ import { ToastContainer, toast } from "react-toastify";
 import StripeContainer from "../components/StripeContainer";
 import emailjs from "@emailjs/browser";
 import EditAddress from "../components/EditAddress";
+import "./CartScreen.css";
 
 const ITEMS_PER_PAGE = 5; // Adjust as needed
 const CartScreen = () => {
@@ -638,23 +639,26 @@ const CartScreen = () => {
               {currentCartItems.reverse().map((item) => (
                 <ListGroup.Item
                   key={item.id}
-                  className="d-flex align-items-center"
+                  className="d-flex align-items-center product-item row"
                 >
                   {/* Column 1: Image */}
-                  <div className="col-md-2 mb-3">
+                  <div className="col-md-2 mb-3 d-flex align-items-center justify-content-center">
                     <Link to={`/product/${item.productId}`}>
                       <Image
                         src={item.image}
                         fluid
                         rounded
-                        style={{ maxWidth: "100px", maxHeight: "100px" }} // Set max width and height for the image
+                        style={{ maxWidth: "100px", maxHeight: "100px" }}
                       />
                     </Link>
                   </div>
 
                   {/* Column 2: Title */}
-                  <div className="col-md-3 mb-3">
-                    <Link to={`/product/${item.productId}`}>
+                  <div className="col-md-4 mb-3 d-flex align-items-center">
+                    <Link
+                      to={`/product/${item.productId}`}
+                      className="text-center text-md-start"
+                    >
                       {item.title}
                       <br />
                       {item.variant}
@@ -662,7 +666,7 @@ const CartScreen = () => {
                   </div>
 
                   {/* Column 3: Quantity */}
-                  <div className="col-md-2 mb-3">
+                  <div className="col-md-2 mb-3 d-flex align-items-center justify-content-center">
                     <Form.Control
                       type="number"
                       value={item.qty}
@@ -680,12 +684,12 @@ const CartScreen = () => {
                   </div>
 
                   {/* Column 4: Price */}
-                  <div className="col-md-2 mb-3 text-sm-center">
+                  <div className="col-md-2 mb-2 text-sm-center d-flex align-items-center justify-content-center price">
                     ${item.price}
                   </div>
 
-                  {/* Column 5: Remove and Select */}
-                  <div className="col-md-3 d-flex align-items-center justify-content-center">
+                  {/* Column 5: Remove */}
+                  <div className="col-md-1 d-flex align-items-center justify-content-center">
                     <Button
                       type="button"
                       variant="light"
@@ -693,14 +697,22 @@ const CartScreen = () => {
                     >
                       <i className="fas fa-trash"></i>
                     </Button>
-                    <div className="ml-2 align-self-center mx-3 mb-3">
-                      <Form.Check
-                        type="checkbox"
-                        id={`select-${item.id}`}
-                        checked={selectedItems.includes(item.id)}
-                        onChange={() => toggleSelectItem(item.id)}
-                      />
-                    </div>
+                  </div>
+
+                  {/* Column 6: Select */}
+                  <div className="col-md-1 d-flex align-items-center justify-content-center">
+                    <Form.Check
+                      type="checkbox"
+                      id={`select-${item.id}`}
+                      checked={selectedItems.includes(item.id)}
+                      onChange={() => toggleSelectItem(item.id)}
+                      style={{
+                        minHeight: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    />
                   </div>
                 </ListGroup.Item>
               ))}

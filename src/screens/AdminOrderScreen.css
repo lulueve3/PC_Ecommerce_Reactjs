@@ -1,0 +1,11 @@
+.tr-unfulfilled {
+  background-color: #fff3cd; /* màu nền vàng nhạt */
+}
+
+.tr-fulfilled {
+  background-color: #d4edda; /* màu nền xanh lá cây nhạt */
+}
+
+.tr-shipped {
+  background-color: #cce5ff; /* màu nền xanh nước biển nhạt */
+}
