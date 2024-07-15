@@ -3,10 +3,14 @@ import { Container, Card, Button, Row, Col } from "react-bootstrap";
 import NavigationBar from "../components/NavigationBar";
 import axios from "axios";
 import "./RedeemPage.css"; // Import custom CSS
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const RedeemPage = () => {
-  const [points, setPoints] = useState(0);
+  const [points, setPoints] = useState(30);
   const [redeemOptions, setRedeemOptions] = useState([]);
+  const [discountCode, setDiscountCode] = useState(null); // State to store discount code
+  const [showDiscount, setShowDiscount] = useState(false); // State to control displaying discount code
 
   useEffect(() => {
     const fetchPoints = async () => {
@@ -51,15 +55,33 @@ const RedeemPage = () => {
     fetchRedeemOptions();
   }, []);
 
-  const handleRedeem = (redeemOptionId) => {
-    // Implement redeem logic here
-    console.log("Redeeming option with ID:", redeemOptionId);
+  const handleRedeem = async (title) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken") || null;
+      const response = await axios.post(
+        "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards",
+        {
+          code: title,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      setDiscountCode(response.data.discountCode);
+      setShowDiscount(true);
+    } catch (error) {
+      console.error("Error redeeming:", error);
+      // Handle error, show error message to user
+    }
   };
 
   return (
     <>
       <NavigationBar />
       <Container>
+        <ToastContainer />
         <Row className="align-items-center my-3">
           <Col>
             <h2>Redeem</h2>
@@ -78,31 +100,26 @@ const RedeemPage = () => {
             <Card.Body>
               <Card.Title>{option.title}</Card.Title>
               <Card.Text>{option.description}</Card.Text>
-              <Button variant="primary" onClick={() => handleRedeem(option.id)}>
+              <Button
+                variant="primary"
+                onClick={() => handleRedeem(option.title)}
+              >
                 Redeem
               </Button>
             </Card.Body>
           </Card>
         ))}
 
-        {/* Example of static Card components (you can remove these)
-        <Card>
-          <Card.Body>
-            <Card.Title>Redeem Option 1</Card.Title>
-            <Card.Text>Description of Redeem Option 1</Card.Text>
-            <Button variant="primary">Redeem</Button>
-          </Card.Body>
-        </Card>
-        <Card>
-          <Card.Body>
-            <Card.Title>Redeem Option 2</Card.Title>
-            <Card.Text>Description of Redeem Option 2</Card.Text>
-            <Button variant="primary">Redeem</Button>
-          </Card.Body>
-        </Card>
-        */}
-
-        {/* Add more redeem option cards as needed */}
+        {/* Display the discount code if available */}
+        {/* {showDiscount && discountCode && (
+          <Card className="mt-3">
+            <Card.Body>
+              <Card.Text className="text-success">
+                Your discount code: <strong>{discountCode}</strong>
+              </Card.Text>
+            </Card.Body>
+          </Card>
+        )} */}
       </Container>
     </>
   );

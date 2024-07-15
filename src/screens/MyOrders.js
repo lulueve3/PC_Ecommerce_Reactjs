@@ -164,7 +164,7 @@ const MyOrders = () => {
             })}
           </tbody>
         </Table>
-        {order.discountApplications &&
+        {order?.discountApplications &&
           order.discountApplications.length > 0 && (
             <div>
               <h6>

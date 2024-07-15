@@ -176,50 +176,67 @@ const AdminOrderScreen = () => {
             </tr>
           </thead>
           <tbody>
-            {orders?.map((order) => (
-              <tr
-                key={order.id}
-                className={getClassByFulfillmentStatus(order.fulfillmentStatus)}
-              >
-                <td>{order.id}</td>
-                <td>{`${order.address.name}`}</td>
-                <td>{totalOrderById(order.id)}</td>
-                <td>{formatTime(order.createdAt)}</td>
-                <td>
-                  <div className="d-flex align-items-center">
-                    <DropdownButton
-                      id={`dropdown-button-${order.id}`}
-                      title={order.fulfillmentStatus}
-                      className="mr-2" // Để tạo khoảng cách giữa Dropdown và Button
-                    >
-                      {order.fulfillmentStatus === "UNFULFILLED" && (
-                        <Dropdown.Item
-                          onClick={() =>
-                            changeOrderStatus(order.id, "FULFILLED")
-                          }
-                        >
-                          Mark as Fulfilled
-                        </Dropdown.Item>
-                      )}
-                      {/* Hiển thị các Dropdown.Item phù hợp với trạng thái khác */}
-                      {order.fulfillmentStatus === "FULFILLED" && (
-                        <Dropdown.Item
-                          onClick={() => changeOrderStatus(order.id, "SHIPPED")}
-                        >
-                          Mark as SHIPPED
-                        </Dropdown.Item>
-                      )}
-                    </DropdownButton>
-                    <Button onClick={() => handleViewDetails(order.id)}>
-                      Details
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {order.lineItems?.map((item) => {
+              const product = productDetails.find(
+                (product) => product.id === item.productId
+              );
+              const variant = findVariantById(item.productId, item.variantId);
+              console.log(variant);
+
+              return (
+                <tr key={item.productId}>
+                  <td
+                    style={{
+                      display: "block",
+                      maxWidth: "100%",
+                      wordWrap: "break-word",
+                      wordBreak: "break-all",
+                    }}
+                  >
+                    {product ? product.title : "Product Not Found"}
+                  </td>
+                  <td>
+                    {product ? (
+                      <img
+                        src={
+                          product.image
+                            ? product.image.src
+                            : "URL_DEFAULT_IMAGE"
+                        } // Thay thế 'URL_DEFAULT_IMAGE' bằng URL hình ảnh mặc định nếu không có hình ảnh
+                        alt={product.title || "Product Image"}
+                        style={{ maxWidth: "100px", maxHeight: "100px" }} // Thay đổi kích thước hình ảnh tùy ý
+                      />
+                    ) : (
+                      "Product Not Found"
+                    )}
+                  </td>
+                  <td>
+                    {variant && (
+                      <>
+                        {variant.option1 && (
+                          <span>{variant.option1 + "-"}</span>
+                        )}
+                        {variant.option2 && (
+                          <span>{variant.option2 + "-"}</span>
+                        )}
+                        {variant.option3 && (
+                          <span>{variant.option3 + "-"}</span>
+                        )}
+                        {!variant.option1 &&
+                          !variant.option2 &&
+                          !variant.option3 && <span>No Options</span>}
+                      </>
+                    )}
+                    {!variant && "Variant Not Found"}
+                  </td>
+                  <td>{item.price}</td>
+                  <td>{item.quantity}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
-        {order.discountApplications &&
+        {order?.discountApplications &&
           order.discountApplications.length > 0 && (
             <div>
               <h6>
@@ -242,12 +259,14 @@ const AdminOrderScreen = () => {
             Total Amount:{" "}
             {order.subtotalPrice !== discountedTotal ? (
               <span style={{ textDecoration: "line-through" }}>
-                ${order.subtotalPrice}
+                ${order.subtotalPrice.toFixed(2)}
               </span>
             ) : (
               <span></span>
             )}{" "}
-            <span style={{ color: "green" }}>${discountedTotal}</span>
+            <span style={{ color: "green" }}>
+              ${discountedTotal.toFixed(2)}
+            </span>
           </h5>
         </div>
       </div>

@@ -53,6 +53,20 @@ const MyOrders = () => {
     });
   }, [orders]);
 
+  const totalOrderById = (orderId) => {
+    let sum = 0;
+
+    const order = orders.find((order) => order.id === orderId);
+
+    if (order) {
+      order.lineItems.forEach((item) => {
+        sum += item.price * item.quantity;
+      });
+    }
+
+    return sum;
+  };
+
   const getProductsByOrderId = (orderId) => {
     const order = orders.find((order) => order.id === orderId);
 
@@ -111,20 +125,10 @@ const MyOrders = () => {
                 (product) => product.id === item.productId
               );
               const variant = findVariantById(item.productId, item.variantId);
-              console.log(variant);
 
               return (
                 <tr key={item.productId}>
-                  <td
-                    style={{
-                      display: "block",
-                      maxWidth: "100%",
-                      wordWrap: "break-word",
-                      wordBreak: "break-all",
-                    }}
-                  >
-                    {product ? product.title : "Product Not Found"}
-                  </td>
+                  <td>{product ? product.title : "Product Not Found"}</td>
                   <td>
                     {product ? (
                       <img
@@ -132,9 +136,9 @@ const MyOrders = () => {
                           product.image
                             ? product.image.src
                             : "URL_DEFAULT_IMAGE"
-                        } // Thay thế 'URL_DEFAULT_IMAGE' bằng URL hình ảnh mặc định nếu không có hình ảnh
+                        }
                         alt={product.title || "Product Image"}
-                        style={{ maxWidth: "100px", maxHeight: "100px" }} // Thay đổi kích thước hình ảnh tùy ý
+                        style={{ maxWidth: "100px", maxHeight: "100px" }}
                       />
                     ) : (
                       "Product Not Found"
@@ -166,7 +170,7 @@ const MyOrders = () => {
             })}
           </tbody>
         </Table>
-        {order.discountApplications &&
+        {order?.discountApplications &&
           order.discountApplications.length > 0 && (
             <div>
               <h6>
@@ -185,17 +189,17 @@ const MyOrders = () => {
           <h6>Phone: {order.address.phone}</h6>
         </div>
         <div>
-          <h5>
+          {/* <h5>
             Total Amount:{" "}
             {order.subtotalPrice !== discountedTotal ? (
               <span style={{ textDecoration: "line-through" }}>
-                ${order.subtotalPrice}
+                ${order.subtotalPrice.toFixed(2)}
               </span>
             ) : (
-              <span>${order.subtotalPrice}</span>
+              <span>${order.subtotalPrice.toFixed(2)}</span>
             )}{" "}
             <span style={{ color: "green" }}>${discountedTotal}</span>
-          </h5>
+          </h5> */}
         </div>
       </div>
     );
@@ -221,16 +225,6 @@ const MyOrders = () => {
       console.error("Error fetching product details:", error);
     }
   };
-  const totalOrderById = (orderId) => {
-    const order = orders.find((order) => order.id === orderId);
-
-    if (order) {
-      return order.subtotalPrice;
-    }
-
-    return 0;
-  };
-
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     fetchOrders(pageNumber - 1);
@@ -251,6 +245,7 @@ const MyOrders = () => {
   const handleCloseModal = () => {
     setShowModal(false);
   };
+
   const totalOrderAmount = (order) => {
     let sum = 0;
 
