@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Modal, Form, Table } from "react-bootstrap";
+import { Button, Table } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import RewardModal from "../components/RewardModal";
+import "./AdminRewardScreen.css";
 
 const AdminRewardScreen = () => {
   const [rewards, setRewards] = useState([]);
@@ -13,7 +14,6 @@ const AdminRewardScreen = () => {
     fetchRewards();
   }, []);
 
-  // Inside AdminRewardScreen component
   const onSave = async (rewardData) => {
     const accessToken = localStorage.getItem("accessToken");
     const config = {
@@ -67,6 +67,24 @@ const AdminRewardScreen = () => {
     }
   };
 
+  const handleDisable = async (rewardId) => {
+    const accessToken = localStorage.getItem("accessToken");
+    const config = {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    };
+    try {
+      await axios.patch(
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/rewards/${rewardId}`,
+        { endAt: new Date().toISOString() },
+        config
+      );
+      toast.success("Reward disabled successfully!");
+      fetchRewards(); // Refresh the list
+    } catch (error) {
+      toast.error("Error disabling reward: " + error.message);
+    }
+  };
+
   const renderRewardsTable = () => (
     <Table striped bordered hover>
       <thead>
@@ -83,7 +101,12 @@ const AdminRewardScreen = () => {
       </thead>
       <tbody>
         {rewards?.map((reward) => (
-          <tr key={reward.id}>
+          <tr
+            key={reward.id}
+            className={
+              new Date(reward.endAt) < new Date() ? "disabled-reward" : ""
+            }
+          >
             <td>{reward.id}</td>
             <td>{reward.title}</td>
             <td>{reward.quantity}</td>
@@ -101,12 +124,7 @@ const AdminRewardScreen = () => {
               >
                 Detail
               </Button>{" "}
-              <Button
-                variant="danger"
-                onClick={() => {
-                  // Add your delete handler here
-                }}
-              >
+              <Button variant="danger" onClick={() => handleDisable(reward.id)}>
                 Disable
               </Button>
             </td>
@@ -115,8 +133,6 @@ const AdminRewardScreen = () => {
       </tbody>
     </Table>
   );
-
-  // Handler functions for POST, DELETE, PATCH, and opening the modal would go here...
 
   return (
     <div>

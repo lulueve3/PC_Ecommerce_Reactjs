@@ -11,6 +11,7 @@ const RedeemPage = () => {
   const [redeemOptions, setRedeemOptions] = useState([]);
   const [discountCode, setDiscountCode] = useState(null); // State to store discount code
   const [showDiscount, setShowDiscount] = useState(false); // State to control displaying discount code
+
   const fetchPoints = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken") || null;
@@ -38,14 +39,18 @@ const RedeemPage = () => {
         const accessToken = localStorage.getItem("accessToken") || null;
 
         const response = await axios.get(
-          "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards?page=0&size=10&sortBy=id&sortDirection=ASC",
+          "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards?page=0&size=20&sortBy=id&sortDirection=ASC",
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
           }
         );
-        setRedeemOptions(response.data.results);
+        // Filter out rewards where endAt date is in the past
+        const validRewards = response.data.results.filter(
+          (reward) => new Date(reward.endAt) > new Date()
+        );
+        setRedeemOptions(validRewards);
       } catch (error) {
         console.error("Error fetching redeem options:", error);
       }

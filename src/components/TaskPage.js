@@ -59,9 +59,14 @@ const TaskPage = () => {
       }
     } catch (error) {
       console.error("Error completing task:", error);
-      toast.error("An error occurred while completing the task.", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
+      if (error.response.data.message)
+        toast.error(`Error: ${error.response.data.message}`, {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      else
+        toast.error("An error occurred while completing the task.", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
     }
   };
 
