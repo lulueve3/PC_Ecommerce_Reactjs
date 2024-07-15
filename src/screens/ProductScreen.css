@@ -1,0 +1,5 @@
+.background-col {
+  background-color: #726868; /* Màu nền tùy chỉnh, bạn có thể thay đổi màu sắc theo ý muốn */
+  padding: 20px; /* Tùy chỉnh padding nếu cần thiết */
+  border-radius: 8px; /* Tùy chỉnh border radius nếu cần thiết */
+}

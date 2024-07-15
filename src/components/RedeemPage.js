@@ -7,29 +7,28 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const RedeemPage = () => {
-  const [points, setPoints] = useState(30);
+  const [points, setPoints] = useState(0);
   const [redeemOptions, setRedeemOptions] = useState([]);
   const [discountCode, setDiscountCode] = useState(null); // State to store discount code
   const [showDiscount, setShowDiscount] = useState(false); // State to control displaying discount code
+  const fetchPoints = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken") || null;
+      const response = await axios.get(
+        "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards/point",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      setPoints(response.data.point);
+    } catch (error) {
+      console.error("Error fetching points:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchPoints = async () => {
-      try {
-        const accessToken = localStorage.getItem("accessToken") || null;
-        const response = await axios.get(
-          "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards/point",
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        setPoints(response.data.point);
-      } catch (error) {
-        console.error("Error fetching points:", error);
-      }
-    };
-
     fetchPoints();
   }, []);
 
@@ -71,9 +70,19 @@ const RedeemPage = () => {
       );
       setDiscountCode(response.data.discountCode);
       setShowDiscount(true);
+      fetchPoints();
+      toast.success("Redeemed successfully!");
     } catch (error) {
       console.error("Error redeeming:", error);
-      // Handle error, show error message to user
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message); // Hiển thị thông báo lỗi từ phản hồi của API
+      } else {
+        toast.error("An error occurred while redeeming. Please try again."); // Thông báo lỗi chung
+      }
     }
   };
 
@@ -110,8 +119,7 @@ const RedeemPage = () => {
           </Card>
         ))}
 
-        {/* Display the discount code if available */}
-        {/* {showDiscount && discountCode && (
+        {showDiscount && discountCode && (
           <Card className="mt-3">
             <Card.Body>
               <Card.Text className="text-success">
@@ -119,7 +127,7 @@ const RedeemPage = () => {
               </Card.Text>
             </Card.Body>
           </Card>
-        )} */}
+        )}
       </Container>
     </>
   );

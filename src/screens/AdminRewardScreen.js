@@ -87,7 +87,7 @@ const AdminRewardScreen = () => {
             <td>{reward.id}</td>
             <td>{reward.title}</td>
             <td>{reward.quantity}</td>
-            <td>{reward.cost}</td>
+            <td>{reward.cost * -1}</td>
             <td>{new Date(reward.startAt).toLocaleString()}</td>
             <td>{new Date(reward.endAt).toLocaleString()}</td>
             {/* Render other reward properties as necessary */}

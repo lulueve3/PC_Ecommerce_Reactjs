@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./RedeemPage.css"; // Import custom CSS
 
 const TaskPage = () => {
-  const [points, setPoints] = useState(30);
+  const [points, setPoints] = useState(0);
 
   const fetchPoints = async () => {
     try {
@@ -31,43 +31,38 @@ const TaskPage = () => {
   }, []);
 
   const completeTask = async (missionType) => {
-    setPoints(Number(points + Number(10)));
+    try {
+      const accessToken = localStorage.getItem("accessToken") || null;
+      const response = await axios.post(
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards/check-mission?missionType=${missionType}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-    toast.success(`You gained 10 points!`, {
-      position: toast.POSITION.TOP_RIGHT,
-    });
-    // try {
-    //   const accessToken = localStorage.getItem("accessToken") || null;
-    //   const response = await axios.post(
-    //     `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards/check-mission?missionType=${missionType}`,
-    //     {},
-    //     {
-    //       headers: {
-    //         Authorization: `Bearer ${accessToken}`,
-    //       },
-    //     }
-    //   );
+      if (response.data.value) {
+        const pointsGained = response.data.value;
+        // fetchPoints();
+        setPoints(Number(points + Number(response.data.value)));
 
-    //   if (response.data.value) {
-    //     const pointsGained = response.data.value;
-    //     // fetchPoints();
-    //     setPoints(Number(points + Number(response.data.value)));
-
-    //     toast.success(`You gained ${pointsGained} points!`, {
-    //       position: toast.POSITION.TOP_RIGHT,
-    //     });
-    //   } else {
-    //     console.error("Error completing task:", response.data.message);
-    //     toast.error(`Error: ${response.data.message}`, {
-    //       position: toast.POSITION.TOP_RIGHT,
-    //     });
-    //   }
-    // } catch (error) {
-    //   console.error("Error completing task:", error);
-    //   toast.error("An error occurred while completing the task.", {
-    //     position: toast.POSITION.TOP_RIGHT,
-    //   });
-    // }
+        toast.success(`You gained ${pointsGained} points!`, {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      } else {
+        console.error("Error completing task:", response.data.message);
+        toast.error(`Error: ${response.data.message}`, {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      }
+    } catch (error) {
+      console.error("Error completing task:", error);
+      toast.error("An error occurred while completing the task.", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    }
   };
 
   return (

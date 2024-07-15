@@ -435,7 +435,7 @@ const CartScreen = () => {
     const customer = {
       first_name: customerInfo.firstName,
       last_name: customerInfo.lastName,
-      email: userEmail ? userEmail : customerInfo.email,
+      email: userEmail || customerInfo.email || newAddress.email,
     };
 
     const fullAddressDetails = newAddress?.street
@@ -503,7 +503,7 @@ const CartScreen = () => {
 
       setSelectedItems([]);
       setTimeout(() => {
-        navigate("/MyOrders");
+        if (accessToken) navigate("/MyOrders");
       }, 2000);
 
       setDiscountedSubtotal(undefined);
@@ -870,6 +870,7 @@ const CartScreen = () => {
                   {/* New Address Form */}
                   {showAddressForm && (
                     <EditAddress
+                      isNewAddress={true}
                       address={newAddress}
                       handleAddAddress={() => {}} // Not needed anymore
                       handleEditAddress={() => {}} // Not needed anymore
