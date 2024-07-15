@@ -12,6 +12,11 @@ const PostDetail = ({ handleBack }) => {
   const [answers, setAnswers] = useState([]);
   const [newCode, setNewCode] = useState("");
   const [isCodeValid, setIsCodeValid] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [comments, setComments] = useState([]);
+  const commentsPerPage = 5; // Số lượng comment mỗi trang
+
+  const totalPages = Math.ceil(comments.length / commentsPerPage);
 
   const fetchQuestionDetail = async () => {
     try {
@@ -63,11 +68,6 @@ const PostDetail = ({ handleBack }) => {
   };
 
   // Danh sách comment mẫu
-  const [comments, setComments] = useState([
-    { id: 1, user: "User1", content: "Comment 1", likes: 0, dislikes: 0 },
-    { id: 2, user: "User2", content: "Comment 2", likes: 0, dislikes: 0 },
-    { id: 3, user: "User3", content: "Comment 3", likes: 0, dislikes: 0 },
-  ]);
 
   // Trạng thái của form nhập comment mới
   const [newComment, setNewComment] = useState("");
@@ -227,12 +227,29 @@ const PostDetail = ({ handleBack }) => {
           </Form>
         </Col>
       </Row>
-      {/* 
-            <Row className="mt-4">
-                <Col>
-                    <Button onClick={handleBack}>Back to Posts</Button>
-                </Col>
-            </Row> */}
+      <Row className="mt-4">
+        <Col>
+          <div className="d-flex justify-content-center">
+            <Button
+              variant="primary"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="mx-3">{currentPage}</span>
+            <Button
+              variant="primary"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </Col>
+      </Row>
       <ToastContainer
         position="top-right"
         autoClose={5000}

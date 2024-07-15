@@ -387,7 +387,7 @@ const BuildPcScrenn = () => {
               marginLeft: "10px",
             }}
           >
-            <Button variant="secondary">{generatedCode}</Button>
+            <h4 variant="secondary">{generatedCode}</h4>
           </div>
         )}
       </div>
