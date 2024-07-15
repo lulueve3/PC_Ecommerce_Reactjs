@@ -21,7 +21,7 @@ const BuildDetailsModal = ({ show, onHide, buildCode }) => {
           dispatch(
             addToCart({
               productId: item.part.productId,
-              id: item.id, // Assuming this is the variant ID
+              id: item.part.productId, // Assuming this is the variant ID
               variant: item.part.variantTitle, // Assuming this is the variant title
               title: item.part.title,
               qty: item.quantity, // Quantity is set to 1 for each individual addition
