@@ -69,7 +69,7 @@ const DiscountManager = () => {
       const updatedDiscount = {
         endTime: new Date().toISOString(), // Set the end time to now
       };
-      await axios.put(
+      await axios.post(
         `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules/${id}`,
         updatedDiscount,
         {
