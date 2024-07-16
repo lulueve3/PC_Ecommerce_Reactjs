@@ -603,6 +603,23 @@ const CartScreen = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const getStripeAmout = () => {
+    let totalAmount = selectedItems
+      ?.reduce(
+        (acc, itemId) =>
+          acc +
+          cartItems.find((item) => item.id === itemId)?.qty *
+            cartItems.find((item) => item.id === itemId)?.price,
+        0
+      )
+      .toFixed(2);
+
+    let finalSubtotal = discountedSubtotal; // Create a new variable for reassignment
+
+    if (finalSubtotal <= 0) finalSubtotal = Number(0.5);
+    return finalSubtotal ? Number(finalSubtotal).toFixed(2) : totalAmount;
+  };
+
   return (
     <>
       <ToastContainer />
@@ -615,15 +632,7 @@ const CartScreen = () => {
           <StripeContainer
             success={success}
             onSuccess={createOrder}
-            amount={selectedItems
-              ?.reduce(
-                (acc, itemId) =>
-                  acc +
-                  cartItems.find((item) => item.id === itemId)?.qty *
-                    cartItems.find((item) => item.id === itemId)?.price,
-                0
-              )
-              .toFixed(3)}
+            amount={getStripeAmout()}
           />
         </Modal.Body>
       </Modal>
