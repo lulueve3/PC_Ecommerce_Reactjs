@@ -297,11 +297,17 @@ const AdminOrderScreen = () => {
   const totalOrderById = (orderId) => {
     const order = orders.find((order) => order.id === orderId);
 
-    if (order) {
-      return order.subtotalPrice;
-    }
+    const totalDiscount =
+      order.discountApplications?.reduce((acc, discount) => {
+        if (discount.valueType === "FIXED_AMOUNT") {
+          return acc + discount.value;
+        } else if (discount.valueType === "PERCENTAGE") {
+          return acc + order.subtotalPrice * (discount.value / 100);
+        }
+        return acc;
+      }, 0) || 0;
 
-    return 0;
+    return order.subtotalPrice + totalDiscount;
   };
 
   const fetchProductDetails = async (productId) => {
@@ -417,7 +423,6 @@ const AdminOrderScreen = () => {
           {selectedOrder && (
             <>
               <h5>Order ID: {selectedOrder.id}</h5>
-              <p>Total Amount: ${totalOrderById(selectedOrder.id)}</p>
               <p>Email: {selectedOrder.customer.email} </p>
               <div>{getOrderProducts(selectedOrder.id)}</div>
             </>

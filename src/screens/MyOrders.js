@@ -220,17 +220,19 @@ const MyOrders = () => {
     }
   };
   const totalOrderById = (orderId) => {
-    let sum = 0;
-
     const order = orders.find((order) => order.id === orderId);
 
-    if (order) {
-      order.lineItems.forEach((item) => {
-        sum += item.price * item.quantity;
-      });
-    }
+    const totalDiscount =
+      order.discountApplications?.reduce((acc, discount) => {
+        if (discount.valueType === "FIXED_AMOUNT") {
+          return acc + discount.value;
+        } else if (discount.valueType === "PERCENTAGE") {
+          return acc + order.subtotalPrice * (discount.value / 100);
+        }
+        return acc;
+      }, 0) || 0;
 
-    return sum;
+    return order.subtotalPrice + totalDiscount;
   };
 
   const handlePageChange = (pageNumber) => {
