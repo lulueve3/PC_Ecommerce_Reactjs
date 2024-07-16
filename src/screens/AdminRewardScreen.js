@@ -57,7 +57,7 @@ const AdminRewardScreen = () => {
             page: 0,
             size: 10,
             sortBy: "id",
-            sortDirection: "ASC",
+            sortDirection: "DESC",
           },
         }
       );

@@ -97,12 +97,12 @@ const DashboardScreen = () => {
   };
 
   useEffect(() => {
-    getProductCount();
+    getProductCount(2024);
     getOrderCount();
     getUserCount();
   }, []);
 
-  const getProductCount = async () => {
+  const getProductCount = async (year) => {
     try {
       const accessToken = localStorage.getItem("accessToken") || null;
 
@@ -112,9 +112,12 @@ const DashboardScreen = () => {
         },
       };
       const response = await axios.get(
-        "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/analysis/product",
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/analysis/product?fromTime=${year}-01-01T00:00:00.000Z&toTime=${
+          year + 1
+        }-01-01T00:00:00.000Z`,
         config
       );
+
       setStatistics((prevStatistics) => ({
         ...prevStatistics,
         productCount: response.data.total,
