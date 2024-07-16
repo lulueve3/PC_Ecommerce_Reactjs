@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-
 import { Container, Row, Col, Button, Card, Form } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import BuildDetailsModal from "../components/BuildDetailsModal"; // Adjust the path as per your file structure
 
 const PostDetail = ({ handleBack }) => {
   const { id } = useParams();
@@ -14,6 +14,9 @@ const PostDetail = ({ handleBack }) => {
   const [isCodeValid, setIsCodeValid] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [comments, setComments] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedBuildCode, setSelectedBuildCode] = useState("");
+
   const commentsPerPage = 5; // Số lượng comment mỗi trang
 
   const totalPages = Math.ceil(comments.length / commentsPerPage);
@@ -130,8 +133,20 @@ const PostDetail = ({ handleBack }) => {
     }
   };
 
+  const handleAnswerClick = (answerContent) => {
+    setSelectedBuildCode(answerContent); // Set the selected build code
+    setShowModal(true); // Show the modal
+  };
+
   return (
     <Container>
+      <BuildDetailsModal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+        }}
+        buildCode={selectedBuildCode}
+      />
       <Row className="mt-4">
         <Col>
           <div
@@ -175,7 +190,7 @@ const PostDetail = ({ handleBack }) => {
                   </Button>
                 </div>
                 <div style={{ flex: "1" }}>
-                  <Card.Title>
+                  <Card.Title onClick={() => handleAnswerClick(answer.content)}>
                     {answer.fullName}: {answer.content}
                   </Card.Title>
                   <Card.Text></Card.Text>
