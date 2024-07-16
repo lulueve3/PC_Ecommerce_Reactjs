@@ -181,9 +181,9 @@ const BuildPcScreen = () => {
     }
   };
 
-  useEffect(() => {
-    fetchComponents();
-  }, []);
+  // useEffect(() => {
+  //   fetchComponents();
+  // }, []);
 
   const generatePcBuild = async () => {
     try {
