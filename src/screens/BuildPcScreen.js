@@ -3,9 +3,10 @@ import { Button, Table, Form, Modal } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BuildDetailsModal from "../components/BuildDetailsModal";
+import ProductSelectionModal from "../components/ProductSelectionModal";
 import axios from "axios";
 
-const BuildPcScrenn = () => {
+const BuildPcScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState({});
   const [generatedCode, setGeneratedCode] = useState("");
@@ -15,50 +16,50 @@ const BuildPcScrenn = () => {
   const [buildCode, setBuildCode] = useState("");
   const [loadingBuild, setLoadingBuild] = useState(false);
   const [showBuildDetailsModal, setShowBuildDetailsModal] = useState(false);
-
-  useEffect(() => {
-    console.log(selectedVariants);
-  }, [selectedVariants]);
+  const [showProductSelectionModal, setShowProductSelectionModal] = useState({
+    show: false,
+    componentType: "",
+    collectionId: 0,
+  });
 
   const [productSelections, setProductSelections] = useState({
-    mainboard: [],
+    motherboard: [],
     cpu: [],
-    caseCooler: [],
+    COOLER: [],
     ram: [],
-    hdd: [], // Thêm HDD
+    hdd: [],
     ssd: [],
     vga: [],
-    powerSupply: [],
+    POWER_SUPPLY: [],
     case: [],
   });
 
   const productCollections = [
-    { id: 52, name: "MOTHERBOARD" },
-    { id: 53, name: "CPU" },
+    { id: 52, name: "motherboard" },
+    { id: 53, name: "cpu" },
     { id: 54, name: "COOLER" },
-    { id: 55, name: "RAM" },
-    { id: 63, name: "HDD" },
-    { id: 56, name: "SSD" },
-    { id: 57, name: "VGA" },
-    { id: 58, name: "Power_Supply" },
-    { id: 59, name: "Case" },
+    { id: 55, name: "ram" },
+    { id: 63, name: "hdd" },
+    { id: 56, name: "ssd" },
+    { id: 57, name: "vga" },
+    { id: 58, name: "POWER_SUPPLY" },
+    { id: 59, name: "case" },
   ];
 
   const convertSelectedVariantsToItemsArray = (selectedVariants) => {
     const items = Object.keys(selectedVariants).map((partType) => {
       const variant = selectedVariants[partType];
-      console.log(variant);
       return {
-        quantity: variant.quantity || 1, // Số lượng mặc định là 1
-        partType: partType.toUpperCase(), // Chuyển partType thành chữ hoa
-        partId: variant.id, // ID của variant
+        quantity: variant.quantity || 1,
+        partType: partType.toUpperCase(),
+        partId: variant.id,
       };
     });
 
     return { items };
   };
 
-  const adjustableQuantityComponents = ["SSD", "HDD", "RAM"]; // Thêm HDD vào danh sách này
+  const adjustableQuantityComponents = ["SSD", "HDD", "RAM"];
 
   const [selectedProducts, setSelectedProducts] = useState({
     mainboard: "",
@@ -72,18 +73,18 @@ const BuildPcScrenn = () => {
     case: "",
   });
 
-  const handleSelectionChange = (componentType, selectedProductId) => {
-    const product = productSelections[componentType].find(
-      (p) => p.id === parseInt(selectedProductId)
-    );
-
+  const handleSelectionChange = (componentType, selectedProduct) => {
     setSelectedProducts((prevSelections) => ({
       ...prevSelections,
-      [componentType]: product || null,
+      [componentType]: selectedProduct || null,
     }));
 
-    if (product && product.variants && product.variants.length === 1) {
-      const singleVariant = product.variants[0];
+    if (
+      selectedProduct &&
+      selectedProduct.variants &&
+      selectedProduct.variants.length === 1
+    ) {
+      const singleVariant = selectedProduct.variants[0];
       const updatedVariant = {
         ...singleVariant,
         quantity: 1,
@@ -188,7 +189,6 @@ const BuildPcScrenn = () => {
     try {
       const convertedItems =
         convertSelectedVariantsToItemsArray(selectedVariants);
-      console.log(convertedItems);
       const response = await axios.post(
         "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/pc-builds",
         convertedItems
@@ -201,8 +201,6 @@ const BuildPcScrenn = () => {
       );
 
       navigator.clipboard.writeText(response.data.title);
-
-      console.log("PC Build created:", response.data);
     } catch (error) {
       console.error("Error creating PC build:", error);
       toast.error("Error creating PC build. Please try again.");
@@ -252,13 +250,12 @@ const BuildPcScrenn = () => {
       <Table striped bordered hover className="table-custom">
         <thead>
           <tr>
-            <th>title</th>
             <th>Component</th>
             <th>Detail</th>
+            <th>Action</th>
             <th>Price</th>
           </tr>
         </thead>
-
         <tbody>
           {Object.keys(productSelections).map((componentType) => {
             const product = productSelections[componentType]?.find(
@@ -280,20 +277,20 @@ const BuildPcScrenn = () => {
                     </>
                   ) : (
                     <>
-                      <Form.Select
-                        value={selectedProducts[componentType]?.id || ""}
-                        onChange={(e) =>
-                          handleSelectionChange(componentType, e.target.value)
+                      <Button
+                        variant="primary"
+                        onClick={() =>
+                          setShowProductSelectionModal({
+                            show: true,
+                            componentType,
+                            collectionId: productCollections.find(
+                              (collection) => collection.name === componentType
+                            )?.id,
+                          })
                         }
-                        hidden={loadingBuild}
                       >
-                        <option value="">Select {componentType}</option>
-                        {productSelections[componentType]?.map((product) => (
-                          <option key={product.id} value={product.id}>
-                            {product.title}
-                          </option>
-                        ))}
-                      </Form.Select>
+                        Select {componentType}
+                      </Button>
                     </>
                   )}
 
@@ -330,6 +327,7 @@ const BuildPcScrenn = () => {
                         <input
                           type="number"
                           min="1"
+                          max="2"
                           value={variant ? variant.quantity : 1}
                           onChange={(e) =>
                             handleQuantityChange(
@@ -392,8 +390,25 @@ const BuildPcScrenn = () => {
         )}
       </div>
       <ToastContainer />
+      <ProductSelectionModal
+        show={showProductSelectionModal.show}
+        onHide={() =>
+          setShowProductSelectionModal({
+            show: false,
+            componentType: "",
+            collectionId: 0,
+          })
+        }
+        onSelect={(product) =>
+          handleSelectionChange(
+            showProductSelectionModal.componentType,
+            product
+          )
+        }
+        collectionId={showProductSelectionModal.collectionId}
+      />
     </div>
   );
 };
 
-export default BuildPcScrenn;
+export default BuildPcScreen;
