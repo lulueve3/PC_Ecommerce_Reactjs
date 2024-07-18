@@ -13,12 +13,15 @@ const ForgotPassword = () => {
     setError(null);
 
     try {
+      console.log("Making API request to forgot-password endpoint"); // Log before the request
       await axios.post(
         "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/auth/forgot-password",
         { email }
       );
+      console.log("API request completed"); // Log after the request
       navigate("/reset-password", { state: { email } });
     } catch (error) {
+      console.error("API request failed", error); // Log errors
       setError("Failed to send reset password email. Please try again.");
     }
   };
