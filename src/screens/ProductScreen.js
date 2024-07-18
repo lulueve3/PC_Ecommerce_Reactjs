@@ -17,12 +17,14 @@ import Message from "../components/Message";
 import Loader from "../components/Loader";
 import { addToCart } from "../action/cartAction";
 import "./ProductScreen.css";
+import { line } from "d3";
 
 const ProductScreen = () => {
   const [selectedButton, setSelectedButton] = useState(0);
   const [selectedImage, setSelectedImage] = useState(0);
   const [qty, setQty] = useState(1);
   const [price, setPrice] = useState(0);
+  const [compareAtPrice, setCompareAtPrice] = useState(null);
   const [inStock, setInStock] = useState(1);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -35,9 +37,10 @@ const ProductScreen = () => {
     dispatch(listProductDetail(id));
   }, [dispatch, id]);
 
-  const handleButtonClick = (index, price) => {
+  const handleButtonClick = (index, price, compareAtPrice) => {
     setSelectedButton(index);
     setPrice(price);
+    setCompareAtPrice(compareAtPrice);
     setQty(1);
   };
 
@@ -56,6 +59,7 @@ const ProductScreen = () => {
   useEffect(() => {
     if (product && product.variants) {
       setPrice(product.variants[0].price);
+      setCompareAtPrice(product.variants[0].compareAtPrice);
       setInStock(product.variants[0].quantity);
     }
   }, [product]);
@@ -172,7 +176,21 @@ const ProductScreen = () => {
             <Col md={4} className="background-col">
               <ListGroup variant="flush">
                 <ListGroupItem>
-                  <h3>Price: ${price}</h3>
+                  {compareAtPrice ? (
+                    <>
+                      <h3>
+                        <span
+                          className="line-through"
+                          style={{ textDecorationLine: "line-through" }}
+                        >
+                          ${compareAtPrice.toFixed(2)}
+                        </span>{" "}
+                        <span>${price.toFixed(2)}</span>
+                      </h3>
+                    </>
+                  ) : (
+                    <h3>Price: ${price.toFixed(2)}</h3>
+                  )}
                 </ListGroupItem>
                 <ListGroupItem>
                   <Row>
@@ -191,7 +209,11 @@ const ProductScreen = () => {
                           variant={selectedButton === index ? "info" : "light"}
                           type="button"
                           onClick={() =>
-                            handleButtonClick(index, variant.price)
+                            handleButtonClick(
+                              index,
+                              variant.price,
+                              variant.compareAtPrice
+                            )
                           }
                           className="me-2"
                         >

@@ -68,6 +68,7 @@ const CartScreen = () => {
 
   const [discountCode, setDiscountCode] = useState("");
   const [discountData, setDiscountData] = useState(null);
+  const [isDiscountApplied, setIsDiscountApplied] = useState(false);
 
   const applyDiscount = async () => {
     try {
@@ -119,12 +120,14 @@ const CartScreen = () => {
           subtotal >= discount.prerequisiteSubtotalRange
         ) {
           setDiscountData(discount);
+          setIsDiscountApplied(true);
           toast.success(`Discount code applied`);
           console.log(1);
         } else {
           console.log(2);
 
           setDiscountData(null);
+          setIsDiscountApplied(false);
           if (now < startTime) {
             toast.error("Discount code is not yet active.");
           } else if (now > endTime) {
@@ -148,12 +151,20 @@ const CartScreen = () => {
         }
       } else {
         setDiscountData(null);
+        setIsDiscountApplied(false);
         toast.error("Invalid discount code.");
       }
     } catch (error) {
       console.error("Error fetching discount data:", error);
       toast.error("Error applying discount code. Please try again.");
     }
+  };
+
+  const removeDiscount = () => {
+    setDiscountData(null);
+    setIsDiscountApplied(false);
+    setDiscountCode("");
+    toast.success("Discount code removed");
   };
 
   const [discountedSubtotal, setDiscountedSubtotal] = useState(0);
@@ -757,7 +768,7 @@ const CartScreen = () => {
             <ListGroup variant="flush">
               <ListGroup.Item>
                 <h3>Subtotal ({selectedItems.length})</h3>
-                {discountedSubtotal !== undefined ? (
+                {discountedSubtotal && selectedItems?.length > 0 ? (
                   <>
                     <h5 style={{ textDecoration: "line-through" }}>
                       $
@@ -772,7 +783,32 @@ const CartScreen = () => {
                         )
                         .toFixed(3)}
                     </h5>
-                    <h5>${discountedSubtotal}</h5>
+                    <h5 style={{ color: "green" }}>${discountedSubtotal}</h5>
+                    <p style={{ textDecoration: "none" }}>
+                      (
+                      {(
+                        ((selectedItems.reduce(
+                          (acc, itemId) =>
+                            acc +
+                            cartItems.find((item) => item.id === itemId)?.qty *
+                              cartItems.find((item) => item.id === itemId)
+                                ?.price,
+                          0
+                        ) -
+                          discountedSubtotal) /
+                          selectedItems.reduce(
+                            (acc, itemId) =>
+                              acc +
+                              cartItems.find((item) => item.id === itemId)
+                                ?.qty *
+                                cartItems.find((item) => item.id === itemId)
+                                  ?.price,
+                            0
+                          )) *
+                        100
+                      ).toFixed(2)}
+                      %)
+                    </p>
                   </>
                 ) : (
                   <h5>
@@ -803,12 +839,16 @@ const CartScreen = () => {
                     </Form.Group>
                   </Col>
                   <Col className="d-flex align-items-end">
-                    <Button
-                      onClick={applyDiscount}
-                      disabled={!discountCode.trim()}
-                    >
-                      Apply
-                    </Button>
+                    {isDiscountApplied ? (
+                      <Button onClick={removeDiscount}>Remove</Button>
+                    ) : (
+                      <Button
+                        onClick={applyDiscount}
+                        disabled={!discountCode.trim()}
+                      >
+                        Apply
+                      </Button>
+                    )}
                   </Col>
                 </Row>
               </ListGroup.Item>
