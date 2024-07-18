@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { Container, Row, Col, Button, Card, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Card,
+  Form,
+  Pagination,
+} from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BuildDetailsModal from "../components/BuildDetailsModal"; // Adjust the path as per your file structure
@@ -12,14 +20,38 @@ const PostDetail = ({ handleBack }) => {
   const [answers, setAnswers] = useState([]);
   const [newCode, setNewCode] = useState("");
   const [isCodeValid, setIsCodeValid] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [comments, setComments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedBuildCode, setSelectedBuildCode] = useState("");
+  const [totalPages, setTotalPages] = useState(0);
 
-  const commentsPerPage = 5; // Số lượng comment mỗi trang
+  const handlePageChange = (page) => {
+    setCurrentPage(page - 1);
+  };
 
-  const totalPages = Math.ceil(comments.length / commentsPerPage);
+  const fetchAnswers = async (page) => {
+    try {
+      const response = await axios.get(
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/forums/questions/${id}/answers`,
+        {
+          params: {
+            page,
+            size: 4,
+            sortBy: "id",
+            sortDirection: "Desc",
+          },
+        }
+      );
+      const sortedAnswers = response.data.results.sort(
+        (a, b) => b.likesCount - a.likesCount
+      );
+      setAnswers(response.data.results);
+      setTotalPages(response.data.page.totalPages);
+    } catch (error) {
+      console.error("Failed to fetch answers:", error);
+    }
+  };
 
   const fetchQuestionDetail = async () => {
     try {
@@ -27,7 +59,7 @@ const PostDetail = ({ handleBack }) => {
         `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/forums/questions/${id}`
       );
       setQuestionDetail(response.data);
-      setAnswers(response.data.answers); // Set the answers state
+      // setAnswers(response.data.answers); // Set the answers state
     } catch (error) {
       console.error("Failed to fetch question detail:", error);
     }
@@ -36,8 +68,9 @@ const PostDetail = ({ handleBack }) => {
   useEffect(() => {
     if (id) {
       fetchQuestionDetail();
+      fetchAnswers(currentPage);
     }
-  }, [id]); // Execute when the id changes
+  }, [id, currentPage]);
 
   const handleSubmitCode = () => {
     if (isValidSyntax(newCode)) {
@@ -163,10 +196,64 @@ const PostDetail = ({ handleBack }) => {
           </div>
         </Col>
       </Row>
+
+      <Row className="mt-4" style={{ display: "flex", alignItems: "center" }}>
+        <Col>
+          <h3>Submit Your Answer:</h3>
+          <Form
+            onSubmit={handleSubmitComment}
+            style={{ display: "flex", alignItems: "center" }}
+          >
+            <Form.Group
+              controlId="codeInput"
+              style={{ flex: 1, marginRight: "8px" }}
+            >
+              <Form.Label>Code</Form.Label>
+              <Form.Control
+                type="text"
+                value={newCode}
+                onChange={(e) => setNewCode(e.target.value)}
+                placeholder="Enter your code here..."
+                maxLength="6"
+              />
+            </Form.Group>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginRight: "8px",
+                height: "100%",
+                marginTop: "27px",
+              }}
+            >
+              <Button
+                variant="secondary"
+                onClick={checkCode}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                Check Code
+              </Button>
+            </div>
+            <div
+              style={{ display: "flex", alignItems: "center", height: "100%" }}
+            >
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={!isCodeValid}
+                style={{ marginLeft: "8px", marginTop: "27px" }}
+              >
+                Submit Answer
+              </Button>
+            </div>
+          </Form>
+        </Col>
+      </Row>
+
       <Row className="mt-4">
         <Col>
           <h3>Answers:</h3>
-          {answers.map((answer) => (
+          {answers?.map((answer) => (
             <Card
               key={answer.id}
               className="mb-2"
@@ -206,63 +293,25 @@ const PostDetail = ({ handleBack }) => {
 
       <Row className="mt-4">
         <Col>
-          <h3>Submit Your Answer :</h3>
-          <Form
-            onSubmit={handleSubmitComment}
-            style={{ display: "flex", alignItems: "center" }}
-          >
-            <Form.Group
-              controlId="codeInput"
-              style={{ flex: 1, marginRight: "8px" }}
-            >
-              <Form.Label>Code</Form.Label>
-              <Form.Control
-                type="text"
-                value={newCode}
-                onChange={(e) => setNewCode(e.target.value)}
-                placeholder="Enter your code here..."
-                maxLength="6" // Adjust based on your requirements
-              />
-            </Form.Group>
-            <Button
-              variant="secondary"
-              onClick={checkCode}
-              style={{ whiteSpace: "nowrap" }}
-            >
-              Check Code
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={!isCodeValid}
-              style={{ marginLeft: "8px" }}
-            >
-              Submit Answer
-            </Button>
-          </Form>
-        </Col>
-      </Row>
-      <Row className="mt-4">
-        <Col>
-          <div className="d-flex justify-content-center">
-            <Button
-              variant="primary"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            <span className="mx-3">{currentPage}</span>
-            <Button
-              variant="primary"
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-          </div>
+          <Pagination>
+            <Pagination.Prev
+              onClick={() => handlePageChange(currentPage)}
+              disabled={currentPage === 0}
+            />
+            {[...Array(totalPages).keys()].map((page) => (
+              <Pagination.Item
+                key={page}
+                active={page === currentPage}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                {page + 1}
+              </Pagination.Item>
+            ))}
+            <Pagination.Next
+              onClick={() => handlePageChange(currentPage + 2)}
+              disabled={currentPage === totalPages - 1}
+            />
+          </Pagination>
         </Col>
       </Row>
       <ToastContainer

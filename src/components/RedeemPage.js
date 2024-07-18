@@ -40,7 +40,7 @@ const RedeemPage = () => {
       const accessToken = localStorage.getItem("accessToken") || null;
 
       const response = await axios.get(
-        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards?page=${page}&size=10&sortBy=id&sortDirection=DESC`,
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards?page=${page}&size=4&sortBy=id&sortDirection=DESC`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -95,7 +95,7 @@ const RedeemPage = () => {
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setCurrentPage(page - 1);
   };
 
   return (
@@ -157,11 +157,20 @@ const RedeemPage = () => {
         <Row className="justify-content-center mt-4">
           <Pagination>
             <Pagination.Prev
-              onClick={() => handlePageChange(currentPage - 1)}
+              onClick={() => handlePageChange(currentPage)}
               disabled={currentPage === 0}
             />
+            {[...Array(totalPages).keys()].map((page) => (
+              <Pagination.Item
+                key={page}
+                active={page === currentPage}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                {page + 1}
+              </Pagination.Item>
+            ))}
             <Pagination.Next
-              onClick={() => handlePageChange(currentPage + 1)}
+              onClick={() => handlePageChange(currentPage + 2)}
               disabled={currentPage === totalPages - 1}
             />
           </Pagination>

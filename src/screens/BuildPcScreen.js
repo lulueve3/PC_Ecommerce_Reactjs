@@ -319,7 +319,7 @@ const BuildPcScreen = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <Button variant="info">!</Button>
+                        <Button variant="info">Detail</Button>
                       </a>
                       {adjustableQuantityComponents.includes(
                         componentType.toUpperCase()
