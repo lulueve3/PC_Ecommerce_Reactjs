@@ -187,12 +187,14 @@ const MyOrders = () => {
             Total Amount:{" "}
             {order.subtotalPrice !== discountedTotal ? (
               <span style={{ textDecoration: "line-through" }}>
-                ${order.subtotalPrice}
+                ${order.subtotalPrice.toFixed(2)}
               </span>
             ) : (
               <span></span>
             )}{" "}
-            <span style={{ color: "green" }}>${discountedTotal}</span>
+            <span style={{ color: "green" }}>
+              ${discountedTotal.toFixed(2)}
+            </span>
           </h5>
         </div>
       </div>
@@ -232,7 +234,7 @@ const MyOrders = () => {
         return acc;
       }, 0) || 0;
 
-    return order.subtotalPrice + totalDiscount;
+    return (order.subtotalPrice + totalDiscount).toFixed(2);
   };
 
   const handlePageChange = (pageNumber) => {
@@ -329,7 +331,6 @@ const MyOrders = () => {
           {selectedOrder && (
             <>
               <h5>Order ID: {selectedOrder.id}</h5>
-              <p>Total Amount: ${totalOrderAmount(selectedOrder)}</p>
               <div>
                 {/* Hiển thị thông tin chi tiết của từng sản phẩm trong đơn hàng */}
                 {getOrderProducts(selectedOrder.id)}

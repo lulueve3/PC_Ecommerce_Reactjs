@@ -164,7 +164,6 @@ const AdminOrderScreen = () => {
 
     return (
       <div>
-        <h5>Order Details</h5>
         <Table striped bordered hover>
           <thead>
             <tr>
@@ -307,7 +306,7 @@ const AdminOrderScreen = () => {
         return acc;
       }, 0) || 0;
 
-    return order.subtotalPrice + totalDiscount;
+    return (order.subtotalPrice + totalDiscount).toFixed(2);
   };
 
   const fetchProductDetails = async (productId) => {

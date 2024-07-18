@@ -34,8 +34,18 @@ const RewardModal = ({ show, onHide, currentReward, onSave }) => {
 
   const handleCheckDiscount = async (priceRuleTitle) => {
     try {
+      const accessToken = localStorage.getItem("accessToken") || null;
+      let config = {};
+      if (accessToken)
+        config = {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        };
+      console.log(config);
       const response = await axios.get(
-        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/discounts/${priceRuleTitle}`
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/discounts/${priceRuleTitle}`,
+        config
       );
 
       // Get the current time
