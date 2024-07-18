@@ -54,17 +54,19 @@ const MyOrders = () => {
   }, [orders]);
 
   const totalOrderById = (orderId) => {
-    let sum = 0;
-
     const order = orders.find((order) => order.id === orderId);
 
-    if (order) {
-      order.lineItems.forEach((item) => {
-        sum += item.price * item.quantity;
-      });
-    }
+    const totalDiscount =
+      order.discountApplications?.reduce((acc, discount) => {
+        if (discount.valueType === "FIXED_AMOUNT") {
+          return acc + discount.value;
+        } else if (discount.valueType === "PERCENTAGE") {
+          return acc + order.subtotalPrice * (discount.value / 100);
+        }
+        return acc;
+      }, 0) || 0;
 
-    return sum;
+    return order.subtotalPrice + totalDiscount;
   };
 
   const getProductsByOrderId = (orderId) => {
@@ -189,17 +191,17 @@ const MyOrders = () => {
           <h6>Phone: {order.address.phone}</h6>
         </div>
         <div>
-          {/* <h5>
+          <h5>
             Total Amount:{" "}
             {order.subtotalPrice !== discountedTotal ? (
               <span style={{ textDecoration: "line-through" }}>
-                ${order.subtotalPrice.toFixed(2)}
+                ${order.subtotalPrice}
               </span>
             ) : (
-              <span>${order.subtotalPrice.toFixed(2)}</span>
+              <span></span>
             )}{" "}
             <span style={{ color: "green" }}>${discountedTotal}</span>
-          </h5> */}
+          </h5>
         </div>
       </div>
     );

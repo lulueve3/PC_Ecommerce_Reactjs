@@ -72,9 +72,17 @@ const CartScreen = () => {
   const applyDiscount = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken") || null;
+      let config = {};
+      if (accessToken)
+        config = {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        };
 
       const { data } = await axios.get(
-        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/discounts/${discountCode}`
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/discounts/${discountCode}`,
+        config
       );
       // Assuming the API returns an array and you want the first match
       const discount = data;
@@ -121,7 +129,10 @@ const CartScreen = () => {
             toast.error("Discount code is not yet active.");
           } else if (now > endTime) {
             toast.error("Discount code has expired.");
-          } else if (discount.usageLimit !== null && discount.usageLimit <= 0) {
+          } else if (
+            discount.remainingDiscountQuantity !== null &&
+            discount.remainingDiscountQuantity <= 0
+          ) {
             toast.error("Discount code usage limit has been reached.");
           } else if (totalQuantity < discount.prerequisiteQuantityRange) {
             toast.error(
