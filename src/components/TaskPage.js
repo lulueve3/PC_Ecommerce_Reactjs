@@ -8,6 +8,10 @@ import "./RedeemPage.css"; // Import custom CSS
 
 const TaskPage = () => {
   const [points, setPoints] = useState(0);
+  const [taskStatus, setTaskStatus] = useState({
+    answerCompleted: "NEW",
+    likeCompleted: "NEW",
+  });
 
   const fetchPoints = async () => {
     try {
@@ -26,8 +30,26 @@ const TaskPage = () => {
     }
   };
 
+  const fetchTaskStatus = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken") || null;
+      const response = await axios.get(
+        "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards/mission",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      setTaskStatus(response.data);
+    } catch (error) {
+      console.error("Error fetching task status:", error);
+    }
+  };
+
   useEffect(() => {
     fetchPoints();
+    fetchTaskStatus();
   }, []);
 
   const completeTask = async (missionType) => {
@@ -45,8 +67,9 @@ const TaskPage = () => {
 
       if (response.data.value) {
         const pointsGained = response.data.value;
-        // fetchPoints();
-        setPoints(Number(points + Number(response.data.value)));
+        setPoints((prevPoints) => prevPoints + Number(pointsGained));
+        // Update task status after completing the task
+        fetchTaskStatus();
 
         toast.success(`You gained ${pointsGained} points!`, {
           position: toast.POSITION.TOP_RIGHT,
@@ -59,15 +82,33 @@ const TaskPage = () => {
       }
     } catch (error) {
       console.error("Error completing task:", error);
-      if (error.response.data.message)
+      if (error.response.data.message) {
         toast.error(`Error: ${error.response.data.message}`, {
           position: toast.POSITION.TOP_RIGHT,
         });
-      else
+      } else {
         toast.error("An error occurred while completing the task.", {
           position: toast.POSITION.TOP_RIGHT,
         });
+      }
     }
+  };
+
+  const getButtonText = (status) => {
+    switch (status) {
+      case "NEW":
+        return "NEW";
+      case "COMPLETED":
+        return "Task Completed";
+      case "CLAIMED":
+        return "Claimed";
+      default:
+        return "";
+    }
+  };
+
+  const isButtonDisabled = (status) => {
+    return status === "COMPLETED" || status === "CLAIMED";
   };
 
   return (
@@ -90,18 +131,26 @@ const TaskPage = () => {
         <Card>
           <Card.Body>
             <Card.Title>Like</Card.Title>
-            <Card.Text>like a comment</Card.Text>
-            <Button variant="primary" onClick={() => completeTask("LIKE")}>
-              Complete Task
+            <Card.Text>Like a comment</Card.Text>
+            <Button
+              variant="primary"
+              onClick={() => completeTask("LIKE")}
+              disabled={isButtonDisabled(taskStatus.likeCompleted)}
+            >
+              {getButtonText(taskStatus.likeCompleted)}
             </Button>
           </Card.Body>
         </Card>
         <Card>
           <Card.Body>
             <Card.Title>Comment</Card.Title>
-            <Card.Text>comment on a post</Card.Text>
-            <Button variant="primary" onClick={() => completeTask("ANSWER")}>
-              Complete Task
+            <Card.Text>Comment on a post</Card.Text>
+            <Button
+              variant="primary"
+              onClick={() => completeTask("ANSWER")}
+              disabled={isButtonDisabled(taskStatus.answerCompleted)}
+            >
+              {getButtonText(taskStatus.answerCompleted)}
             </Button>
           </Card.Body>
         </Card>

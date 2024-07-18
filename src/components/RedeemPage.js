@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Container, Card, Button, Row, Col } from "react-bootstrap";
+import { Container, Card, Button, Row, Col, Pagination } from "react-bootstrap";
 import NavigationBar from "../components/NavigationBar";
 import axios from "axios";
-import "./RedeemPage.css"; // Import custom CSS
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./RedeemPage.css"; // Import custom CSS
 
 const RedeemPage = () => {
   const [points, setPoints] = useState(0);
   const [redeemOptions, setRedeemOptions] = useState([]);
   const [discountCode, setDiscountCode] = useState(null); // State to store discount code
   const [showDiscount, setShowDiscount] = useState(false); // State to control displaying discount code
+  const [currentPage, setCurrentPage] = useState(0); // State to track current page
+  const [totalPages, setTotalPages] = useState(1); // State to store total pages
 
   const fetchPoints = async () => {
     try {
@@ -33,31 +35,32 @@ const RedeemPage = () => {
     fetchPoints();
   }, []);
 
+  const fetchRedeemOptions = async (page) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken") || null;
+
+      const response = await axios.get(
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards?page=${page}&size=10&sortBy=id&sortDirection=DESC`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      // Set total pages based on response
+      setTotalPages(response.data.page.totalPages);
+
+      // Set redeem options
+      setRedeemOptions(response.data.results);
+    } catch (error) {
+      console.error("Error fetching redeem options:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchRedeemOptions = async () => {
-      try {
-        const accessToken = localStorage.getItem("accessToken") || null;
-
-        const response = await axios.get(
-          "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/rewards?page=0&size=20&sortBy=id&sortDirection=ASC",
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        // Filter out rewards where endAt date is in the past
-        const validRewards = response.data.results.filter(
-          (reward) => new Date(reward.endAt) > new Date()
-        );
-        setRedeemOptions(validRewards);
-      } catch (error) {
-        console.error("Error fetching redeem options:", error);
-      }
-    };
-
-    fetchRedeemOptions();
-  }, []);
+    fetchRedeemOptions(currentPage);
+  }, [currentPage]);
 
   const handleRedeem = async (title) => {
     try {
@@ -91,6 +94,10 @@ const RedeemPage = () => {
     }
   };
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <>
       <NavigationBar />
@@ -109,30 +116,56 @@ const RedeemPage = () => {
           </Col>
         </Row>
 
-        {redeemOptions.map((option) => (
+        {showDiscount && discountCode && (
+          <Card.Text className="text-success">
+            <h6 style={{ color: "blue" }}>
+              Your discount code: <strong>{discountCode}</strong>
+            </h6>
+          </Card.Text>
+        )}
+
+        {redeemOptions?.map((option) => (
           <Card key={option.id} className="mb-3">
             <Card.Body>
               <Card.Title>{option.title}</Card.Title>
               <Card.Text>{option.description}</Card.Text>
+              <Card.Text>
+                <strong>Cost:</strong> {option.cost * -1}
+              </Card.Text>
+              <Card.Text>
+                <strong>Valid Until:</strong>{" "}
+                {new Date(option.endAt).toLocaleString()}
+              </Card.Text>
               <Button
                 variant="primary"
                 onClick={() => handleRedeem(option.title)}
+                disabled={option.code || showDiscount}
               >
                 Redeem
               </Button>
+              {option.code && (
+                <Card.Text className="text-success mt-2">
+                  <h6 style={{ color: "blue" }}>
+                    Your discount code: <strong>{option.code}</strong>
+                  </h6>
+                </Card.Text>
+              )}
             </Card.Body>
           </Card>
         ))}
 
-        {showDiscount && discountCode && (
-          <Card className="mt-3">
-            <Card.Body>
-              <Card.Text className="text-success">
-                Your discount code: <strong>{discountCode}</strong>
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        )}
+        <Row className="justify-content-center mt-4">
+          <Pagination>
+            <Pagination.Prev
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+            />
+            <Pagination.Next
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages - 1}
+            />
+          </Pagination>
+        </Row>
       </Container>
     </>
   );

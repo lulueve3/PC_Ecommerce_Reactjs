@@ -175,7 +175,7 @@ const EditAddress = ({
     <div>
       <Modal show={true} onHide={onCancel}>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Address</Modal.Title>
+          <Modal.Title>Address</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
