@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Table, Pagination } from "react-bootstrap";
+import { Button, Table, Pagination, Form } from "react-bootstrap";
 import DiscountModal from "../components/DiscountModal";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -12,14 +12,14 @@ const DiscountManager = () => {
   const [isNew, setIsNew] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Updated fetchDiscounts function to include pagination
-  const fetchDiscounts = async (page = 0) => {
+  const fetchDiscounts = async (page = 0, searchTerm = "") => {
     const size = 7;
     const accessToken = localStorage.getItem("accessToken") || null;
     try {
       const response = await axios.get(
-        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules?page=${page}&size=${size}&sortDirection=DESC`,
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules?page=${page}&size=${size}&sortDirection=DESC&keyword=${searchTerm}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -27,8 +27,8 @@ const DiscountManager = () => {
         }
       );
       setDiscounts(response.data.results || []);
-      setTotalPages(response.data.page.totalPages); // Update total pages
-      setCurrentPage(response.data.page.number); // Update current page
+      setTotalPages(response.data.page.totalPages);
+      setCurrentPage(response.data.page.number);
     } catch (error) {
       console.error("Error fetching discounts:", error);
       toast.error("Error fetching discounts. Please try again.");
@@ -36,12 +36,12 @@ const DiscountManager = () => {
   };
 
   const handleDiscountUpdated = () => {
-    fetchDiscounts(currentPage);
+    fetchDiscounts(currentPage, searchTerm);
   };
 
   useEffect(() => {
-    fetchDiscounts(currentPage);
-  }, [currentPage]);
+    fetchDiscounts(currentPage, searchTerm);
+  }, [currentPage, searchTerm]);
 
   const renderPagination = () => {
     let items = [];
@@ -67,7 +67,7 @@ const DiscountManager = () => {
     try {
       const accessToken = localStorage.getItem("accessToken") || null;
       const updatedDiscount = {
-        endTime: new Date().toISOString(), // Set the end time to now
+        endTime: new Date().toISOString(),
       };
       await axios.post(
         `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/price_rules/${id}`,
@@ -89,7 +89,6 @@ const DiscountManager = () => {
   const handleShowModal = (discount) => {
     setCurrentDiscount(
       discount || {
-        // New discount default values
         title: "",
         usageLimit: 0,
         value: 0,
@@ -127,6 +126,10 @@ const DiscountManager = () => {
       console.error("Error deleting the discount:", error);
       toast.error("Error deleting discount. Please try again.");
     }
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
   const renderDiscountsTable = () => (
@@ -184,6 +187,13 @@ const DiscountManager = () => {
   return (
     <>
       <ToastContainer />
+      <Form.Control
+        type="text"
+        placeholder="Search by title"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        className="mb-3"
+      />
       <Button variant="primary" onClick={() => handleShowModal(null)}>
         Add Discount
       </Button>
@@ -194,7 +204,7 @@ const DiscountManager = () => {
         handleClose={() => setShowModal(false)}
         discount={currentDiscount}
         setDiscount={setCurrentDiscount}
-        handleSubmit={() => {}} // Implement submission logic here
+        handleSubmit={() => {}}
         isNew={isNew}
         onSubmitSuccess={handleDiscountUpdated}
       />

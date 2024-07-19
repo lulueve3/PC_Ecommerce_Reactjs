@@ -99,16 +99,6 @@ const ProductCreateScreen = () => {
       );
       return;
     }
-    // console.log({
-    //   title,
-    //   description: convertHTML(),
-    //   vendor,
-    //   active,
-    //   variants,
-    //   options,
-    //   images,
-    //   collectionIds: selectedCollections,
-    // });
 
     dispatch(
       createProduct({

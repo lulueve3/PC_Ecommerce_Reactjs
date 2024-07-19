@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Table } from "react-bootstrap";
+import { Button, Table, Pagination, Form } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import RewardModal from "../components/RewardModal";
 import "./AdminRewardScreen.css";
@@ -8,43 +8,17 @@ import "./AdminRewardScreen.css";
 const AdminRewardScreen = () => {
   const [rewards, setRewards] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [currentReward, setCurrentReward] = useState(null); // null for new rewards
+  const [currentReward, setCurrentReward] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const pageSize = 10;
 
   useEffect(() => {
-    fetchRewards();
-  }, []);
+    fetchRewards(currentPage, searchQuery);
+  }, [currentPage, searchQuery]);
 
-  const onSave = async (rewardData) => {
-    const accessToken = localStorage.getItem("accessToken");
-    const config = {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    };
-
-    try {
-      if (currentReward) {
-        // If editing, send a PATCH request
-        await axios.patch(
-          `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/rewards/${currentReward.id}`,
-          rewardData,
-          config
-        );
-      } else {
-        // If creating a new reward, send a POST request
-        await axios.post(
-          "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/rewards",
-          rewardData,
-          config
-        );
-      }
-      toast.success("Reward saved successfully!");
-      setShowModal(false);
-      fetchRewards(); // Refresh the list
-    } catch (error) {
-      toast.error("Error saving reward: " + error.message);
-    }
-  };
-
-  const fetchRewards = async () => {
+  const fetchRewards = async (page = 0, query = "") => {
     const accessToken = localStorage.getItem("accessToken") || null;
     try {
       const response = await axios.get(
@@ -54,14 +28,16 @@ const AdminRewardScreen = () => {
             Authorization: `Bearer ${accessToken}`,
           },
           params: {
-            page: 0,
-            size: 10,
+            page: page,
+            size: pageSize,
             sortBy: "id",
             sortDirection: "DESC",
+            keyword: query,
           },
         }
       );
       setRewards(response.data.results);
+      setTotalPages(response.data.page.totalPages);
     } catch (error) {
       toast.error("Failed to fetch rewards");
     }
@@ -79,9 +55,37 @@ const AdminRewardScreen = () => {
         config
       );
       toast.success("Reward disabled successfully!");
-      fetchRewards(); // Refresh the list
+      fetchRewards(currentPage, searchQuery); // Refresh the list
     } catch (error) {
       toast.error("Error disabling reward: " + error.message);
+    }
+  };
+
+  const onSave = async (rewardData) => {
+    const accessToken = localStorage.getItem("accessToken");
+    const config = {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    };
+
+    try {
+      if (currentReward) {
+        await axios.patch(
+          `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/rewards/${currentReward.id}`,
+          rewardData,
+          config
+        );
+      } else {
+        await axios.post(
+          "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/rewards",
+          rewardData,
+          config
+        );
+      }
+      toast.success("Reward saved successfully!");
+      setShowModal(false);
+      fetchRewards(currentPage, searchQuery); // Refresh the list
+    } catch (error) {
+      toast.error("Error saving reward: " + error.message);
     }
   };
 
@@ -95,7 +99,6 @@ const AdminRewardScreen = () => {
           <th>Cost</th>
           <th>Start At</th>
           <th>End At</th>
-          {/* Include other columns as necessary */}
           <th>Actions</th>
         </tr>
       </thead>
@@ -113,7 +116,6 @@ const AdminRewardScreen = () => {
             <td>{reward.cost * -1}</td>
             <td>{new Date(reward.startAt).toLocaleString()}</td>
             <td>{new Date(reward.endAt).toLocaleString()}</td>
-            {/* Render other reward properties as necessary */}
             <td>
               <Button
                 variant="primary"
@@ -134,8 +136,34 @@ const AdminRewardScreen = () => {
     </Table>
   );
 
+  const renderPagination = () => (
+    <div className="d-flex justify-content-center">
+      <Pagination>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <Pagination.Item
+            key={index}
+            active={index === currentPage}
+            onClick={() => setCurrentPage(index)}
+          >
+            {index + 1}
+          </Pagination.Item>
+        ))}
+      </Pagination>
+    </div>
+  );
+
   return (
     <div>
+      <Form.Control
+        type="text"
+        placeholder="Search rewards..."
+        value={searchQuery}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+          setCurrentPage(0); // Reset to the first page on search
+        }}
+        className="mb-3"
+      />
       <Button onClick={() => setShowModal(true)}>Create Reward</Button>
       <RewardModal
         show={showModal}
@@ -145,6 +173,7 @@ const AdminRewardScreen = () => {
       />
       <ToastContainer />
       {renderRewardsTable()}
+      {renderPagination()}
     </div>
   );
 };

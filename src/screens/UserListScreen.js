@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Table, Pagination } from "react-bootstrap";
+import { Container, Row, Col, Table, Pagination, Form } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -9,17 +9,23 @@ const UserListScreen = () => {
   const [userList, setUserList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     // Fetch users when the component mounts
     getUser();
   }, []);
 
+  useEffect(() => {
+    // Fetch users when the search term changes
+    getUser(currentPage - 1, 10, searchTerm);
+  }, [searchTerm]);
+
   const getUserOrder = (id) => {
     navigate(`./${id}`);
   };
 
-  const getUser = async (page = 0, size = 10) => {
+  const getUser = async (page = 0, size = 10, keyword = "") => {
     try {
       const accessToken = localStorage.getItem("accessToken") || null;
 
@@ -29,7 +35,7 @@ const UserListScreen = () => {
         },
       };
       const response = await axios.get(
-        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/customers?page=${page}&size=${size}&sortBy=id&sortDirection=ASC`,
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/admin/customers?page=${page}&size=${size}&sortBy=id&sortDirection=ASC&keyword=${keyword}`,
         config
       );
       setUserList(response.data.results);
@@ -41,16 +47,25 @@ const UserListScreen = () => {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    getUser(pageNumber - 1);
+    getUser(pageNumber - 1, 10, searchTerm);
   };
 
-  const filteredUserList = userList.filter((user) => user); // Filter out users with null or empty email
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   return (
     <Container>
       <Row className="mt-4">
         <Col>
           <h2>User List</h2>
+          <Form.Control
+            type="text"
+            placeholder="Search by email"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="mb-3"
+          />
           <Table className="mt-3" striped bordered hover>
             <thead>
               <tr>
@@ -62,7 +77,7 @@ const UserListScreen = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredUserList.map((user) => (
+              {userList?.map((user) => (
                 <tr key={user.id}>
                   <td>{user.id}</td>
                   <td>{user.firstName + " " + (user.lastName || "")}</td>
@@ -70,7 +85,7 @@ const UserListScreen = () => {
                   <td>{"$" + user.totalOrderValue.toFixed(2)}</td>
                   <td
                     onClick={() => getUserOrder(user.id)}
-                    style={{ fontSize: "2em" }}
+                    style={{ fontSize: "2em", cursor: "pointer" }}
                   >
                     ℹ️
                   </td>
