@@ -73,13 +73,17 @@ const CartScreen = () => {
   const applyDiscount = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken") || null;
-      let config = {};
-      if (accessToken)
-        config = {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        };
+
+      if (!accessToken) {
+        toast.error("Please log in to apply the discount code.");
+        return; // Exit the function if the user is not logged in
+      }
+
+      let config = {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      };
 
       const { data } = await axios.get(
         `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/discounts/${discountCode}`,
