@@ -69,6 +69,20 @@ const ProductScreen = () => {
   };
 
   const addToCartHandler = () => {
+    if (qty === 0) {
+      toast.error("Quantity cannot be zero.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return;
+    }
+
     dispatch(
       addToCart({
         productId: product.id,
