@@ -240,7 +240,20 @@ const ProductCreateScreen = () => {
 
   const handleImageChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    setSelectImage(selectedFiles);
+
+    const validImageTypes = ["image/jpeg", "image/png"];
+
+    const validFiles = selectedFiles.filter((file) =>
+      validImageTypes.includes(file.type)
+    );
+
+    const invalidFiles = selectedFiles.filter(
+      (file) => !validImageTypes.includes(file.type)
+    );
+    if (invalidFiles.length > 0) {
+      console.warn("Invalid files selected:", invalidFiles);
+    }
+    setSelectImage(validFiles);
   };
 
   const uploadImage = async (selectedImages) => {
@@ -378,7 +391,9 @@ const ProductCreateScreen = () => {
                   type="file"
                   onChange={(e) => handleImageChange(e)}
                   multiple
+                  accept=".jpg, .jpeg, .png"
                 />
+
                 {!images || images.length === 0 ? null : (
                   <div>
                     {images.map((image, index) => (
