@@ -30,7 +30,7 @@ const Product = ({ product }) => {
             <strong>{product.title}</strong>
           </Card.Title>
         </Link>
-        {hasDiscount && (
+        {compareAtPrice.toFixed(2) > 0 && (
           <div>
             <Card.Text as="div" style={{ textDecoration: "line-through" }}>
               ${compareAtPrice.toFixed(2)}

@@ -19,7 +19,7 @@ import {
 import axios from "axios";
 
 export const listProducts =
-  (keyword = "", page = "0", category = "") =>
+  (keyword = "", page = "0", categoryIds = [], priceRange = [0, 1000]) =>
   async (dispatch) => {
     try {
       dispatch({ type: PRODUCT_LIST_REQUEST });
@@ -29,12 +29,14 @@ export const listProducts =
         size: "8",
         keyword: keyword,
         sortDirection: "DESC",
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
       });
+      console.log(categoryIds);
 
-      if (category) {
+      if (categoryIds.length > 0) {
         // Handle multiple categories
-        const categories = Array.isArray(category) ? category : [category];
-        categories.forEach((cat) => queryParams.append("collectionIds", cat));
+        categoryIds.forEach((id) => queryParams.append("collectionIds", id));
       }
 
       const url = `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/products?${queryParams.toString()}`;
