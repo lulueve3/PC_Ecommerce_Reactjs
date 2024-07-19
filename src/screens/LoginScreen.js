@@ -45,7 +45,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
   }, [navigate, accessToken, redirect]);
 
   const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+\.com$/;
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
   };
 
