@@ -218,11 +218,13 @@ const AdminOrderScreen = () => {
             </div>
           )}
         <div>
-          <h6>
+          <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14 }}>
             Address: {order.address.name}, {order.address.street},{" "}
             {order.address.ward}, {order.address.district}, {order.address.city}
-          </h6>
-          <h6>Phone: {order.address.phone}</h6>
+          </p>
+          <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14 }}>
+            Phone: {order.address.phone}
+          </p>
         </div>
         <div>
           <h5>
