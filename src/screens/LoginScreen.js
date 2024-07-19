@@ -16,6 +16,8 @@ import { login } from "../action/userAction";
 import FormContainer from "../components/FormContainer";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LoginScreen = ({ handleLoginLogout }) => {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -42,40 +44,130 @@ const LoginScreen = ({ handleLoginLogout }) => {
     }
   }, [navigate, accessToken, redirect]);
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+\.com$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const validatePhoneNumber = (phone) => {
+    const re = /^\d{10}$/;
+    return re.test(phone);
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
 
+    if (!validateEmail(email)) {
+      toast.error("Email không hợp lệ", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return;
+    }
+
     if (isRegistering) {
+      if (!validatePhoneNumber(phone)) {
+        toast.error("Số điện thoại phải đúng 10 chữ số", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        return;
+      }
+
       if (password.length < 6) {
-        alert("Mật khẩu ít nhất 6 ký tự");
-      } else {
-        try {
-          const config = {
-            header: {
-              "Content-Type": "application/json",
-            },
-          };
+        toast.error("Mật khẩu ít nhất 6 ký tự", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        return;
+      }
 
-          const { data } = await axios.post(
-            "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/auth/register",
-            {
-              email,
-              password,
-              firstname: firstName,
-              lastname: lastName,
-              phone,
-            },
-            config
-          );
+      const validateName = (name) => {
+        const re = /^[A-Za-z]+$/;
+        return re.test(name);
+      };
 
-          localStorage.setItem("accessToken", data.accessToken);
-          handleLoginLogout(true);
-          dispatch(login(email, password));
-          setIsRegistering(false);
-        } catch (error) {
-          console.log(error);
-          alert(error.response.data.message);
-        }
+      if (!validateName(firstName)) {
+        toast.error("First Name chỉ chứa chữ cái", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        return;
+      }
+
+      if (!validateName(lastName)) {
+        toast.error("Last Name chỉ chứa chữ cái", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        return;
+      }
+
+      try {
+        const config = {
+          header: {
+            "Content-Type": "application/json",
+          },
+        };
+
+        const { data } = await axios.post(
+          "http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/auth/register",
+          {
+            email,
+            password,
+            firstname: firstName,
+            lastname: lastName,
+            phone,
+          },
+          config
+        );
+
+        localStorage.setItem("accessToken", data.accessToken);
+        handleLoginLogout(true);
+        dispatch(login(email, password));
+        setIsRegistering(false);
+      } catch (error) {
+        console.log(error);
+        toast.error(error.response.data.message, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       }
     } else {
       // Handle login here with email and password
@@ -162,6 +254,7 @@ const LoginScreen = ({ handleLoginLogout }) => {
           <Link to="/forgot-password">Forgot password</Link>
         </Col>
       </Row>
+      <ToastContainer />
     </FormContainer>
   );
 };
