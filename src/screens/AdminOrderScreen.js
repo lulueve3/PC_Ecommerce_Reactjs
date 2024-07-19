@@ -156,141 +156,64 @@ const AdminOrderScreen = () => {
   const getOrderProducts = (orderId) => {
     const order = orders.find((order) => order.id === orderId);
 
-    const totalDiscount =
-      order?.discountApplications?.reduce((acc, discount) => {
-        if (discount.valueType === "FIXED_AMOUNT") {
-          return acc + discount.value;
-        } else if (discount.valueType === "PERCENTAGE") {
-          return acc + order?.subtotalPrice * (discount.value / 100);
-        }
-        return acc;
-      }, 0) || 0;
-
-    const discountedTotal = order?.subtotalPrice + totalDiscount;
+    if (!order) return null;
 
     return (
       <div>
+        <h5>Order Details</h5>
         <Table striped bordered hover>
           <thead>
             <tr>
-              <th>Order ID</th>
-              <th>Customer Name</th>
-              <th>Total Amount</th>
-              <th>Created Time</th>
-              <th>Actions</th>
+              <th>Product Name</th>
+              <th>Image</th>
+              <th>Variant</th>
+              <th>Price</th>
+              <th>Quantity</th>
             </tr>
           </thead>
           <tbody>
-            {orders?.map((order) => (
-              <tr
-                key={order.id}
-                className={getClassByFulfillmentStatus(order.fulfillmentStatus)}
-              >
-                <td>{order.id}</td>
-                <td>{`${order.address.name}`}</td>
-                <td>{totalOrderById(order.id)}</td>
-                <td>{formatTime(order.createdAt)}</td>
-                <td>
-                  <div className="d-flex align-items-center">
-                    <DropdownButton
-                      id={`dropdown-button-${order.id}`}
-                      title={order.fulfillmentStatus}
-                      className="mr-2"
-                    >
-                      {order.fulfillmentStatus === "UNFULFILLED" && (
-                        <>
-                          <Dropdown.Item
-                            onClick={() =>
-                              changeOrderStatus(order.id, "FULFILLED")
-                            }
-                          >
-                            Mark as FULFILLED
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() =>
-                              changeOrderStatus(order.id, "SHIPPED")
-                            }
-                          >
-                            Mark as SHIPPED
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() =>
-                              changeOrderStatus(
-                                order.id,
-                                "REQUESTED_FOR_CANCELLATION"
-                              )
-                            }
-                          >
-                            Request Cancellation
-                          </Dropdown.Item>
-                        </>
-                      )}
-                      {order.fulfillmentStatus === "FULFILLED" && (
-                        <>
-                          <Dropdown.Item
-                            onClick={() =>
-                              changeOrderStatus(order.id, "SHIPPED")
-                            }
-                          >
-                            Mark SHIPPED3
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() =>
-                              changeOrderStatus(
-                                order.id,
-                                "REQUESTED_FOR_CANCELLATION"
-                              )
-                            }
-                          >
-                            Request Cancellation
-                          </Dropdown.Item>
-                        </>
-                      )}
-                      {order.fulfillmentStatus === "SHIPPED" && (
-                        <>
-                          <Dropdown.Item
-                            onClick={() =>
-                              changeOrderStatus(order.id, "UNFULFILLED")
-                            }
-                          >
-                            Mark as UNFULFILLED
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() =>
-                              changeOrderStatus(order.id, "FULFILLED")
-                            }
-                          >
-                            Mark as FULFILLED
-                          </Dropdown.Item>
-                        </>
-                      )}
-                    </DropdownButton>
-                    <Button
-                      onClick={() => handleViewDetails(order.id)}
-                      style={{
-                        backgroundColor:
-                          order.fulfillmentStatus ===
-                          "REQUESTED_FOR_CANCELLATION"
-                            ? "yellow"
-                            : "default",
-                      }}
-                    >
-                      Details
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {order.lineItems?.map((item) => {
+              const product = productDetails.find(
+                (product) => product.id === item.productId
+              );
+              const variant = product?.variants.find(
+                (variant) => variant.id === item.variantId
+              );
+
+              return (
+                <tr key={item.productId}>
+                  <td>{product ? product.title : "Product Not Found"}</td>
+                  <td>
+                    {product ? (
+                      <img
+                        src={
+                          product.image
+                            ? product.image.src
+                            : "URL_DEFAULT_IMAGE"
+                        }
+                        alt={product.title || "Product Image"}
+                        style={{ maxWidth: "100px", maxHeight: "100px" }}
+                      />
+                    ) : (
+                      "Product Not Found"
+                    )}
+                  </td>
+                  <td>{item.variantTitle || "No Options"}</td>
+                  <td>{item.price}</td>
+                  <td>{item.quantity}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
         {order?.discountApplications &&
-          order?.discountApplications.length > 0 && (
+          order.discountApplications.length > 0 && (
             <div>
               <h6>
                 Discount Codes:{" "}
-                {order?.discountApplications.map(
-                  (discount, index) => discount.discountCode
-                )}
+                {order.discountApplications
+                  .map((discount) => discount.discountCode)
+                  .join(", ")}
               </h6>
             </div>
           )}
@@ -304,16 +227,14 @@ const AdminOrderScreen = () => {
         <div>
           <h5>
             Total Amount:{" "}
-            {order?.subtotalPrice !== discountedTotal ? (
+            {order?.subtotalPrice !== totalOrderById(order.id) ? (
               <span style={{ textDecoration: "line-through" }}>
                 ${order?.subtotalPrice.toFixed(2)}
               </span>
             ) : (
               <span></span>
             )}{" "}
-            <span style={{ color: "green" }}>
-              ${discountedTotal.toFixed(2)}
-            </span>
+            <span style={{ color: "green" }}>${totalOrderById(order.id)}</span>
           </h5>
         </div>
       </div>

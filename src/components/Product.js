@@ -1,6 +1,7 @@
 import React from "react";
 import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import "./Product.css"; // Import CSS file
 
 const Product = ({ product }) => {
   const { price, compareAtPrice } = product.variants[0];
@@ -26,11 +27,11 @@ const Product = ({ product }) => {
       </Link>
       <Card.Body style={{ height: "100%" }}>
         <Link to={`/product/${product.id}`} style={{ textDecoration: "none" }}>
-          <Card.Title as="div" style={{ minHeight: "3rem" }}>
+          <Card.Title as="div" className="product-title">
             <strong>{product.title}</strong>
           </Card.Title>
         </Link>
-        {compareAtPrice.toFixed(2) > 0 && (
+        {compareAtPrice > 0 && (
           <div>
             <Card.Text as="div" style={{ textDecoration: "line-through" }}>
               ${compareAtPrice.toFixed(2)}

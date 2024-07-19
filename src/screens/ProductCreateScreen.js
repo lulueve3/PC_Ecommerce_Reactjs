@@ -85,7 +85,11 @@ const ProductCreateScreen = () => {
     const isVariantPricingValid = variants.every((variant) => {
       console.log(variant.price);
       // If compareAtPrice is not set, or if it's greater than price, it's valid
-      return !variant.compareAtPrice || variant.compareAtPrice > variant.price;
+      return (
+        !variant.compareAtPrice ||
+        variant.compareAtPrice > variant.price ||
+        variant.compareAtPrice === 0
+      );
     });
 
     // If any variant fails the validation, show an error and return early
@@ -95,6 +99,16 @@ const ProductCreateScreen = () => {
       );
       return;
     }
+    // console.log({
+    //   title,
+    //   description: convertHTML(),
+    //   vendor,
+    //   active,
+    //   variants,
+    //   options,
+    //   images,
+    //   collectionIds: selectedCollections,
+    // });
 
     dispatch(
       createProduct({
@@ -313,6 +327,7 @@ const ProductCreateScreen = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
+                  max={200}
                 />
               </div>
               <div
@@ -543,7 +558,7 @@ const ProductCreateScreen = () => {
                 ))}
 
                 {/* Add button to add more options */}
-                {options.length >= 0 && (
+                {options.length >= 0 && options.length <= 4 && (
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -604,7 +619,7 @@ const ProductCreateScreen = () => {
                                 e.target.value
                               )
                             }
-                            min={1}
+                            min={0}
                             onClick={(e) => e.target.select()}
                             required
                           />

@@ -44,7 +44,7 @@ const UserListScreen = () => {
     getUser(pageNumber - 1);
   };
 
-  const filteredUserList = userList.filter((user) => user.email); // Filter out users with null or empty email
+  const filteredUserList = userList.filter((user) => user); // Filter out users with null or empty email
 
   return (
     <Container>
@@ -67,7 +67,7 @@ const UserListScreen = () => {
                   <td>{user.id}</td>
                   <td>{user.firstName + " " + (user.lastName || "")}</td>
                   <td>{user.email}</td>
-                  <td>{user.totalOrderValue + " $"}</td>
+                  <td>{"$" + user.totalOrderValue.toFixed(2)}</td>
                   <td
                     onClick={() => getUserOrder(user.id)}
                     style={{ fontSize: "2em" }}

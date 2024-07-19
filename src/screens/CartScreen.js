@@ -278,7 +278,7 @@ const CartScreen = () => {
 
   const sendEmail = (orders) => {
     const templateParams = {
-      name: customerInfo.first_name + customerInfo.lastName,
+      name: customerInfo.first_name + customerInfo.lastName || newAddress.name,
       email: userEmail || customerInfo.email || newAddress.email,
       my_html: OrderConfirmationEmail(orders),
     };
