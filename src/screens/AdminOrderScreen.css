@@ -9,3 +9,11 @@
 .tr-shipped {
   background-color: #cce5ff; /* màu nền xanh nước biển nhạt */
 }
+
+.tr-requested-cancellation {
+  background-color: #ffffcc; /* Màu nền vàng nhạt cho trạng thái REQUESTED_FOR_CANCELLATION */
+}
+
+.tr-cancelled {
+  background-color: #ffcccc; /* Màu nền đỏ nhạt cho trạng thái CANCELLED */
+}

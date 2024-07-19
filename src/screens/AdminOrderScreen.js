@@ -25,6 +25,10 @@ const AdminOrderScreen = () => {
         return "tr-fulfilled";
       case "SHIPPED":
         return "tr-shipped";
+      case "REQUESTED_FOR_CANCELLATION":
+        return "tr-requested-cancellation"; // Thêm lớp CSS cho trạng thái này
+      case "CANCELLED":
+        return "tr-cancelled"; // Thêm lớp CSS cho trạng thái này
       default:
         return "";
     }
@@ -35,6 +39,8 @@ const AdminOrderScreen = () => {
     UNFULFILLED: "UNFULFILLED",
     FULFILLED: "FULFILLED",
     SHIPPED: "SHIPPED",
+    REQUESTED_FOR_CANCELLATION: "REQUESTED_FOR_CANCELLATION",
+    CANCELLED: "CANCELLED",
   };
 
   const fetchOrders = async (
@@ -151,96 +157,138 @@ const AdminOrderScreen = () => {
     const order = orders.find((order) => order.id === orderId);
 
     const totalDiscount =
-      order.discountApplications?.reduce((acc, discount) => {
+      order?.discountApplications?.reduce((acc, discount) => {
         if (discount.valueType === "FIXED_AMOUNT") {
           return acc + discount.value;
         } else if (discount.valueType === "PERCENTAGE") {
-          return acc + order.subtotalPrice * (discount.value / 100);
+          return acc + order?.subtotalPrice * (discount.value / 100);
         }
         return acc;
       }, 0) || 0;
 
-    const discountedTotal = order.subtotalPrice + totalDiscount;
+    const discountedTotal = order?.subtotalPrice + totalDiscount;
 
     return (
       <div>
         <Table striped bordered hover>
           <thead>
             <tr>
-              <th>Product Name</th>
-              <th>Image</th>
-              <th>Variant</th>
-              <th>Price</th>
-              <th>Quantity</th>
+              <th>Order ID</th>
+              <th>Customer Name</th>
+              <th>Total Amount</th>
+              <th>Created Time</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {order.lineItems?.map((item) => {
-              const product = productDetails.find(
-                (product) => product.id === item.productId
-              );
-              const variant = findVariantById(item.productId, item.variantId);
-              console.log(variant);
-
-              return (
-                <tr key={item.productId}>
-                  <td
-                    style={{
-                      display: "block",
-                      maxWidth: "100%",
-                      wordWrap: "break-word",
-                      wordBreak: "break-all",
-                    }}
-                  >
-                    {product ? product.title : "Product Not Found"}
-                  </td>
-                  <td>
-                    {product ? (
-                      <img
-                        src={
-                          product.image
-                            ? product.image.src
-                            : "URL_DEFAULT_IMAGE"
-                        } // Thay thế 'URL_DEFAULT_IMAGE' bằng URL hình ảnh mặc định nếu không có hình ảnh
-                        alt={product.title || "Product Image"}
-                        style={{ maxWidth: "100px", maxHeight: "100px" }} // Thay đổi kích thước hình ảnh tùy ý
-                      />
-                    ) : (
-                      "Product Not Found"
-                    )}
-                  </td>
-                  <td>
-                    {variant && (
-                      <>
-                        {variant.option1 && (
-                          <span>{variant.option1 + "-"}</span>
-                        )}
-                        {variant.option2 && (
-                          <span>{variant.option2 + "-"}</span>
-                        )}
-                        {variant.option3 && (
-                          <span>{variant.option3 + "-"}</span>
-                        )}
-                        {!variant.option1 &&
-                          !variant.option2 &&
-                          !variant.option3 && <span>No Options</span>}
-                      </>
-                    )}
-                    {!variant && "Variant Not Found"}
-                  </td>
-                  <td>{item.price}</td>
-                  <td>{item.quantity}</td>
-                </tr>
-              );
-            })}
+            {orders?.map((order) => (
+              <tr
+                key={order.id}
+                className={getClassByFulfillmentStatus(order.fulfillmentStatus)}
+              >
+                <td>{order.id}</td>
+                <td>{`${order.address.name}`}</td>
+                <td>{totalOrderById(order.id)}</td>
+                <td>{formatTime(order.createdAt)}</td>
+                <td>
+                  <div className="d-flex align-items-center">
+                    <DropdownButton
+                      id={`dropdown-button-${order.id}`}
+                      title={order.fulfillmentStatus}
+                      className="mr-2"
+                    >
+                      {order.fulfillmentStatus === "UNFULFILLED" && (
+                        <>
+                          <Dropdown.Item
+                            onClick={() =>
+                              changeOrderStatus(order.id, "FULFILLED")
+                            }
+                          >
+                            Mark as FULFILLED
+                          </Dropdown.Item>
+                          <Dropdown.Item
+                            onClick={() =>
+                              changeOrderStatus(order.id, "SHIPPED")
+                            }
+                          >
+                            Mark as SHIPPED
+                          </Dropdown.Item>
+                          <Dropdown.Item
+                            onClick={() =>
+                              changeOrderStatus(
+                                order.id,
+                                "REQUESTED_FOR_CANCELLATION"
+                              )
+                            }
+                          >
+                            Request Cancellation
+                          </Dropdown.Item>
+                        </>
+                      )}
+                      {order.fulfillmentStatus === "FULFILLED" && (
+                        <>
+                          <Dropdown.Item
+                            onClick={() =>
+                              changeOrderStatus(order.id, "SHIPPED")
+                            }
+                          >
+                            Mark SHIPPED3
+                          </Dropdown.Item>
+                          <Dropdown.Item
+                            onClick={() =>
+                              changeOrderStatus(
+                                order.id,
+                                "REQUESTED_FOR_CANCELLATION"
+                              )
+                            }
+                          >
+                            Request Cancellation
+                          </Dropdown.Item>
+                        </>
+                      )}
+                      {order.fulfillmentStatus === "SHIPPED" && (
+                        <>
+                          <Dropdown.Item
+                            onClick={() =>
+                              changeOrderStatus(order.id, "UNFULFILLED")
+                            }
+                          >
+                            Mark as UNFULFILLED
+                          </Dropdown.Item>
+                          <Dropdown.Item
+                            onClick={() =>
+                              changeOrderStatus(order.id, "FULFILLED")
+                            }
+                          >
+                            Mark as FULFILLED
+                          </Dropdown.Item>
+                        </>
+                      )}
+                    </DropdownButton>
+                    <Button
+                      onClick={() => handleViewDetails(order.id)}
+                      style={{
+                        backgroundColor:
+                          order.fulfillmentStatus ===
+                          "REQUESTED_FOR_CANCELLATION"
+                            ? "yellow"
+                            : "default",
+                      }}
+                    >
+                      Details
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </Table>
         {order?.discountApplications &&
-          order.discountApplications.length > 0 && (
+          order?.discountApplications.length > 0 && (
             <div>
               <h6>
                 Discount Codes:{" "}
-                {order.discountApplications.map(
+                {order?.discountApplications.map(
                   (discount, index) => discount.discountCode
                 )}
               </h6>
@@ -256,9 +304,9 @@ const AdminOrderScreen = () => {
         <div>
           <h5>
             Total Amount:{" "}
-            {order.subtotalPrice !== discountedTotal ? (
+            {order?.subtotalPrice !== discountedTotal ? (
               <span style={{ textDecoration: "line-through" }}>
-                ${order.subtotalPrice.toFixed(2)}
+                ${order?.subtotalPrice.toFixed(2)}
               </span>
             ) : (
               <span></span>
@@ -297,16 +345,16 @@ const AdminOrderScreen = () => {
     const order = orders.find((order) => order.id === orderId);
 
     const totalDiscount =
-      order.discountApplications?.reduce((acc, discount) => {
+      order?.discountApplications?.reduce((acc, discount) => {
         if (discount.valueType === "FIXED_AMOUNT") {
           return acc + discount.value;
         } else if (discount.valueType === "PERCENTAGE") {
-          return acc + order.subtotalPrice * (discount.value / 100);
+          return acc + order?.subtotalPrice * (discount.value / 100);
         }
         return acc;
       }, 0) || 0;
 
-    return (order.subtotalPrice + totalDiscount).toFixed(2);
+    return (order?.subtotalPrice + totalDiscount).toFixed(2);
   };
 
   const fetchProductDetails = async (productId) => {
@@ -373,19 +421,86 @@ const AdminOrderScreen = () => {
                     className="mr-2" // Để tạo khoảng cách giữa Dropdown và Button
                   >
                     {order.fulfillmentStatus === "UNFULFILLED" && (
-                      <Dropdown.Item
-                        onClick={() => changeOrderStatus(order.id, "FULFILLED")}
-                      >
-                        Mark as Fulfilled
-                      </Dropdown.Item>
+                      <>
+                        <Dropdown.Item
+                          onClick={() =>
+                            changeOrderStatus(order.id, "FULFILLED")
+                          }
+                        >
+                          Mark as FULFILLED
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => changeOrderStatus(order.id, "SHIPPED")}
+                        >
+                          Mark as SHIPPED
+                        </Dropdown.Item>
+                      </>
                     )}
                     {/* Hiển thị các Dropdown.Item phù hợp với trạng thái khác */}
                     {order.fulfillmentStatus === "FULFILLED" && (
-                      <Dropdown.Item
-                        onClick={() => changeOrderStatus(order.id, "SHIPPED")}
-                      >
-                        Mark as SHIPPED
-                      </Dropdown.Item>
+                      <>
+                        <Dropdown.Item
+                          onClick={() =>
+                            changeOrderStatus(order.id, "UNFULFILLED")
+                          }
+                        >
+                          Mark as UNFULFILLED
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => changeOrderStatus(order.id, "SHIPPED")}
+                        >
+                          Mark as SHIPPED
+                        </Dropdown.Item>
+                      </>
+                    )}
+                    {order.fulfillmentStatus === "SHIPPED" && (
+                      <>
+                        <Dropdown.Item
+                          onClick={() =>
+                            changeOrderStatus(order.id, "UNFULFILLED")
+                          }
+                        >
+                          Mark as UNFULFILLED
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() =>
+                            changeOrderStatus(order.id, "FULFILLED")
+                          }
+                        >
+                          Mark as FULFILLED
+                        </Dropdown.Item>
+                      </>
+                    )}
+                    {order.fulfillmentStatus ===
+                      "REQUESTED_FOR_CANCELLATION" && (
+                      <>
+                        <Dropdown.Item
+                          onClick={() =>
+                            changeOrderStatus(order.id, "UNFULFILLED")
+                          }
+                        >
+                          Mark as UNFULFILLED
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() =>
+                            changeOrderStatus(order.id, "FULFILLED")
+                          }
+                        >
+                          Mark as FULFILLED
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => changeOrderStatus(order.id, "SHIPPED")}
+                        >
+                          Mark as SHIPPED
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() =>
+                            changeOrderStatus(order.id, "CANCELLED")
+                          }
+                        >
+                          Mark as CANCELLED
+                        </Dropdown.Item>
+                      </>
                     )}
                   </DropdownButton>
                   <Button onClick={() => handleViewDetails(order.id)}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Pagination, Modal, Button } from "react-bootstrap";
+import { Table, Pagination, Modal, Button, Toast } from "react-bootstrap";
 import axios from "axios";
 import { format } from "date-fns";
 
@@ -10,11 +10,11 @@ const MyOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [productDetails, setProductDetails] = useState([]);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const formatTime = (time) => {
-    console.log(time);
-    const formattedTime = format(new Date(time), "dd/MM/yyyy HH:mm:ss");
-    return formattedTime;
+    return format(new Date(time), "dd/MM/yyyy HH:mm:ss");
   };
 
   const fetchOrders = async (page = 0, size = 10) => {
@@ -37,6 +37,10 @@ const MyOrders = () => {
   };
 
   useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
     const fetchProductDetailsForOrder = async (order) => {
       const productDetailsPromises = order.lineItems.map(async (item) => {
         const productId = item.productId;
@@ -50,156 +54,6 @@ const MyOrders = () => {
       fetchProductDetailsForOrder(order);
     });
   }, [orders]);
-
-  const getProductsByOrderId = (orderId) => {
-    const order = orders.find((order) => order.id === orderId);
-
-    if (!order) {
-      return [];
-    }
-
-    const productIdsInOrder = order.lineItems.map((item) => item.productId);
-
-    const productsInOrder = productDetails.filter((product) =>
-      productIdsInOrder.includes(product.id)
-    );
-
-    return productsInOrder;
-  };
-
-  const findVariantById = (productId, variantId) => {
-    const product = productDetails.find((product) => product.id === productId);
-    if (product) {
-      return product.variants.find((variant) => variant.id === variantId);
-    }
-    return null;
-  };
-
-  const getOrderProducts = (orderId) => {
-    const order = orders.find((order) => order.id === orderId);
-
-    const totalDiscount =
-      order.discountApplications?.reduce((acc, discount) => {
-        if (discount.valueType === "FIXED_AMOUNT") {
-          return acc + discount.value;
-        } else if (discount.valueType === "PERCENTAGE") {
-          return acc + order.subtotalPrice * (discount.value / 100);
-        }
-        return acc;
-      }, 0) || 0;
-
-    const discountedTotal = order.subtotalPrice + totalDiscount;
-
-    return (
-      <div>
-        <h5>Order Details</h5>
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>Image</th>
-              <th>Variant</th>
-              <th>Price</th>
-              <th>Quantity</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.lineItems?.map((item) => {
-              const product = productDetails.find(
-                (product) => product.id === item.productId
-              );
-              const variant = findVariantById(item.productId, item.variantId);
-              console.log(variant);
-
-              return (
-                <tr key={item.productId}>
-                  <td
-                    style={{
-                      display: "block",
-                      maxWidth: "100%",
-                      wordWrap: "break-word",
-                      wordBreak: "break-all",
-                    }}
-                  >
-                    {product ? product.title : "Product Not Found"}
-                  </td>
-                  <td>
-                    {product ? (
-                      <img
-                        src={
-                          product.image
-                            ? product.image.src
-                            : "URL_DEFAULT_IMAGE"
-                        } // Thay thế 'URL_DEFAULT_IMAGE' bằng URL hình ảnh mặc định nếu không có hình ảnh
-                        alt={product.title || "Product Image"}
-                        style={{ maxWidth: "100px", maxHeight: "100px" }} // Thay đổi kích thước hình ảnh tùy ý
-                      />
-                    ) : (
-                      "Product Not Found"
-                    )}
-                  </td>
-                  <td>
-                    {variant && (
-                      <>
-                        {variant.option1 && (
-                          <span>{variant.option1 + "-"}</span>
-                        )}
-                        {variant.option2 && (
-                          <span>{variant.option2 + "-"}</span>
-                        )}
-                        {variant.option3 && (
-                          <span>{variant.option3 + "-"}</span>
-                        )}
-                        {!variant.option1 &&
-                          !variant.option2 &&
-                          !variant.option3 && <span>No Options</span>}
-                      </>
-                    )}
-                    {!variant && "Variant Not Found"}
-                  </td>
-                  <td>{item.price}</td>
-                  <td>{item.quantity}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
-        {order?.discountApplications &&
-          order.discountApplications.length > 0 && (
-            <div>
-              <h6>
-                Discount Codes:{" "}
-                {order.discountApplications.map(
-                  (discount, index) => discount.discountCode
-                )}
-              </h6>
-            </div>
-          )}
-        <div>
-          <h6>
-            Address: {order.address.name}, {order.address.street},{" "}
-            {order.address.ward}, {order.address.district}, {order.address.city}
-          </h6>
-          <h6>Phone: {order.address.phone}</h6>
-        </div>
-        <div>
-          <h5>
-            Total Amount:{" "}
-            {order.subtotalPrice !== discountedTotal ? (
-              <span style={{ textDecoration: "line-through" }}>
-                ${order.subtotalPrice.toFixed(2)}
-              </span>
-            ) : (
-              <span></span>
-            )}{" "}
-            <span style={{ color: "green" }}>
-              ${discountedTotal.toFixed(2)}
-            </span>
-          </h5>
-        </div>
-      </div>
-    );
-  };
 
   const fetchProductDetails = async (productId) => {
     try {
@@ -221,20 +75,37 @@ const MyOrders = () => {
       console.error("Error fetching product details:", error);
     }
   };
-  const totalOrderById = (orderId) => {
-    const order = orders.find((order) => order.id === orderId);
 
-    const totalDiscount =
-      order.discountApplications?.reduce((acc, discount) => {
-        if (discount.valueType === "FIXED_AMOUNT") {
-          return acc + discount.value;
-        } else if (discount.valueType === "PERCENTAGE") {
-          return acc + order.subtotalPrice * (discount.value / 100);
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken") || null;
+      await axios.patch(
+        `http://mousecomputer-api.southeastasia.cloudapp.azure.com/api/orders/${orderId}`,
+        { fulfillmentStatus: "REQUESTED_FOR_CANCELLATION" },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
-        return acc;
-      }, 0) || 0;
+      );
 
-    return (order.subtotalPrice + totalDiscount).toFixed(2);
+      // Update the local state to reflect the change
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId
+            ? { ...order, fulfillmentStatus: "REQUESTED_FOR_CANCELLATION" }
+            : order
+        )
+      );
+
+      // Set toast message and show it
+      setToastMessage(
+        "Please contact us via email to request cancellation. HHCOMPUTER@gmail.com"
+      );
+      setShowToast(true);
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+    }
   };
 
   const handlePageChange = (pageNumber) => {
@@ -244,31 +115,124 @@ const MyOrders = () => {
 
   const handleViewDetails = async (orderId) => {
     const order = orders.find((order) => order.id === orderId);
-    setSelectedOrder(order);
-    await fetchProductDetails(orderId);
 
-    setShowModal(true);
-    setShowModal(true);
+    if (order) {
+      setSelectedOrder(order);
+
+      const productIds = order.productIds || [];
+      await Promise.all(productIds.map(fetchProductDetails));
+
+      setShowModal(true);
+    } else {
+      console.error("Order not found");
+    }
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
   };
-  const totalOrderAmount = (order) => {
-    let sum = 0;
 
-    if (order) {
-      order.lineItems.forEach((item) => {
-        sum += item.price * item.quantity;
-      });
-    }
-
-    return sum;
+  const totalOrderById = (orderId) => {
+    const order = orders.find((order) => order.id === orderId);
+    const totalDiscount =
+      order?.discountApplications?.reduce((acc, discount) => {
+        if (discount.valueType === "FIXED_AMOUNT") {
+          return acc + discount.value;
+        } else if (discount.valueType === "PERCENTAGE") {
+          return acc + order?.subtotalPrice * (discount.value / 100);
+        }
+        return acc;
+      }, 0) || 0;
+    return (order?.subtotalPrice + totalDiscount).toFixed(2);
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  const getOrderProducts = (orderId) => {
+    const order = orders.find((order) => order.id === orderId);
+
+    if (!order) return null;
+
+    return (
+      <div>
+        <h5>Order Details</h5>
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>Image</th>
+              <th>Variant</th>
+              <th>Price</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {order.lineItems?.map((item) => {
+              const product = productDetails.find(
+                (product) => product.id === item.productId
+              );
+              const variant = product?.variants.find(
+                (variant) => variant.id === item.variantId
+              );
+
+              return (
+                <tr key={item.productId}>
+                  <td>{product ? product.title : "Product Not Found"}</td>
+                  <td>
+                    {product ? (
+                      <img
+                        src={
+                          product.image
+                            ? product.image.src
+                            : "URL_DEFAULT_IMAGE"
+                        }
+                        alt={product.title || "Product Image"}
+                        style={{ maxWidth: "100px", maxHeight: "100px" }}
+                      />
+                    ) : (
+                      "Product Not Found"
+                    )}
+                  </td>
+                  <td>{item.variantTitle || "No Options"}</td>
+                  <td>{item.price}</td>
+                  <td>{item.quantity}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+        {order?.discountApplications &&
+          order.discountApplications.length > 0 && (
+            <div>
+              <h6>
+                Discount Codes:{" "}
+                {order.discountApplications
+                  .map((discount) => discount.discountCode)
+                  .join(", ")}
+              </h6>
+            </div>
+          )}
+        <div>
+          <h6>
+            Address: {order.address.name}, {order.address.street},{" "}
+            {order.address.ward}, {order.address.district}, {order.address.city}
+          </h6>
+          <h6>Phone: {order.address.phone}</h6>
+        </div>
+        <div>
+          <h5>
+            Total Amount:{" "}
+            {order?.subtotalPrice !== totalOrderById(order.id) ? (
+              <span style={{ textDecoration: "line-through" }}>
+                ${order?.subtotalPrice.toFixed(2)}
+              </span>
+            ) : (
+              <span></span>
+            )}{" "}
+            <span style={{ color: "green" }}>${totalOrderById(order.id)}</span>
+          </h5>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -281,8 +245,8 @@ const MyOrders = () => {
             <th>Total Amount</th>
             <th>Created Time</th>
             <th>Status</th>
-            <th>Detail</th>
-            {/* Thêm các cột khác tùy thuộc vào dữ liệu đơn hàng */}
+            <th>Details</th>
+            <th>Cancel</th>
           </tr>
         </thead>
         <tbody>
@@ -298,10 +262,20 @@ const MyOrders = () => {
                   variant="info"
                   onClick={() => handleViewDetails(order.id)}
                 >
-                  View Details
+                  Details
                 </Button>
               </td>
-              {/* Thêm các cột khác tùy thuộc vào dữ liệu đơn hàng */}
+              <td>
+                {order.fulfillmentStatus !== "REQUESTED_FOR_CANCELLATION" &&
+                  order.fulfillmentStatus !== "CANCELLED" && (
+                    <Button
+                      variant="danger"
+                      onClick={() => handleCancelOrder(order.id)}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -331,10 +305,7 @@ const MyOrders = () => {
           {selectedOrder && (
             <>
               <h5>Order ID: {selectedOrder.id}</h5>
-              <div>
-                {/* Hiển thị thông tin chi tiết của từng sản phẩm trong đơn hàng */}
-                {getOrderProducts(selectedOrder.id)}
-              </div>
+              <div>{getOrderProducts(selectedOrder.id)}</div>
             </>
           )}
         </Modal.Body>
@@ -344,6 +315,20 @@ const MyOrders = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+      <Toast
+        show={showToast}
+        onClose={() => setShowToast(false)}
+        delay={10000}
+        autohide
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          backgroundColor: "yellow",
+        }}
+      >
+        <Toast.Body>{toastMessage}</Toast.Body>
+      </Toast>
     </div>
   );
 };

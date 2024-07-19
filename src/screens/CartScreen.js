@@ -279,7 +279,7 @@ const CartScreen = () => {
   const sendEmail = (orders) => {
     const templateParams = {
       name: customerInfo.first_name + customerInfo.lastName,
-      email: userEmail ? userEmail : customerInfo.email,
+      email: userEmail || customerInfo.email || newAddress.email,
       my_html: OrderConfirmationEmail(orders),
     };
     emailjs.send(
@@ -528,9 +528,9 @@ const CartScreen = () => {
       if (orders.customer.email) sendEmail(orders);
 
       setSelectedItems([]);
-      setTimeout(() => {
-        if (accessToken) navigate("/MyOrders");
-      }, 2000);
+      // setTimeout(() => {
+      //   if (accessToken) navigate("/MyOrders");
+      // }, 2000);
 
       setDiscountedSubtotal(undefined);
     } catch (error) {

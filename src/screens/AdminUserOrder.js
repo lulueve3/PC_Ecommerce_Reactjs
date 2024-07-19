@@ -57,16 +57,16 @@ const MyOrders = () => {
     const order = orders.find((order) => order.id === orderId);
 
     const totalDiscount =
-      order.discountApplications?.reduce((acc, discount) => {
+      order?.discountApplications?.reduce((acc, discount) => {
         if (discount.valueType === "FIXED_AMOUNT") {
           return acc + discount.value;
         } else if (discount.valueType === "PERCENTAGE") {
-          return acc + order.subtotalPrice * (discount.value / 100);
+          return acc + order?.subtotalPrice * (discount.value / 100);
         }
         return acc;
       }, 0) || 0;
 
-    return (order.subtotalPrice + totalDiscount).toFixed(2);
+    return (order?.subtotalPrice + totalDiscount).toFixed(2);
   };
 
   const getProductsByOrderId = (orderId) => {
@@ -97,16 +97,16 @@ const MyOrders = () => {
     const order = orders.find((order) => order.id === orderId);
 
     const totalDiscount =
-      order.discountApplications?.reduce((acc, discount) => {
+      order?.discountApplications?.reduce((acc, discount) => {
         if (discount.valueType === "FIXED_AMOUNT") {
           return acc + discount.value;
         } else if (discount.valueType === "PERCENTAGE") {
-          return acc + order.subtotalPrice * (discount.value / 100);
+          return acc + order?.subtotalPrice * (discount.value / 100);
         }
         return acc;
       }, 0) || 0;
 
-    const discountedTotal = order.subtotalPrice + totalDiscount;
+    const discountedTotal = order?.subtotalPrice + totalDiscount;
 
     return (
       <div>
@@ -146,23 +146,11 @@ const MyOrders = () => {
                     )}
                   </td>
                   <td>
-                    {variant && (
-                      <>
-                        {variant.option1 && (
-                          <span>{variant.option1 + "-"}</span>
-                        )}
-                        {variant.option2 && (
-                          <span>{variant.option2 + "-"}</span>
-                        )}
-                        {variant.option3 && (
-                          <span>{variant.option3 + "-"}</span>
-                        )}
-                        {!variant.option1 &&
-                          !variant.option2 &&
-                          !variant.option3 && <span>No Options</span>}
-                      </>
+                    {item?.variantTitle ? (
+                      <>{item.variantTitle}</>
+                    ) : (
+                      <span>No Options</span>
                     )}
-                    {!variant && "Variant Not Found"}
                   </td>
                   <td>{item.price}</td>
                   <td>{item.quantity}</td>
@@ -172,11 +160,11 @@ const MyOrders = () => {
           </tbody>
         </Table>
         {order?.discountApplications &&
-          order.discountApplications.length > 0 && (
+          order?.discountApplications.length > 0 && (
             <div>
               <h6>
                 Discount Codes:{" "}
-                {order.discountApplications.map(
+                {order?.discountApplications.map(
                   (discount, index) => discount.discountCode
                 )}
               </h6>
@@ -192,9 +180,9 @@ const MyOrders = () => {
         <div>
           <h5>
             Total Amount:{" "}
-            {order.subtotalPrice !== discountedTotal ? (
+            {order?.subtotalPrice !== discountedTotal ? (
               <span style={{ textDecoration: "line-through" }}>
-                ${order.subtotalPrice.toFixed(2)}
+                ${order?.subtotalPrice.toFixed(2)}
               </span>
             ) : (
               <span></span>
